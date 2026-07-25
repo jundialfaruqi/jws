@@ -3,6 +3,7 @@ import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_live_clock.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat.dart';
+import 'package:jws/core/widgets/app_next_prayer_bar.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -33,6 +34,11 @@ class Theme7Widget extends StatelessWidget {
               textColor: AppColors.textYellow,
               addressColor: AppColors.textInverse,
               isRightAligned: true,
+            ),
+            
+            // Info Bar Waktu Sholat & Tanggal
+            AppNextPrayerBar(
+              leftMargin: 600, // Menghindari card melayang di kiri
             ),
 
             // Konten Utama (Tengah) - Tema 7 (Default)
@@ -78,13 +84,39 @@ class Theme7Widget extends StatelessWidget {
           left: 0,
           top: 0,
           bottom: 0,
-          child: AppJadwalSholat(
-            backgroundColor: AppColors.bgNavy,
-            textColor: AppColors.textYellow,
-            iconColor: AppColors.textYellow,
+          child: ClipPath(
+            clipper: JadwalCurveClipper(),
+            child: AppJadwalSholat(
+              backgroundColor: AppColors.bgNavy,
+              textColor: AppColors.textYellow,
+              iconColor: AppColors.textYellow,
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+class JadwalCurveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    // Tarik garis dari kiri atas ke kanan atas (mundur 150px untuk memberi ruang kurva)
+    path.lineTo(size.width - 230, 0);
+    // Buat kurva melengkung ke kanan tengah maksimal menyentuh batas container, lalu kembali ke kiri bawah
+    path.quadraticBezierTo(
+      size.width,
+      size.height / 2, // Titik kontrol menyentuh ujung kanan
+      size.width - 230,
+      size.height, // Titik akhir kurva di bawah
+    );
+    // Tarik garis kembali ke kiri bawah
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
