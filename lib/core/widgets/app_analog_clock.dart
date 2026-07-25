@@ -1,0 +1,229 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+
+class AppAnalogClock extends StatefulWidget {
+  final double size;
+
+  const AppAnalogClock({
+    super.key,
+    this.size = 350,
+  });
+
+  @override
+  State<AppAnalogClock> createState() => _AppAnalogClockState();
+}
+
+class _AppAnalogClockState extends State<AppAnalogClock> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String formattedTime =
+        "${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}";
+
+    return Container(
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        color: const Color(0xFF003366), // Warna bgNavy agar senada
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 24,
+            spreadRadius: 4,
+            offset: const Offset(8, 8),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 2,
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Canvas jam analog
+          CustomPaint(
+            size: Size(widget.size, widget.size),
+            painter: AnalogClockPainter(
+              dateTime: _now,
+              handColor: Colors.white,
+              secondHandColor: Colors.red,
+              tickColor: Colors.white,
+            ),
+          ),
+          
+          // Jam digital di bagian tengah bawah
+          Positioned(
+            bottom: widget.size * 0.25,
+            child: Text(
+              formattedTime,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: widget.size * 0.09,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'JetBrainsMono',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AnalogClockPainter extends CustomPainter {
+  final DateTime dateTime;
+  final Color handColor;
+  final Color secondHandColor;
+  final Color tickColor;
+
+  AnalogClockPainter({
+    required this.dateTime,
+    required this.handColor,
+    required this.secondHandColor,
+    required this.tickColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width, size.height) / 2;
+
+    // Draw Ticks (Garis penunjuk menit & jam)
+    final tickPaint = Paint()
+      ..color = tickColor
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 60; i++) {
+      final angle = i * 6 * pi / 180;
+      final isHour = i % 5 == 0;
+      final tickLength = isHour ? radius * 0.08 : radius * 0.04;
+      final strokeWidth = isHour ? 4.0 : 2.0;
+
+      tickPaint.strokeWidth = strokeWidth;
+      tickPaint.color = tickColor.withValues(alpha: isHour ? 1.0 : 0.5);
+
+      final p1 = Offset(
+        center.dx + cos(angle) * (radius - tickLength - 8),
+        center.dy + sin(angle) * (radius - tickLength - 8),
+      );
+      final p2 = Offset(
+        center.dx + cos(angle) * (radius - 8),
+        center.dy + sin(angle) * (radius - 8),
+      );
+
+      canvas.drawLine(p1, p2, tickPaint);
+    }
+
+    // Draw Numbers (Angka 1-12)
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    for (int i = 1; i <= 12; i++) {
+      final angle = (i * 30 - 90) * pi / 180;
+
+      textPainter.text = TextSpan(
+        text: i.toString(),
+        style: TextStyle(
+          color: i == 12 ? Colors.red : Colors.white,
+          fontSize: radius * 0.25, // Diperkecil agar lebih rapi
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Poppins',
+        ),
+      );
+
+      textPainter.layout();
+      final offset = Offset(
+        center.dx + cos(angle) * (radius * 0.72) - (textPainter.width / 2),
+        center.dy + sin(angle) * (radius * 0.72) - (textPainter.height / 2),
+      );
+
+      textPainter.paint(canvas, offset);
+    }
+
+    // Hitung Sudut Jarum Jam
+    final hour = dateTime.hour % 12;
+    final minute = dateTime.minute;
+    final second = dateTime.second;
+
+    final hourAngle = (hour * 30 + minute * 0.5 - 90) * pi / 180;
+    final minuteAngle = (minute * 6 + second * 0.1 - 90) * pi / 180;
+    final secondAngle = (second * 6 - 90) * pi / 180;
+
+    // Jarum Jam (Hour Hand)
+    final hourPaint = Paint()
+      ..color = handColor
+      ..strokeWidth = radius * 0.06
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      center,
+      Offset(
+        center.dx + cos(hourAngle) * (radius * 0.45),
+        center.dy + sin(hourAngle) * (radius * 0.45),
+      ),
+      hourPaint,
+    );
+
+    // Jarum Menit (Minute Hand)
+    final minPaint = Paint()
+      ..color = handColor
+      ..strokeWidth = radius * 0.04
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      center,
+      Offset(
+        center.dx + cos(minuteAngle) * (radius * 0.65),
+        center.dy + sin(minuteAngle) * (radius * 0.65),
+      ),
+      minPaint,
+    );
+
+    // Jarum Detik (Second Hand)
+    final secPaint = Paint()
+      ..color = secondHandColor
+      ..strokeWidth = radius * 0.02
+      ..strokeCap = StrokeCap.round;
+      
+    // Ekor jarum detik
+    canvas.drawLine(
+      Offset(
+        center.dx - cos(secondAngle) * (radius * 0.15),
+        center.dy - sin(secondAngle) * (radius * 0.15),
+      ),
+      Offset(
+        center.dx + cos(secondAngle) * (radius * 0.75),
+        center.dy + sin(secondAngle) * (radius * 0.75),
+      ),
+      secPaint,
+    );
+
+    // Lingkaran merah di tengah
+    canvas.drawCircle(center, radius * 0.05, Paint()..color = secondHandColor);
+  }
+
+  @override
+  bool shouldRepaint(covariant AnalogClockPainter oldDelegate) {
+    return oldDelegate.dateTime != dateTime;
+  }
+}

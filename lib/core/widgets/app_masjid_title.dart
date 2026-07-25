@@ -45,7 +45,7 @@ class AppMasjidTitle extends StatelessWidget {
 
     List<Widget> logoWidgets = [];
 
-    final double logoSize = 130.0; // Ukuran global untuk logo
+    final double logoSize = 100.0; // Ukuran global untuk logo
 
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(
@@ -116,7 +116,7 @@ class AppMasjidTitle extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 64,
+                  fontSize: 50, // Dikecilkan sedikit
                   fontWeight: FontWeight.bold,
                   color: textColor,
                   fontFamily: 'Poppins',
