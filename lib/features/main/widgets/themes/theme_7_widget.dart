@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_live_clock.dart';
+import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
 
@@ -52,8 +53,16 @@ class Theme7Widget extends StatelessWidget {
         ),
 
         // Widget Marquee (Bawah)
-        // Widget Marquee (Bawah)
-        AppMarquee(text: marqueeText, velocity: calculatedVelocity),
+        AppMarquee(
+          text: marqueeText, 
+          velocity: calculatedVelocity,
+          textStyle: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 64,
+            color: AppColors.textYellow,
+          ),
+        ),
       ],
     );
   }
