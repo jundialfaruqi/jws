@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
 import '../models/profil_masjid_model.dart';
 
 class ProfilCardWidget extends StatefulWidget {
@@ -24,12 +25,12 @@ class _ProfilCardWidgetState extends State<ProfilCardWidget> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       // Naikkan elevation dan ubah warna background saat item difokuskan via remote
       elevation: _isFocused ? 12 : 2,
-      color: _isFocused ? Colors.blue.shade50 : Colors.white,
+      color: _isFocused ? AppColors.ghost : AppColors.bgPrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         // Beri border biru yang tebal agar sangat terlihat di layar TV
         side: BorderSide(
-          color: _isFocused ? Colors.blue : Colors.transparent,
+          color: _isFocused ? AppColors.primary : Colors.transparent,
           width: 2,
         ),
       ),

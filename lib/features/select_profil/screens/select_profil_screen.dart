@@ -10,6 +10,8 @@ import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/utils/error_handler.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
@@ -141,7 +143,10 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
       ),
       child: AppScaffold(
         appBar: const AppTopBar(
-          title: Text('Pilih Masjid'),
+          title: Text(
+            'Pilih Masjid',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         body: Column(
           children: [
@@ -179,22 +184,22 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: _isSearchFocused ? Colors.blue.shade50 : Colors.transparent,
+              color: _isSearchFocused ? AppColors.ghost : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _isSearchFocused ? Colors.blue : Colors.grey,
+                color: _isSearchFocused ? AppColors.primary : AppColors.borderDark,
                 width: _isSearchFocused ? 2 : 1,
               ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.search, color: Colors.grey),
+                const Icon(Icons.search, color: AppColors.textHint),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     _searchQuery.isEmpty ? 'Cari masjid...' : _searchQuery,
                     style: TextStyle(
-                      color: _searchQuery.isEmpty ? Colors.grey.shade600 : Colors.black,
+                      color: _searchQuery.isEmpty ? AppColors.textHint : AppColors.textPrimary,
                       fontSize: 16,
                     ),
                   ),
@@ -238,9 +243,9 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.blue, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
-            fillColor: Colors.blue.shade50,
+            fillColor: AppColors.ghost,
             filled: true,
             contentPadding: const EdgeInsets.symmetric(vertical: 0),
           ),
@@ -251,7 +256,7 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const AppLoadingSpinner(message: 'Memuat data masjid...');
     }
 
     if (_error != null && _items.isEmpty) {
@@ -261,7 +266,7 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
           child: Text(
             'Terjadi kesalahan:\n$_error',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.alert),
           ),
         ),
       );
@@ -277,8 +282,8 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
       itemBuilder: (context, index) {
         if (index == _items.length) {
           return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+            padding: EdgeInsets.all(24.0),
+            child: AppLoadingSpinner(size: 30),
           );
         }
         
