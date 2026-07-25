@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import '../../../core/providers/storage_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/widgets/app_scaffold.dart';
+import '../../../core/widgets/app_top_bar.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
-import 'dart:async';
-import 'dart:convert';
 
 class SelectProfilScreen extends ConsumerStatefulWidget {
   const SelectProfilScreen({super.key});
@@ -131,10 +134,9 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pilih Masjid'),
-        centerTitle: true,
+    return AppScaffold(
+      appBar: const AppTopBar(
+        title: Text('Pilih Masjid'),
       ),
       body: Column(
         children: [
