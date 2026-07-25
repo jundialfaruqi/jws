@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'tv/tv_button.dart';
 
 class AppConfirmExit extends StatelessWidget {
   final Widget child;
@@ -22,14 +23,18 @@ class AppConfirmExit extends StatelessWidget {
             style: TextStyle(fontSize: 16),
           ),
           actions: [
-            _TvGhostButton(
+            TvButton(
               label: 'Batal',
               autofocus: true,
+              variant: TvButtonVariant.ghost,
+              fontSize: 16,
               onPressed: () => Navigator.of(context).pop(false),
             ),
             const SizedBox(width: 8),
-            _TvRedButton(
+            TvButton(
               label: 'Ya, Keluar',
+              variant: TvButtonVariant.danger,
+              fontSize: 16,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -42,7 +47,7 @@ class AppConfirmExit extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
         final bool shouldExit = await _showExitDialog(context);
@@ -51,83 +56,6 @@ class AppConfirmExit extends StatelessWidget {
         }
       },
       child: child,
-    );
-  }
-}
-
-class _TvGhostButton extends StatefulWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final bool autofocus;
-
-  const _TvGhostButton({
-    required this.label,
-    required this.onPressed,
-    this.autofocus = false,
-  });
-
-  @override
-  State<_TvGhostButton> createState() => _TvGhostButtonState();
-}
-
-class _TvGhostButtonState extends State<_TvGhostButton> {
-  bool _isFocused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      autofocus: widget.autofocus,
-      onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
-      onPressed: widget.onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: _isFocused ? Colors.blue.shade900 : Colors.black87,
-        backgroundColor: _isFocused ? Colors.blue.shade50 : Colors.transparent,
-        side: BorderSide(
-          color: _isFocused ? Colors.blue : Colors.transparent,
-          width: 3,
-        ),
-      ),
-      child: Text(
-        widget.label,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _TvRedButton extends StatefulWidget {
-  final String label;
-  final VoidCallback onPressed;
-
-  const _TvRedButton({
-    required this.label,
-    required this.onPressed,
-  });
-
-  @override
-  State<_TvRedButton> createState() => _TvRedButtonState();
-}
-
-class _TvRedButtonState extends State<_TvRedButton> {
-  bool _isFocused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
-      onPressed: widget.onPressed,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: _isFocused ? Colors.red.shade900 : Colors.red,
-        side: BorderSide(
-          color: _isFocused ? Colors.black : Colors.transparent,
-          width: 3,
-        ),
-      ),
-      child: Text(
-        widget.label,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
     );
   }
 }
