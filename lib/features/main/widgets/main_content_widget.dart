@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/selected_profil_provider.dart';
-import '../../../core/widgets/app_marquee.dart';
 import '../providers/my_masjid_provider.dart';
-import '../models/marquee_model.dart';
+import '../models/my_masjid_model.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
+import '../../../core/services/websocket_service.dart';
+
+// Impor 4 Tema
+import 'themes/theme_4_widget.dart';
+import 'themes/theme_7_widget.dart';
+import 'themes/theme_10_widget.dart';
+import 'themes/theme_12_widget.dart';
 
 class MainContentWidget extends ConsumerWidget {
   const MainContentWidget({super.key});
@@ -15,24 +21,30 @@ class MainContentWidget extends ConsumerWidget {
 
     if (profil == null) {
       return const Expanded(
-        child: Center(
-          child: Text('Profil tidak ditemukan'),
-        ),
+        child: Center(child: Text('Profil tidak ditemukan')),
       );
     }
+
+    // Inisiasi koneksi WebSocket
+    ref.read(webSocketServiceProvider(profil.slug)).connect();
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.slug));
 
     return Expanded(
       child: myMasjidAsync.when(
-        loading: () => const Center(child: AppLoadingSpinner(message: 'Memuat data masjid...')),
+        loading: () => const Center(
+          child: AppLoadingSpinner(message: 'Memuat data masjid...'),
+        ),
         error: (err, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 64),
               const SizedBox(height: 16),
-              Text('Terjadi kesalahan: $err', style: const TextStyle(color: Colors.red, fontSize: 24)),
+              Text(
+                'Terjadi kesalahan: $err',
+                style: const TextStyle(color: Colors.red, fontSize: 24),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(myMasjidProvider(profil.slug)),
@@ -42,57 +54,30 @@ class MainContentWidget extends ConsumerWidget {
           ),
         ),
         data: (data) {
-          final marqueeText = data.marquee?.concatenatedText ?? MarqueeModel.defaultMarqueeText;
-          
-          // Kecepatan dasar dinaikkan menjadi 120.0 agar sesuai dengan rasa di web, dikalikan dengan pengali dari API (marqueeSpeed)
-          final speedMultiplier = data.marquee?.marqueeSpeed ?? 1.0;
-          final calculatedVelocity = 120.0 * speedMultiplier;
+          final themeId = data.themeId ?? 7; // Tema Default
 
-          return Column(
-            children: [
-              // Konten Utama (Tengah)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.mosque,
-                        size: 150,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        data.profil.name,
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Waktu Server: ${data.currentTime}',
-                        style: const TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 28,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              // Widget Marquee (Bawah)
-              AppMarquee(
-                text: marqueeText,
-                velocity: calculatedVelocity,
-              ),
-            ],
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 800),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: _buildThemeWidget(themeId, data),
           );
         },
       ),
     );
+  }
+
+  Widget _buildThemeWidget(int themeId, MyMasjidModel data) {
+    switch (themeId) {
+      case 4:
+        return Theme4Widget(key: const ValueKey(4), data: data);
+      case 10:
+        return Theme10Widget(key: const ValueKey(10), data: data);
+      case 12:
+        return Theme12Widget(key: const ValueKey(12), data: data);
+      case 7:
+      default:
+        return Theme7Widget(key: const ValueKey(7), data: data);
+    }
   }
 }
