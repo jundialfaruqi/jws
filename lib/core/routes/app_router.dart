@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/select_profil/screens/select_profil_screen.dart';
 import '../../features/main/screens/main_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/webview/screens/webview_screen.dart';
 import '../providers/selected_profil_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -25,6 +26,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/webview/:slug',
+        name: 'webview',
+        builder: (context, state) {
+          final slug = state.pathParameters['slug']!;
+          return WebViewScreen(slug: slug);
+        },
       ),
     ],
   );
