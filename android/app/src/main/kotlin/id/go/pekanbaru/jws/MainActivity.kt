@@ -1,4 +1,4 @@
-package com.example.jws
+package id.go.pekanbaru.jws
 
 import io.flutter.embedding.android.FlutterActivity
 
