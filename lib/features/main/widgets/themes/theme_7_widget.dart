@@ -5,7 +5,7 @@ import '../../models/marquee_model.dart';
 
 class Theme7Widget extends StatelessWidget {
   final MyMasjidModel data;
-  
+
   const Theme7Widget({super.key, required this.data});
 
   @override
@@ -22,11 +22,7 @@ class Theme7Widget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.mosque,
-                  size: 150,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.mosque, size: 150, color: Colors.blue),
                 const SizedBox(height: 24),
                 Text(
                   data.profil.name,
@@ -49,12 +45,10 @@ class Theme7Widget extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Widget Marquee (Bawah)
-        AppMarquee(
-          text: marqueeText,
-          velocity: calculatedVelocity,
-        ),
+        // Widget Marquee (Bawah)
+        AppMarquee(text: marqueeText, velocity: calculatedVelocity),
       ],
     );
   }

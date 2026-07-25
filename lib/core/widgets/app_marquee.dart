@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:marquee/marquee.dart';
+import 'package:flutter/scheduler.dart';
 import '../constants/app_colors.dart';
 
-class AppMarquee extends StatelessWidget {
+class AppMarquee extends StatefulWidget {
   final String text;
   final double height;
   final Color backgroundColor;
@@ -20,30 +20,116 @@ class AppMarquee extends StatelessWidget {
       fontSize: 48,
       color: AppColors.textYellow,
     ),
-    this.velocity = 50.0,
-    this.blankSpace = 400.0,
+    this.velocity = 120.0,
+    this.blankSpace = 300.0, // Spasi pemisah sebelum teks berulang
   });
 
   @override
+  State<AppMarquee> createState() => _AppMarqueeState();
+}
+
+class _AppMarqueeState extends State<AppMarquee> with SingleTickerProviderStateMixin {
+  late Ticker _ticker;
+  double _textWidth = 0.0;
+  double _offsetX = 0.0;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateTextWidth();
+    
+    // Ticker berjalan pada refresh rate layar (60/120 fps)
+    _ticker = createTicker((elapsed) {
+      if (!_isReady || _textWidth == 0.0) return;
+
+      // Logika Sinkronisasi Jam Dunia (Keajaiban Sinkronisasi)
+      final int nowMs = DateTime.now().millisecondsSinceEpoch;
+      
+      // Jarak = (waktu_berjalan_dalam_detik) * kecepatan
+      final double distance = (nowMs / 1000.0) * widget.velocity;
+      
+      final double totalWidth = _textWidth + widget.blankSpace;
+      
+      // Hitung sisa jarak agar animasi berulang (looping) secara mulus
+      final double position = distance % totalWidth;
+
+      // Update posisi tanpa setState agar super ringan!
+      setState(() {
+        _offsetX = -position; // Minus karena bergerak ke kiri
+      });
+    });
+
+    _ticker.start();
+  }
+
+  void _calculateTextWidth() {
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(text: widget.text, style: widget.textStyle),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: double.infinity);
+
+    setState(() {
+      _textWidth = textPainter.size.width;
+      _isReady = true;
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant AppMarquee oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text || oldWidget.textStyle != widget.textStyle) {
+      _calculateTextWidth();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_isReady) return Container(height: widget.height, color: widget.backgroundColor);
+
     return Container(
-      height: height,
+      height: widget.height,
       width: double.infinity,
-      color: backgroundColor,
-      child: Marquee(
-        text: text,
-        style: textStyle,
-        scrollAxis: Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        blankSpace: blankSpace,
-        velocity: velocity,
-        pauseAfterRound: const Duration(seconds: 1),
-        startPadding: 10.0,
-        accelerationDuration: const Duration(seconds: 1),
-        accelerationCurve: Curves.linear,
-        decelerationDuration: const Duration(milliseconds: 500),
-        decelerationCurve: Curves.easeOut,
+      color: widget.backgroundColor,
+      // ClipRect memastikan teks yang tergeser keluar batas layar disembunyikan
+      child: ClipRect(
+        child: Transform.translate(
+          offset: Offset(_offsetX, 0),
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // Render 2 salinan agar saat salinan pertama menghilang, salinan kedua sudah muncul menyambung
+              children: [
+                Text(
+                  widget.text,
+                  style: widget.textStyle,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+                SizedBox(width: widget.blankSpace),
+                Text(
+                  widget.text,
+                  style: widget.textStyle,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
+
+

@@ -6,7 +6,7 @@ import '../../models/marquee_model.dart';
 
 class Theme4Widget extends StatelessWidget {
   final MyMasjidModel data;
-  
+
   const Theme4Widget({super.key, required this.data});
 
   @override
@@ -20,7 +20,9 @@ class Theme4Widget extends StatelessWidget {
         // Konten Utama (Tengah) - Tema 4 (Misalnya warna ikon dan layout sedikit berbeda)
         Expanded(
           child: Container(
-            color: Colors.blueGrey.shade50, // Latar belakang abu-abu kebiruan khusus Tema 4
+            color: Colors
+                .blueGrey
+                .shade50, // Latar belakang abu-abu kebiruan khusus Tema 4
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -54,7 +56,7 @@ class Theme4Widget extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Widget Marquee (Bawah)
         AppMarquee(
           text: marqueeText,

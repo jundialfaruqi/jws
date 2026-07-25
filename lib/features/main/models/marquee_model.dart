@@ -46,8 +46,8 @@ class MarqueeModel {
     ].join("   •   ");
   }
 
-  // Helper method untuk menggabungkan semua teks marquee menjadi satu kalimat panjang
-  String get concatenatedText {
+  // Helper method untuk mengembalikan pesan dalam bentuk list (membuang yang kosong)
+  List<String> get textList {
     final List<String> parts = [];
     if (marquee1 != null && marquee1!.trim().isNotEmpty) parts.add(marquee1!.trim());
     if (marquee2 != null && marquee2!.trim().isNotEmpty) parts.add(marquee2!.trim());
@@ -56,7 +56,22 @@ class MarqueeModel {
     if (marquee5 != null && marquee5!.trim().isNotEmpty) parts.add(marquee5!.trim());
     if (marquee6 != null && marquee6!.trim().isNotEmpty) parts.add(marquee6!.trim());
     
-    if (parts.isEmpty) return defaultMarqueeText;
+    if (parts.isEmpty) {
+      return [
+        "Matikan ponsel atau gunakan mode senyap saat berada di dalam masjid",
+        "Mohon menjaga kebersihan di dalam masjid",
+        "Berdoalah untuk umat Islam",
+        "Shalatlah berjamaah untuk mendapatkan lebih banyak pahala",
+        "Ingatlah untuk berdonasi demi pemeliharaan masjid",
+        "Harap gunakan rak sepatu yang telah disediakan"
+      ];
+    }
+    return parts;
+  }
+
+  // Helper method untuk menggabungkan semua teks marquee menjadi satu kalimat panjang (Legacy)
+  String get concatenatedText {
+    final List<String> parts = textList;
     return parts.join("   •   ");
   }
 }
