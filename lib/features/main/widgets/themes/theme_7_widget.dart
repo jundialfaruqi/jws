@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_live_clock.dart';
+import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -12,12 +13,22 @@ class Theme7Widget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final marqueeText = data.marquee?.concatenatedText ?? MarqueeModel.defaultMarqueeText;
+    final marqueeText =
+        data.marquee?.concatenatedText ?? MarqueeModel.defaultMarqueeText;
     final speedMultiplier = data.marquee?.marqueeSpeed ?? 1.0;
     final calculatedVelocity = 120.0 * speedMultiplier;
 
     return Column(
       children: [
+        // Judul Masjid di atas
+        AppMasjidTitle(
+          title: data.profil.name,
+          address: data.profil.address,
+          backgroundColor: AppColors.bgBlue,
+          textColor: AppColors.textYellow,
+          addressColor: AppColors.textInverse,
+        ),
+
         // Konten Utama (Tengah) - Tema 7 (Default)
         Expanded(
           child: Container(
@@ -27,16 +38,6 @@ class Theme7Widget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.mosque, size: 150, color: Colors.blue),
-                  const SizedBox(height: 24),
-                  Text(
-                    data.profil.name,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue, // Perjelas warna teks
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
                   const SizedBox(height: 16),
                   AppLiveClock(
                     prefix: 'Tema 7',
@@ -54,7 +55,7 @@ class Theme7Widget extends StatelessWidget {
 
         // Widget Marquee (Bawah)
         AppMarquee(
-          text: marqueeText, 
+          text: marqueeText,
           velocity: calculatedVelocity,
           textStyle: const TextStyle(
             fontFamily: 'Poppins',

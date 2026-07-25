@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_live_clock.dart';
+import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -18,6 +19,14 @@ class Theme10Widget extends StatelessWidget {
 
     return Column(
       children: [
+        // Judul Masjid
+        AppMasjidTitle(
+          title: data.profil.name,
+          address: data.profil.address,
+          backgroundColor: Colors.teal.shade900,
+          textColor: Colors.white,
+        ),
+        
         // Konten Utama (Tengah) - Tema 10
         Expanded(
           child: Container(
@@ -27,16 +36,6 @@ class Theme10Widget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.mosque, size: 150, color: Colors.teal),
-                  const SizedBox(height: 24),
-                  Text(
-                    data.profil.name,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
                   const SizedBox(height: 16),
                   AppLiveClock(
                     prefix: 'Tema 10',

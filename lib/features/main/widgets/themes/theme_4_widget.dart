@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_live_clock.dart';
+import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -18,6 +19,14 @@ class Theme4Widget extends StatelessWidget {
 
     return Column(
       children: [
+        // Judul Masjid
+        AppMasjidTitle(
+          title: data.profil.name,
+          address: data.profil.address,
+          backgroundColor: Colors.black87,
+          textColor: Colors.white,
+        ),
+        
         // Konten Utama (Tengah) - Tema 4 (Misalnya warna ikon dan layout sedikit berbeda)
         Expanded(
           child: Container(
@@ -32,16 +41,6 @@ class Theme4Widget extends StatelessWidget {
                     Icons.mosque,
                     size: 150,
                     color: Colors.orange, // Beda warna untuk membedakan
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    data.profil.name,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   AppLiveClock(
