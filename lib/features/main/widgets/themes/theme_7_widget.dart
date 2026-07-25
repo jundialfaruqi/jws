@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
-import 'package:jws/core/widgets/app_live_clock.dart';
+// import 'package:jws/core/widgets/app_live_clock.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat.dart';
 import 'package:jws/core/widgets/app_next_prayer_bar.dart';
+import 'package:jws/core/widgets/app_image_slider.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -35,7 +36,7 @@ class Theme7Widget extends StatelessWidget {
               addressColor: AppColors.textInverse,
               isRightAligned: true,
             ),
-            
+
             // Info Bar Waktu Sholat & Tanggal
             AppNextPrayerBar(
               leftMargin: 600, // Menghindari card melayang di kiri
@@ -44,23 +45,11 @@ class Theme7Widget extends StatelessWidget {
             // Konten Utama (Tengah) - Tema 7 (Default)
             Expanded(
               child: Container(
-                color: Colors.blue.shade50, // Tambahkan background terang
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.mosque, size: 150, color: Colors.blue),
-                      const SizedBox(height: 16),
-                      AppLiveClock(
-                        prefix: 'Tema 7',
-                        textStyle: const TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 28,
-                          color: Colors.blueGrey, // Perjelas warna jam
-                        ),
-                      ),
-                    ],
-                  ),
+                color: AppColors
+                    .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
+                child: const AppImageSlider(
+                  leftMargin:
+                      500, // Geser slider ke kanan agar tidak banyak tertutup
                 ),
               ),
             ),
@@ -71,6 +60,7 @@ class Theme7Widget extends StatelessWidget {
               velocity: calculatedVelocity,
               backgroundColor: AppColors.bgDark,
               textStyle: const TextStyle(
+                fontFamily: 'Poppins',
                 fontWeight: FontWeight.bold,
                 fontSize: 64,
                 color: AppColors.textYellow,
