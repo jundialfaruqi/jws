@@ -8,9 +8,9 @@ class AppImageSlider extends StatefulWidget {
   const AppImageSlider({
     super.key,
     this.imageUrls = const [
-      'https://images.unsplash.com/photo-1572889693481-42289c894e75?q=80&w=2000', // Dummy masjid 1
-      'https://images.unsplash.com/photo-1564683214965-3619addd900d?q=80&w=2000', // Dummy masjid 2
-      'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?q=80&w=2000', // Dummy masjid 3
+      'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000', // Dummy masjid 1
+      'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000', // Dummy masjid 2
+      'https://images.unsplash.com/photo-1584551246679-0daf3d275d05?q=80&w=2000', // Dummy masjid 3
     ],
     this.leftMargin = 0.0,
   });
