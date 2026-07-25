@@ -1,22 +1,26 @@
 import 'package:dio/dio.dart';
 import '../../../core/constants/api_constant.dart';
-import '../models/profil_masjid_model.dart';
+import '../models/paginated_profil_model.dart';
 
 class ProfilMasjidService {
   final Dio _dio;
 
   ProfilMasjidService(this._dio);
 
-  Future<List<ProfilMasjidModel>> getProfilMasjids({int page = 1}) async {
+  Future<PaginatedProfilModel> getProfilMasjids({int page = 1, String? searchQuery}) async {
     try {
+      final queryParams = <String, dynamic>{'page': page};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParams['search'] = searchQuery;
+      }
+
       final response = await _dio.get(
         ApiConstant.profilMasjid,
-        queryParameters: {'page': page},
+        queryParameters: queryParams,
       );
       
       if (response.data['success'] == true) {
-        final List data = response.data['data']['data'];
-        return data.map((json) => ProfilMasjidModel.fromJson(json)).toList();
+        return PaginatedProfilModel.fromJson(response.data['data']);
       } else {
         throw Exception(response.data['message']);
       }
