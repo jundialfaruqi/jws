@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../../../core/widgets/tv_drawer_menu.dart';
+import '../../../core/widgets/tv_scaffold.dart';
+import '../../../core/widgets/app_confirm_exit.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String slug;
@@ -67,8 +69,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      focusNode: _screenFocusNode,
+    return AppConfirmExit(
+      child: Focus(
+        focusNode: _screenFocusNode,
       autofocus: true,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowRight) {
@@ -77,10 +80,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
         }
         return KeyEventResult.ignored;
       },
-      child: Scaffold(
+      child: TvScaffold(
         backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Stack(
+        body: Stack(
             children: [
               WebViewWidget(controller: _controller),
               if (_isLoading)
@@ -97,7 +99,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
           ],
         ),
       ),
-    ), // Menutup Scaffold
-    ); // Menutup Focus
+    ),
+    );
   }
 }
