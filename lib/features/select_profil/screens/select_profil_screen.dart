@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
@@ -15,6 +17,7 @@ class SelectProfilScreen extends ConsumerStatefulWidget {
 class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   
   List<ProfilMasjidModel> _items = [];
   bool _isLoading = false;
@@ -25,11 +28,24 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
   bool _hasMore = true;
   String _searchQuery = '';
   Timer? _debounce;
+  
+  bool _isSearchFocused = false;
+  bool _isSearchEditing = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    
+    _searchFocusNode.addListener(() {
+      setState(() {
+        _isSearchFocused = _searchFocusNode.hasFocus;
+        if (!_searchFocusNode.hasFocus) {
+          _isSearchEditing = false; // Keluar dari mode edit jika kehilangan fokus
+        }
+      });
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPage();
     });
@@ -39,6 +55,7 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _debounce?.cancel();
     super.dispose();
   }
@@ -118,25 +135,105 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Cari masjid...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              ),
-            ),
-          ),
+          _buildSearchBar(),
           Expanded(
             child: _buildBody(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    if (!_isSearchEditing) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onFocusChange: (focused) {
+            setState(() {
+              _isSearchFocused = focused;
+            });
+          },
+          onTap: () {
+            setState(() {
+              _isSearchEditing = true;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _searchFocusNode.requestFocus();
+              SystemChannels.textInput.invokeMethod('TextInput.show');
+            });
+          },
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: _isSearchFocused ? Colors.blue.shade50 : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isSearchFocused ? Colors.blue : Colors.grey,
+                width: _isSearchFocused ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.search, color: Colors.grey),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _searchQuery.isEmpty ? 'Cari masjid...' : _searchQuery,
+                    style: TextStyle(
+                      color: _searchQuery.isEmpty ? Colors.grey.shade600 : Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Focus(
+        onKeyEvent: (node, event) {
+          // Cegah TextField menahan (trap) tombol panah bawah/atas
+          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            FocusScope.of(context).focusInDirection(TraversalDirection.down);
+            return KeyEventResult.handled;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            FocusScope.of(context).focusInDirection(TraversalDirection.up);
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: TextField(
+          focusNode: _searchFocusNode,
+          controller: _searchController,
+          onSubmitted: (_) {
+            setState(() {
+              _isSearchEditing = false;
+            });
+          },
+          onChanged: _onSearchChanged,
+          decoration: InputDecoration(
+            hintText: 'Cari masjid...',
+            prefixIcon: const Icon(Icons.search),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.blue, width: 2),
+            ),
+            fillColor: Colors.blue.shade50,
+            filled: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+          ),
+        ),
       ),
     );
   }
@@ -178,9 +275,7 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
         return ProfilCardWidget(
           profil: profil,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Anda memilih: ${profil.name}')),
-            );
+            context.goNamed('main', extra: profil);
           },
         );
       },

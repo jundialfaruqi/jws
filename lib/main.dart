@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/select_profil/screens/select_profil_screen.dart';
+import 'core/routes/app_router.dart';
 
 // Class untuk mengabaikan verifikasi SSL secara global
 class MyHttpOverrides extends HttpOverrides {
@@ -25,9 +25,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      home: SelectProfilScreen(),
+      routerConfig: appRouter,
     );
   }
 }
