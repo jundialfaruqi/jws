@@ -19,30 +19,34 @@ class Theme7Widget extends StatelessWidget {
       children: [
         // Konten Utama (Tengah) - Tema 7 (Default)
         Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.mosque, size: 150, color: Colors.blue),
-                const SizedBox(height: 24),
-                Text(
-                  data.profil.name,
-                  style: const TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
+          child: Container(
+            color: Colors.blue.shade50, // Tambahkan background terang
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.mosque, size: 150, color: Colors.blue),
+                  const SizedBox(height: 24),
+                  Text(
+                    data.profil.name,
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue, // Perjelas warna teks
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                AppLiveClock(
-                  prefix: 'Waktu Server',
-                  textStyle: const TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontSize: 24,
-                    color: Colors.black54,
+                  const SizedBox(height: 16),
+                  AppLiveClock(
+                    prefix: 'Tema 7',
+                    textStyle: const TextStyle(
+                      fontFamily: 'JetBrainsMono',
+                      fontSize: 24,
+                      color: Colors.blueGrey, // Perjelas warna jam
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
