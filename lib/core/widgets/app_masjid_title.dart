@@ -26,11 +26,13 @@ class AppMasjidTitle extends StatelessWidget {
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
     if (path.startsWith('http')) return path;
-    
+
     final baseUrl = ApiConstant.baseUrl;
-    final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
     final cleanPath = path.startsWith('/') ? path : '/$path';
-    
+
     return '$cleanBase$cleanPath';
   }
 
@@ -40,28 +42,51 @@ class AppMasjidTitle extends StatelessWidget {
     final String logo2 = _getFullUrl(logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
     final bool hasLogo2 = logo2.isNotEmpty;
-    
+
     List<Widget> logoWidgets = [];
-    
-    final double logoSize = 160.0; // Ukuran global untuk logo
-    
+
+    final double logoSize = 130.0; // Ukuran global untuk logo
+
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(
-        Image.asset('assets/logo/logo-masjid-default.png', height: logoSize, fit: BoxFit.contain),
+        Image.asset(
+          'assets/logo/logo-masjid-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      );
+      logoWidgets.add(const SizedBox(width: 4));
+      logoWidgets.add(
+        Image.asset(
+          'assets/logo/logo-pemko-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
       );
     } else {
       if (hasLogo1) {
         logoWidgets.add(
-          Image.network(logo1, height: logoSize, fit: BoxFit.contain, 
-            errorBuilder: (context, error, stackTrace) => Icon(Icons.mosque, size: logoSize, color: Colors.white),
+          Image.network(
+            logo1,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(Icons.mosque, size: logoSize, color: Colors.white),
           ),
         );
       }
       if (hasLogo2) {
-        if (hasLogo1) logoWidgets.add(const SizedBox(width: 32));
+        if (hasLogo1) logoWidgets.add(const SizedBox(width: 4));
         logoWidgets.add(
-          Image.network(logo2, height: logoSize, fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Icon(Icons.account_balance, size: logoSize, color: Colors.white),
+          Image.network(
+            logo2,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.account_balance,
+              size: logoSize,
+              color: Colors.white,
+            ),
           ),
         );
       }
@@ -69,22 +94,24 @@ class AppMasjidTitle extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 48),
+      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 10),
       color: backgroundColor,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: isRightAligned ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isRightAligned
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
-          if (!isRightAligned)
-            const Expanded(child: SizedBox()),
-            
+          if (!isRightAligned) const Expanded(child: SizedBox()),
+
           if (isRightAligned)
             const Expanded(child: SizedBox()), // Dorong dari kiri ke kanan
-          
           // Bagian Teks
           Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: isRightAligned ? CrossAxisAlignment.end : CrossAxisAlignment.center,
+            crossAxisAlignment: isRightAligned
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.center,
             children: [
               Text(
                 title,
@@ -94,13 +121,14 @@ class AppMasjidTitle extends StatelessWidget {
                   color: textColor,
                   fontFamily: 'Poppins',
                   letterSpacing: 1.5,
+                  height: 1.0, // Merapatkan tinggi baris
                 ),
                 textAlign: isRightAligned ? TextAlign.right : TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               if (address != null && address!.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 2), // Mengurangi jarak
                 Text(
                   address!,
                   style: TextStyle(
@@ -108,14 +136,16 @@ class AppMasjidTitle extends StatelessWidget {
                     color: addressColor ?? textColor.withValues(alpha: 0.8),
                     fontFamily: 'Poppins',
                   ),
-                  textAlign: isRightAligned ? TextAlign.right : TextAlign.center,
+                  textAlign: isRightAligned
+                      ? TextAlign.right
+                      : TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],
           ),
-          
+
           if (!isRightAligned)
             Expanded(
               child: Row(
@@ -125,7 +155,7 @@ class AppMasjidTitle extends StatelessWidget {
               ),
             )
           else ...[
-            const SizedBox(width: 32),
+            const SizedBox(width: 16),
             ...logoWidgets,
           ],
         ],
