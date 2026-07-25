@@ -74,9 +74,13 @@ class Theme7Widget extends StatelessWidget {
           left: 0,
           top: 0,
           bottom: 0,
-          child: ClipPath(
+          child: PhysicalShape(
             clipper: JadwalCurveClipper(),
-            child: AppJadwalSholat(
+            color: AppColors.bgNavy,
+            elevation: 16.0,
+            shadowColor: Colors.black,
+            clipBehavior: Clip.antiAlias,
+            child: const AppJadwalSholat(
               backgroundColor: AppColors.bgNavy,
               textColor: AppColors.textYellow,
               iconColor: AppColors.textYellow,
