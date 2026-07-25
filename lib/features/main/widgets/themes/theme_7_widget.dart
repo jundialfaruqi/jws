@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
-// import 'package:jws/core/widgets/app_live_clock.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat.dart';
 import 'package:jws/core/widgets/app_next_prayer_bar.dart';
