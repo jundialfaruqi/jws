@@ -1,0 +1,36 @@
+import 'package:flutter/material.dart';
+
+class AppLiveClock extends StatelessWidget {
+  final TextStyle textStyle;
+  final String prefix;
+
+  const AppLiveClock({
+    super.key,
+    required this.textStyle,
+    this.prefix = '',
+  });
+
+  String _formatNumber(int number) => number.toString().padLeft(2, '0');
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      // Berdetak setiap 1 detik
+      stream: Stream.periodic(const Duration(seconds: 1)),
+      builder: (context, snapshot) {
+        final now = DateTime.now();
+        final dateStr = "${now.year}-${_formatNumber(now.month)}-${_formatNumber(now.day)}";
+        final timeStr = "${_formatNumber(now.hour)}:${_formatNumber(now.minute)}:${_formatNumber(now.second)}";
+        
+        final displayText = prefix.isNotEmpty 
+            ? '$prefix • $dateStr $timeStr' 
+            : '$dateStr $timeStr';
+
+        return Text(
+          displayText,
+          style: textStyle,
+        );
+      },
+    );
+  }
+}

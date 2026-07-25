@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
+import 'package:jws/core/widgets/app_live_clock.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
 
@@ -33,12 +34,12 @@ class Theme7Widget extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Waktu Server: ${data.currentTime}',
-                  style: const TextStyle(
+                AppLiveClock(
+                  prefix: 'Waktu Server',
+                  textStyle: const TextStyle(
                     fontFamily: 'JetBrainsMono',
-                    fontSize: 28,
-                    color: Colors.grey,
+                    fontSize: 24,
+                    color: Colors.black54,
                   ),
                 ),
               ],

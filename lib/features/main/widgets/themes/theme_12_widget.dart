@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
+import 'package:jws/core/widgets/app_live_clock.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -37,9 +38,9 @@ class Theme12Widget extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Tema 12 • ${data.currentTime}',
-                    style: const TextStyle(
+                  AppLiveClock(
+                    prefix: 'Tema 12',
+                    textStyle: const TextStyle(
                       fontFamily: 'JetBrainsMono',
                       fontSize: 28,
                       color: Colors.deepPurple,
