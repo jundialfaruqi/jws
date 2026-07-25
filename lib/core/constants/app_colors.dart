@@ -18,6 +18,11 @@ class AppColors {
   // ====================
   static const Color bgPrimary = Colors.white; // Putih bersih
   static const Color bgSecondary = Color(0xFFF5F5F5); // Putih agak abu-abu
+  static const Color bgDark = Color(0xFF041426); // Hitam kebiruan sangat gelap
+  static const Color bgBlue = Color(0xFF1E5E9E); // Biru sedang
+  static const Color bgNavy = Color(0xFF003366); // Biru dongker gelap
+  static const Color bgRed = Color(0xFFE23030); // Merah (bisa untuk peringatan)
+  static const Color bgGreen = Color(0xFF10B27D); // Hijau (bisa untuk sukses)
 
   // ====================
   // Text Colors
@@ -26,6 +31,7 @@ class AppColors {
   static const Color textSecondary = Color(0xFF757575); // Abu-abu untuk sub-teks
   static const Color textHint = Color(0xFF9E9E9E); // Abu-abu terang untuk placeholder
   static const Color textInverse = Colors.white; // Putih untuk teks di atas warna gelap
+  static const Color textYellow = Color(0xFFFFEB3A); // Kuning terang untuk sorotan (highlight)
 
   // ====================
   // Status & Alert Colors

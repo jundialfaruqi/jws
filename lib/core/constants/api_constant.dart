@@ -7,4 +7,7 @@ class ApiConstant {
 
   /// Endpoint untuk mengambil profil masjid
   static const String profilMasjid = 'api/v2/profil-masjid';
+  
+  /// Endpoint untuk mengambil data halaman utama masjid (Waktu & Marquee)
+  static const String myMasjid = 'api/v2/my-masjid';
 }
