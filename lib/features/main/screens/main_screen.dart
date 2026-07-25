@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_offline_banner.dart';
+import '../../../core/widgets/app_confirm_exit.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../widgets/main_content_widget.dart';
 
@@ -9,16 +10,18 @@ class MainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return TvScaffold(
-      body: Column(
-        children: [
-          AppOfflineBanner(
-            onRetry: () {
-              // Reload logika di sini
-            },
-          ),
-          const MainContentWidget(),
-        ],
+    return AppConfirmExit(
+      child: TvScaffold(
+        body: Column(
+          children: [
+            AppOfflineBanner(
+              onRetry: () {
+                // Reload logika di sini
+              },
+            ),
+            const MainContentWidget(),
+          ],
+        ),
       ),
     );
   }
