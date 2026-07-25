@@ -5,12 +5,23 @@ import '../../features/main/screens/main_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/webview/screens/webview_screen.dart';
 import '../providers/selected_profil_provider.dart';
+import '../providers/view_mode_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final selectedProfil = ref.read(selectedProfilProvider);
+  final viewMode = ref.read(viewModeProvider);
+
+  String initial = '/';
+  if (selectedProfil != null) {
+    if (viewMode == 'web') {
+      initial = '/webview/${selectedProfil.slug}';
+    } else {
+      initial = '/main';
+    }
+  }
 
   return GoRouter(
-    initialLocation: selectedProfil != null ? '/main' : '/',
+    initialLocation: initial,
     routes: [
       GoRoute(
         path: '/',

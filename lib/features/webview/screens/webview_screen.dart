@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
+import '../../../core/widgets/tv_drawer_menu.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String slug;
@@ -14,6 +16,9 @@ class WebViewScreen extends StatefulWidget {
 class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  
+  final GlobalKey<TvDrawerMenuState> _drawerKey = GlobalKey<TvDrawerMenuState>();
+  final FocusNode _screenFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -55,38 +60,44 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   @override
+  void dispose() {
+    _screenFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (_isLoading)
-              const Center(
-                child: AppLoadingSpinner(message: 'Memuat Web View...'),
-              ),
-            
-            // Tombol kembali mengambang agar mudah keluar dari webview di TV
-            Positioned(
-              top: 16,
-              right: 16,
-              child: Material(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(30),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(30),
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: Icon(Icons.close, color: Colors.white, size: 30),
-                  ),
+    return Focus(
+      focusNode: _screenFocusNode,
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          _drawerKey.currentState?.showDrawer();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (_isLoading)
+                const Center(
+                  child: AppLoadingSpinner(message: 'Memuat Web View...'),
                 ),
-              ),
+            // TvDrawerMenu yang sama dengan MainScreen
+            TvDrawerMenu(
+              key: _drawerKey,
+              onDrawerClosed: () {
+                _screenFocusNode.requestFocus();
+              },
             ),
           ],
         ),
       ),
-    );
+    ), // Menutup Scaffold
+    ); // Menutup Focus
   }
 }

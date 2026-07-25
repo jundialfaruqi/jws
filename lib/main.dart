@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/routes/app_router.dart';
 import 'core/services/secure_storage_service.dart';
 import 'core/providers/selected_profil_provider.dart';
+import 'core/providers/view_mode_provider.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
 
 // Class untuk mengabaikan verifikasi SSL secara global
@@ -25,6 +26,8 @@ Future<void> main() async {
   // Membaca storage untuk cek profil terakhir
   final storage = SecureStorageService();
   final savedProfilJson = await storage.read('selected_profil');
+  final savedViewMode = await storage.read('view_mode');
+  
   ProfilMasjidModel? initialProfil;
   if (savedProfilJson != null) {
     try {
@@ -35,6 +38,7 @@ Future<void> main() async {
   runApp(ProviderScope(
     overrides: [
       initialProfilProvider.overrideWithValue(initialProfil),
+      initialViewModeProvider.overrideWithValue(savedViewMode),
     ],
     child: const MainApp(),
   ));

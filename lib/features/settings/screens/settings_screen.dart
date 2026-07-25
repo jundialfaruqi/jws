@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
+import '../../../core/widgets/app_view_selection_dialog.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/providers/view_mode_provider.dart';
+import '../../../core/providers/selected_profil_provider.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AppScaffold(
       appBar: AppTopBar(
         automaticallyImplyLeading: false,
@@ -34,10 +39,34 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           _SettingsItemWidget(
-            icon: Icons.color_lens,
-            title: 'Tema Aplikasi',
-            subtitle: 'Terang (Dummy)',
-            onTap: () {},
+            icon: Icons.tv,
+            title: 'Mode Tampilan JWS',
+            subtitle: 'Pilih antara versi Web atau Aplikasi Native',
+            onTap: () {
+              AppViewSelectionDialog.show(
+                context,
+                title: 'Ubah Mode Tampilan',
+                subtitle: 'Apakah Anda ingin beralih tampilan?',
+                onPrimarySelected: () async {
+                  await ref
+                      .read(viewModeProvider.notifier)
+                      .setViewMode('native');
+                  if (context.mounted) context.goNamed('main');
+                },
+                onSecondarySelected: () async {
+                  await ref.read(viewModeProvider.notifier).setViewMode('web');
+                  if (context.mounted) {
+                    final profil = ref.read(selectedProfilProvider);
+                    if (profil != null) {
+                      context.goNamed(
+                        'webview',
+                        pathParameters: {'slug': profil.slug},
+                      );
+                    }
+                  }
+                },
+              );
+            },
           ),
           _SettingsItemWidget(
             icon: Icons.language,
@@ -125,7 +154,9 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _isFocused ? AppColors.primary : Colors.black87,
+                          color: _isFocused
+                              ? AppColors.primary
+                              : Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),

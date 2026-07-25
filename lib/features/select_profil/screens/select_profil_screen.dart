@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import '../../../core/providers/storage_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/providers/view_mode_provider.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/app_view_selection_dialog.dart';
@@ -304,15 +305,28 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
                 // Perbarui statenya di provider
                 ref.read(selectedProfilProvider.notifier).setProfil(profil);
                 
+                // Simpan pilihan mode tampilan
+                await ref.read(viewModeProvider.notifier).setViewMode('native');
+                
                 // Navigasi ke main
                 if (context.mounted) {
                   context.goNamed('main');
                 }
               },
-              onSecondarySelected: () {
+              onSecondarySelected: () async {
+                // Simpan ke safe storage
+                final storage = ref.read(secureStorageProvider);
+                await storage.write('selected_profil', jsonEncode(profil.toJson()));
+                
+                // Perbarui statenya di provider
+                ref.read(selectedProfilProvider.notifier).setProfil(profil);
+                
+                // Simpan pilihan mode tampilan
+                await ref.read(viewModeProvider.notifier).setViewMode('web');
+
                 // Buka WebView
                 if (context.mounted) {
-                  context.pushNamed('webview', pathParameters: {'slug': profil.slug});
+                  context.goNamed('webview', pathParameters: {'slug': profil.slug});
                 }
               },
             );
