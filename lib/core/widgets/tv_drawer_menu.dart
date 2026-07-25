@@ -76,6 +76,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
   }
 
   void _handlePressSettings() {
+    hideDrawer();
     context.pushNamed('settings');
   }
 
