@@ -1,8 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/routes/app_router.dart';
+import 'core/services/secure_storage_service.dart';
+import 'core/providers/selected_profil_provider.dart';
+import 'features/select_profil/models/profil_masjid_model.dart';
 
 // Class untuk mengabaikan verifikasi SSL secara global
 class MyHttpOverrides extends HttpOverrides {
@@ -17,17 +21,34 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides(); // Pasang HttpOverrides di sini
   await dotenv.load(fileName: ".env");
-  runApp(const ProviderScope(child: MainApp()));
+
+  // Membaca storage untuk cek profil terakhir
+  final storage = SecureStorageService();
+  final savedProfilJson = await storage.read('selected_profil');
+  ProfilMasjidModel? initialProfil;
+  if (savedProfilJson != null) {
+    try {
+      initialProfil = ProfilMasjidModel.fromJson(jsonDecode(savedProfilJson));
+    } catch (_) {}
+  }
+
+  runApp(ProviderScope(
+    overrides: [
+      initialProfilProvider.overrideWithValue(initialProfil),
+    ],
+    child: const MainApp(),
+  ));
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/providers/storage_provider.dart';
+import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
 import 'dart:async';
+import 'dart:convert';
 
 class SelectProfilScreen extends ConsumerStatefulWidget {
   const SelectProfilScreen({super.key});
@@ -274,8 +277,20 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
         final profil = _items[index];
         return ProfilCardWidget(
           profil: profil,
-          onTap: () {
-            context.goNamed('main', extra: profil);
+          onTap: () async {
+            // Tampilkan indikator loading (opsional) atau langsung navigasi
+            
+            // Simpan ke safe storage
+            final storage = ref.read(secureStorageProvider);
+            await storage.write('selected_profil', jsonEncode(profil.toJson()));
+            
+            // Perbarui statenya di provider
+            ref.read(selectedProfilProvider.notifier).setProfil(profil);
+            
+            // Navigasi ke main
+            if (context.mounted) {
+              context.goNamed('main');
+            }
           },
         );
       },

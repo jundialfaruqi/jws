@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../select_profil/models/profil_masjid_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/selected_profil_provider.dart';
 
-class MainScreen extends StatelessWidget {
-  final ProfilMasjidModel profil;
-
-  const MainScreen({super.key, required this.profil});
+class MainScreen extends ConsumerWidget {
+  const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profil = ref.watch(selectedProfilProvider);
+
+    if (profil == null) {
+      return const Scaffold(
+        body: Center(child: Text('Profil tidak ditemukan')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Jadwal Waktu Sholat'),
