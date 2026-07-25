@@ -58,14 +58,23 @@ class AppJadwalSholat extends StatelessWidget {
     return Container(
       width: 700, // Diperlebar agar lengkungan dan card terlihat jelas
       color: backgroundColor,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+      padding: const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center, // Ubah dari spaceEvenly ke center agar mengumpul
         children: jadwal.map((item) {
           final itemColor = item['color'] as Color;
-          return Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8), // Jarak antar item diperkecil agar tidak overflow
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24), // Tambah padding vertikal agar teks tidak mepet border
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.15),
+                width: 1.0,
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -82,14 +91,14 @@ class AppJadwalSholat extends StatelessWidget {
                       Text(
                         item['nama'] as String,
                         style: TextStyle(
-                          fontSize: 32, // Nama sholat diperbesar
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: itemColor,
                           fontFamily: 'Poppins',
                           letterSpacing: 4.0,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 4), // Kembalikan spasi antara judul dan jam
                       Text(
                         item['jam'] as String,
                         style: TextStyle(
@@ -105,6 +114,7 @@ class AppJadwalSholat extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
             ),
           );
         }).toList(),
