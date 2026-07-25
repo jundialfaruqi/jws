@@ -7,9 +7,11 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
+  dio: ^5.10.0
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.1
+  flutter_riverpod: ^3.3.2
 
 dev_dependencies:
   flutter_test:
