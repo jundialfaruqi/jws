@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/constants/app_colors.dart';
@@ -20,10 +21,17 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(32.0),
         children: [
           _SettingsItemWidget(
-            icon: Icons.wifi,
-            title: 'Koneksi Jaringan',
-            subtitle: 'Terhubung ke WiFi (Dummy)',
-            onTap: () {},
+            icon: Icons.launch,
+            title: 'Izin Layar Mengambang (Auto-Start)',
+            subtitle: 'Wajib diaktifkan untuk Auto-Start (Khusus Android 10+)',
+            onTap: () async {
+              const platform = MethodChannel('id.go.pekanbaru.jws/settings');
+              try {
+                await platform.invokeMethod('openOverlaySettings');
+              } catch (e) {
+                debugPrint("Gagal membuka pengaturan: $e");
+              }
+            },
           ),
           _SettingsItemWidget(
             icon: Icons.color_lens,
