@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/select_profil/screens/select_profil_screen.dart';
 import '../../features/main/screens/main_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 import '../providers/selected_profil_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -19,6 +20,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/main',
         name: 'main',
         builder: (context, state) => const MainScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

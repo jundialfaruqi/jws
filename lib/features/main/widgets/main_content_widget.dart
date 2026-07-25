@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/selected_profil_provider.dart';
-import '../../../core/widgets/ganti_profil_button.dart';
 
 class MainContentWidget extends ConsumerWidget {
   const MainContentWidget({super.key});
@@ -52,8 +51,6 @@ class MainContentWidget extends ConsumerWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 32),
             ),
-            const SizedBox(height: 64),
-            const GantiProfilButton(),
           ],
         ),
       ),

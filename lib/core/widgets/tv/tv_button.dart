@@ -7,24 +7,30 @@ class TvButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback onPressed;
+  final ValueChanged<bool>? onFocusChange;
   final TvButtonVariant variant;
   final bool autofocus;
   final double fontSize;
+  final FocusNode? focusNode;
 
   const TvButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.icon,
+    this.onFocusChange,
     this.variant = TvButtonVariant.primary,
     this.autofocus = false,
     this.fontSize = 24,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     return TvFocusWrapper(
+      focusNode: focusNode,
       autofocus: autofocus,
+      onFocusChange: onFocusChange,
       onTap: onPressed,
       borderRadius: BorderRadius.circular(100), // Bentuk pill membulat
       builder: (context, isFocused) {

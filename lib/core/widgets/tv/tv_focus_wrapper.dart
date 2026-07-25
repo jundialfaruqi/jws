@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 class TvFocusWrapper extends StatefulWidget {
   final Widget Function(BuildContext context, bool isFocused) builder;
   final VoidCallback? onTap;
+  final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final BorderRadius? borderRadius;
+  final FocusNode? focusNode;
 
   const TvFocusWrapper({
     super.key,
     required this.builder,
     this.onTap,
+    this.onFocusChange,
     this.autofocus = false,
     this.borderRadius,
+    this.focusNode,
   });
 
   @override
@@ -24,11 +28,15 @@ class _TvFocusWrapperState extends State<TvFocusWrapper> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       onFocusChange: (hasFocus) {
         setState(() {
           _isFocused = hasFocus;
         });
+        if (widget.onFocusChange != null) {
+          widget.onFocusChange!(hasFocus);
+        }
       },
       onTap: widget.onTap,
       borderRadius: widget.borderRadius,
