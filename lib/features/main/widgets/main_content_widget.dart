@@ -41,6 +41,7 @@ class MainContentWidget extends ConsumerWidget {
             Text(
               'Slug: ${profil.slug}',
               style: const TextStyle(
+                fontFamily: 'JetBrainsMono',
                 fontSize: 28,
                 color: Colors.grey,
               ),

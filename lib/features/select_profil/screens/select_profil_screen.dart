@@ -9,6 +9,7 @@ import '../../../core/providers/storage_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
+import '../../../core/utils/error_handler.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
@@ -119,7 +120,7 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = ErrorHandler.getErrorMessage(e);
         _isLoading = false;
         _isFetchingMore = false;
       });
@@ -134,17 +135,22 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      appBar: const AppTopBar(
-        title: Text('Pilih Masjid'),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Arial'),
       ),
-      body: Column(
-        children: [
-          _buildSearchBar(),
-          Expanded(
-            child: _buildBody(),
-          ),
-        ],
+      child: AppScaffold(
+        appBar: const AppTopBar(
+          title: Text('Pilih Masjid'),
+        ),
+        body: Column(
+          children: [
+            _buildSearchBar(),
+            Expanded(
+              child: _buildBody(),
+            ),
+          ],
+        ),
       ),
     );
   }

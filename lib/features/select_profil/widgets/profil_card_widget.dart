@@ -57,7 +57,12 @@ class _ProfilCardWidgetState extends State<ProfilCardWidget> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('ID: ${widget.profil.slug}'),
+                    Text(
+                      'ID: ${widget.profil.slug}',
+                      style: const TextStyle(
+                        fontFamily: 'JetBrainsMono',
+                      ),
+                    ),
                   ],
                 ),
               ),
