@@ -59,7 +59,7 @@ class Theme12Widget extends StatelessWidget {
           backgroundColor: AppColors.bgRed,
           textStyle: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 48,
+            fontSize: 64,
             color: Colors.white,
           ),
         ),

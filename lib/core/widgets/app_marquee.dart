@@ -13,11 +13,11 @@ class AppMarquee extends StatefulWidget {
   const AppMarquee({
     super.key,
     required this.text,
-    this.height = 90.0,
+    this.height = 120.0,
     this.backgroundColor = AppColors.bgDark,
     this.textStyle = const TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 48,
+      fontSize: 64,
       color: AppColors.textYellow,
     ),
     this.velocity = 120.0,
