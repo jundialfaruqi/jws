@@ -40,6 +40,23 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Mulanya tertutup
     });
+
+    // Cegah fokus melompat keluar dari laci (menghilang ke ruang hampa)
+    _gantiProfilFocusNode.onKeyEvent = (node, event) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp || 
+          event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
+
+    _settingsFocusNode.onKeyEvent = (node, event) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown || 
+          event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
   }
 
   void showDrawer() {
@@ -112,7 +129,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
           return KeyEventResult.ignored;
         },
         child: Container(
-          width: 350,
+          width: 450,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.85),
@@ -132,7 +149,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
                 children: [
                   const SizedBox(height: 64),
                   const Center(
-                    child: Icon(Icons.mosque, color: Colors.white, size: 64),
+                    child: Icon(Icons.mosque, color: Colors.white, size: 80),
                   ),
                   const SizedBox(height: 16),
                   const Center(
@@ -140,7 +157,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
                       'Menu Utama',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -209,7 +226,7 @@ class _TvDrawerMenuItemState extends State<_TvDrawerMenuItem> {
         onTap: widget.onPressed,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
           decoration: BoxDecoration(
             color: _isFocused ? Colors.blue.shade600 : Colors.transparent,
             border: Border(
@@ -224,14 +241,14 @@ class _TvDrawerMenuItemState extends State<_TvDrawerMenuItem> {
               Icon(
                 widget.icon,
                 color: _isFocused ? Colors.white : Colors.white70,
-                size: 32,
+                size: 40,
               ),
               const SizedBox(width: 24),
               Text(
                 widget.label,
                 style: TextStyle(
                   color: _isFocused ? Colors.white : Colors.white70,
-                  fontSize: 22,
+                  fontSize: 28,
                   fontWeight: _isFocused ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
