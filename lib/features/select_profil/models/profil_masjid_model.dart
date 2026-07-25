@@ -3,12 +3,16 @@ class ProfilMasjidModel {
   final String name;
   final String slug;
   final String? address;
+  final String? logoMasjid;
+  final String? logoPemerintah;
 
   ProfilMasjidModel({
     required this.id,
     required this.name,
     required this.slug,
     this.address,
+    this.logoMasjid,
+    this.logoPemerintah,
   });
 
   factory ProfilMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +21,8 @@ class ProfilMasjidModel {
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       address: json['address'],
+      logoMasjid: json['logo_masjid'],
+      logoPemerintah: json['logo_pemerintah'],
     );
   }
 
@@ -26,6 +32,8 @@ class ProfilMasjidModel {
       'name': name,
       'slug': slug,
       'address': address,
+      'logo_masjid': logoMasjid,
+      'logo_pemerintah': logoPemerintah,
     };
   }
 }

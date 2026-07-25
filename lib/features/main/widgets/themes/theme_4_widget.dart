@@ -23,6 +23,8 @@ class Theme4Widget extends StatelessWidget {
         AppMasjidTitle(
           title: data.profil.name,
           address: data.profil.address,
+          logoMasjid: data.profil.logoMasjid,
+          logoPemerintah: data.profil.logoPemerintah,
           backgroundColor: Colors.black87,
           textColor: Colors.white,
         ),

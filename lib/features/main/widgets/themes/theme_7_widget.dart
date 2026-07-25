@@ -24,9 +24,12 @@ class Theme7Widget extends StatelessWidget {
         AppMasjidTitle(
           title: data.profil.name,
           address: data.profil.address,
+          logoMasjid: data.profil.logoMasjid,
+          logoPemerintah: data.profil.logoPemerintah,
           backgroundColor: AppColors.bgBlue,
           textColor: AppColors.textYellow,
           addressColor: AppColors.textInverse,
+          isRightAligned: true,
         ),
 
         // Konten Utama (Tengah) - Tema 7 (Default)
