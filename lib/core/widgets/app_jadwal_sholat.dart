@@ -15,14 +15,8 @@ class AppJadwalSholat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Data Dummy Jadwal Sholat 7 Waktu
+    // Data Dummy Jadwal Sholat 6 Waktu
     final List<Map<String, dynamic>> jadwal = [
-      {
-        'nama': 'IMSAK',
-        'jam': '04:47',
-        'icon': TablerIcons.moon,
-        'color': Colors.white,
-      },
       {
         'nama': 'SUBUH',
         'jam': '04:57',
