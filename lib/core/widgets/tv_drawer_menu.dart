@@ -49,6 +49,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
   }
 
   void hideDrawer() {
+    _hideTimer?.cancel();
     _animationController.reverse();
     widget.onDrawerClosed();
   }
