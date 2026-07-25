@@ -35,6 +35,17 @@ class MarqueeModel {
     );
   }
 
+  static String get defaultMarqueeText {
+    return [
+      "Matikan ponsel atau gunakan mode senyap saat berada di dalam masjid",
+      "Mohon menjaga kebersihan di dalam masjid",
+      "Berdoalah untuk umat Islam",
+      "Shalatlah berjamaah untuk mendapatkan lebih banyak pahala",
+      "Ingatlah untuk berdonasi demi pemeliharaan masjid",
+      "Harap gunakan rak sepatu yang telah disediakan"
+    ].join("   •   ");
+  }
+
   // Helper method untuk menggabungkan semua teks marquee menjadi satu kalimat panjang
   String get concatenatedText {
     final List<String> parts = [];
@@ -45,7 +56,7 @@ class MarqueeModel {
     if (marquee5 != null && marquee5!.trim().isNotEmpty) parts.add(marquee5!.trim());
     if (marquee6 != null && marquee6!.trim().isNotEmpty) parts.add(marquee6!.trim());
     
-    if (parts.isEmpty) return "Selamat Datang di Sistem Informasi Masjid";
+    if (parts.isEmpty) return defaultMarqueeText;
     return parts.join("   •   ");
   }
 }

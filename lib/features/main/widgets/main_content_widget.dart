@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/widgets/app_marquee.dart';
 import '../providers/my_masjid_provider.dart';
+import '../models/marquee_model.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 
 class MainContentWidget extends ConsumerWidget {
@@ -41,7 +42,7 @@ class MainContentWidget extends ConsumerWidget {
           ),
         ),
         data: (data) {
-          final marqueeText = data.marquee?.concatenatedText ?? 'Selamat Datang di Sistem Informasi Masjid';
+          final marqueeText = data.marquee?.concatenatedText ?? MarqueeModel.defaultMarqueeText;
           
           // Kecepatan dasar dinaikkan menjadi 120.0 agar sesuai dengan rasa di web, dikalikan dengan pengali dari API (marqueeSpeed)
           final speedMultiplier = data.marquee?.marqueeSpeed ?? 1.0;
