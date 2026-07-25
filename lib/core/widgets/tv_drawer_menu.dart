@@ -90,7 +90,8 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
   }
 
   void _handlePressProfil() {
-    context.goNamed('select_profil');
+    hideDrawer();
+    context.pushNamed('select_profil');
   }
 
   void _handlePressSettings() {
