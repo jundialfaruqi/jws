@@ -31,7 +31,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
   @override
   void initState() {
     super.initState();
-    // Berdetak setiap 1 detik agar warna sholat akurat, 
+    // Berdetak setiap 1 detik agar warna sholat akurat,
     // tetapi toggle Imsak/Subuh hanya berjalan setiap 7 detik
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -55,14 +55,20 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     if (timeStr == '--:--' || timeStr.isEmpty) return now;
     final parts = timeStr.split(':');
     if (parts.length != 2) return now;
-    return DateTime(now.year, now.month, now.day, int.tryParse(parts[0]) ?? 0, int.tryParse(parts[1]) ?? 0);
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.tryParse(parts[0]) ?? 0,
+      int.tryParse(parts[1]) ?? 0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // Ambil waktu paling mutakhir dari server (secara monotonic)
     final now = ref.read(timeSyncServiceProvider).now();
-    
+
     String activePrayer = '';
     String nextPrayer = '';
 
@@ -70,11 +76,20 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       final times = [
         {'nama': 'IMSAK', 'time': _parseTime(widget.jadwalSholat!.imsak, now)},
         {'nama': 'SUBUH', 'time': _parseTime(widget.jadwalSholat!.subuh, now)},
-        {'nama': 'TERBIT', 'time': _parseTime(widget.jadwalSholat!.terbit, now)},
+        {
+          'nama': 'TERBIT',
+          'time': _parseTime(widget.jadwalSholat!.terbit, now),
+        },
         {'nama': 'DHUHA', 'time': _parseTime(widget.jadwalSholat!.dhuha, now)},
-        {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(widget.jadwalSholat!.dzuhur, now)},
+        {
+          'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+          'time': _parseTime(widget.jadwalSholat!.dzuhur, now),
+        },
         {'nama': 'ASHAR', 'time': _parseTime(widget.jadwalSholat!.ashar, now)},
-        {'nama': 'MAGHRIB', 'time': _parseTime(widget.jadwalSholat!.maghrib, now)},
+        {
+          'nama': 'MAGHRIB',
+          'time': _parseTime(widget.jadwalSholat!.maghrib, now),
+        },
         {'nama': 'ISYA', 'time': _parseTime(widget.jadwalSholat!.isya, now)},
       ];
 
@@ -163,24 +178,34 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       color: widget.backgroundColor,
       padding: const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // Ubah dari spaceEvenly ke center agar mengumpul
+        mainAxisAlignment: MainAxisAlignment
+            .center, // Ubah dari spaceEvenly ke center agar mengumpul
         children: jadwal.asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
           final isLast = index == jadwal.length - 1;
-          
+
           final itemColor = item['color'] as Color;
-          final uniqueKey = ValueKey(item['nama']); // Kunci unik untuk AnimatedSwitcher
+          final uniqueKey = ValueKey(
+            item['nama'],
+          ); // Kunci unik untuk AnimatedSwitcher
 
           return Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : 8), // Hilangkan padding bawah jika item terakhir
+            padding: EdgeInsets.only(
+              bottom: isLast ? 0 : 8,
+            ), // Hilangkan padding bawah jika item terakhir
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
-                border: isLast ? null : Border(
-                  bottom: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
-                ),
+                border: isLast
+                    ? null
+                    : Border(
+                        bottom: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          width: 1.0,
+                        ),
+                      ),
               ),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 800),
@@ -188,7 +213,10 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                 switchOutCurve: Curves.easeInCubic,
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   final offsetAnimation = Tween<Offset>(
-                    begin: const Offset(-0.3, 0.0), // Muncul dari agak kiri (horizontal)
+                    begin: const Offset(
+                      -0.3,
+                      0.0,
+                    ), // Muncul dari agak kiri (horizontal)
                     end: Offset.zero,
                   ).animate(animation);
                   return FadeTransition(
@@ -200,7 +228,8 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   );
                 },
                 child: Row(
-                  key: uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
+                  key:
+                      uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -223,7 +252,9 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                               letterSpacing: 4.0,
                             ),
                           ),
-                          const SizedBox(height: 4), // Kembalikan spasi antara judul dan jam
+                          const SizedBox(
+                            height: 4,
+                          ), // Kembalikan spasi antara judul dan jam
                           Text(
                             item['jam'] as String,
                             style: TextStyle(
@@ -232,7 +263,8 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                               color: itemColor,
                               fontFamily: 'Poppins',
                               height: 1.0,
-                              letterSpacing: 4.0, // Memberikan sedikit spasi antar karakter
+                              letterSpacing:
+                                  5.0, // Memberikan sedikit spasi antar karakter
                             ),
                             textAlign: TextAlign.left,
                           ),
