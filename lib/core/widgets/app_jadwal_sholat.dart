@@ -66,16 +66,14 @@ class AppJadwalSholat extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8), // Jarak antar item diperkecil agar tidak overflow
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24), // Tambah padding vertikal agar teks tidak mepet border
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-                width: 1.0,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                border: Border(
+                  bottom: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
+                ),
               ),
-            ),
-            child: Row(
+              child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -115,9 +113,9 @@ class AppJadwalSholat extends StatelessWidget {
                 ),
               ],
             ),
-            ),
-          );
-        }).toList(),
+          ),
+        );
+      }).toList(),
       ),
     );
   }
