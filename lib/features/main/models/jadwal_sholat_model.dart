@@ -9,6 +9,7 @@ class JadwalSholatModel {
   final String maghrib;
   final String isya;
   final String date;
+  final String? tanggalHijriah;
 
   JadwalSholatModel({
     required this.tanggal,
@@ -21,6 +22,7 @@ class JadwalSholatModel {
     required this.maghrib,
     required this.isya,
     required this.date,
+    this.tanggalHijriah,
   });
 
   factory JadwalSholatModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class JadwalSholatModel {
       maghrib: json['maghrib'] ?? '',
       isya: json['isya'] ?? '',
       date: json['date'] ?? '',
+      tanggalHijriah: json['tanggal_hijriah'],
     );
   }
 }

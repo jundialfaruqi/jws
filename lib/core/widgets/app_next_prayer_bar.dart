@@ -158,9 +158,9 @@ class AppNextPrayerBar extends ConsumerWidget {
                     size: 32,
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    '12 Muharram 1448 H',
-                    style: TextStyle(
+                  Text(
+                    jadwalSholat?.tanggalHijriah ?? '',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
