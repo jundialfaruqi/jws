@@ -40,6 +40,7 @@ class Theme7Widget extends StatelessWidget {
             // Info Bar Waktu Sholat & Tanggal
             AppNextPrayerBar(
               leftMargin: 600, // Menghindari card melayang di kiri
+              jadwalSholat: data.jadwalSholat,
             ),
 
             // Konten Utama (Tengah) - Tema 7 (Default)

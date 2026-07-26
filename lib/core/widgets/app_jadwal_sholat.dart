@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
+import '../time/time_sync_service.dart';
 
-class AppJadwalSholat extends StatefulWidget {
+class AppJadwalSholat extends ConsumerStatefulWidget {
   final Color backgroundColor;
   final Color textColor;
   final Color iconColor;
@@ -18,20 +20,26 @@ class AppJadwalSholat extends StatefulWidget {
   });
 
   @override
-  State<AppJadwalSholat> createState() => _AppJadwalSholatState();
+  ConsumerState<AppJadwalSholat> createState() => _AppJadwalSholatState();
 }
 
-class _AppJadwalSholatState extends State<AppJadwalSholat> {
+class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
   bool _showPrimary = true;
   Timer? _timer;
+  int _tickCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 7), (timer) {
+    // Berdetak setiap 1 detik agar warna sholat akurat, 
+    // tetapi toggle Imsak/Subuh hanya berjalan setiap 7 detik
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
-          _showPrimary = !_showPrimary;
+          _tickCount++;
+          if (_tickCount % 7 == 0) {
+            _showPrimary = !_showPrimary;
+          }
         });
       }
     });
@@ -43,8 +51,59 @@ class _AppJadwalSholatState extends State<AppJadwalSholat> {
     super.dispose();
   }
 
+  DateTime _parseTime(String timeStr, DateTime now) {
+    if (timeStr == '--:--' || timeStr.isEmpty) return now;
+    final parts = timeStr.split(':');
+    if (parts.length != 2) return now;
+    return DateTime(now.year, now.month, now.day, int.tryParse(parts[0]) ?? 0, int.tryParse(parts[1]) ?? 0);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Ambil waktu paling mutakhir dari server (secara monotonic)
+    final now = ref.read(timeSyncServiceProvider).now();
+    
+    String activePrayer = '';
+    String nextPrayer = '';
+
+    if (widget.jadwalSholat != null) {
+      final times = [
+        {'nama': 'IMSAK', 'time': _parseTime(widget.jadwalSholat!.imsak, now)},
+        {'nama': 'SUBUH', 'time': _parseTime(widget.jadwalSholat!.subuh, now)},
+        {'nama': 'TERBIT', 'time': _parseTime(widget.jadwalSholat!.terbit, now)},
+        {'nama': 'DHUHA', 'time': _parseTime(widget.jadwalSholat!.dhuha, now)},
+        {'nama': 'DZUHUR', 'time': _parseTime(widget.jadwalSholat!.dzuhur, now)},
+        {'nama': 'ASHAR', 'time': _parseTime(widget.jadwalSholat!.ashar, now)},
+        {'nama': 'MAGHRIB', 'time': _parseTime(widget.jadwalSholat!.maghrib, now)},
+        {'nama': 'ISYA', 'time': _parseTime(widget.jadwalSholat!.isya, now)},
+      ];
+
+      for (int i = times.length - 1; i >= 0; i--) {
+        final t = times[i]['time'] as DateTime;
+        if (now.isAfter(t) || now.isAtSameMomentAs(t)) {
+          activePrayer = times[i]['nama'] as String;
+          if (i < times.length - 1) {
+            nextPrayer = times[i + 1]['nama'] as String;
+          } else {
+            nextPrayer = times[0]['nama'] as String; // Besok Imsak
+          }
+          break;
+        }
+      }
+
+      // Jika waktu sekarang masih sebelum Imsak hari ini
+      if (activePrayer.isEmpty) {
+        activePrayer = 'ISYA';
+        nextPrayer = 'IMSAK';
+      }
+    }
+
+    Color getColor(String nama) {
+      if (nama == activePrayer) return Colors.red;
+      if (nama == nextPrayer) return Colors.yellow;
+      return Colors.white; // default color
+    }
+
     // Data Jadwal Sholat Dinamis
     final List<Map<String, dynamic>> jadwal = [
       _showPrimary
@@ -52,50 +111,50 @@ class _AppJadwalSholatState extends State<AppJadwalSholat> {
               'nama': 'IMSAK',
               'jam': widget.jadwalSholat?.imsak ?? '--:--',
               'icon': TablerIcons.moon_2,
-              'color': Colors.white,
+              'color': getColor('IMSAK'),
             }
           : {
               'nama': 'SUBUH',
               'jam': widget.jadwalSholat?.subuh ?? '--:--',
               'icon': TablerIcons.sun_low,
-              'color': Colors.white,
+              'color': getColor('SUBUH'),
             },
       _showPrimary
           ? {
               'nama': 'TERBIT',
               'jam': widget.jadwalSholat?.terbit ?? '--:--',
               'icon': TablerIcons.sunrise,
-              'color': Colors.white,
+              'color': getColor('TERBIT'),
             }
           : {
               'nama': 'DHUHA',
               'jam': widget.jadwalSholat?.dhuha ?? '--:--',
               'icon': TablerIcons.sun,
-              'color': Colors.white,
+              'color': getColor('DHUHA'),
             },
       {
         'nama': 'DZUHUR',
         'jam': widget.jadwalSholat?.dzuhur ?? '--:--',
         'icon': TablerIcons.sun_high,
-        'color': Colors.white,
+        'color': getColor('DZUHUR'),
       },
       {
         'nama': 'ASHAR',
         'jam': widget.jadwalSholat?.ashar ?? '--:--',
         'icon': TablerIcons.cloud,
-        'color': Colors.white,
+        'color': getColor('ASHAR'),
       },
       {
         'nama': 'MAGHRIB',
         'jam': widget.jadwalSholat?.maghrib ?? '--:--',
         'icon': TablerIcons.sunset,
-        'color': Colors.yellow,
+        'color': getColor('MAGHRIB'),
       },
       {
         'nama': 'ISYA',
         'jam': widget.jadwalSholat?.isya ?? '--:--',
         'icon': TablerIcons.moon_stars,
-        'color': Colors.red,
+        'color': getColor('ISYA'),
       },
     ];
 
