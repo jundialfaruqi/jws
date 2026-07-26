@@ -1,5 +1,6 @@
 class SlideModel {
   final int id;
+  final bool isActive;
   final String? slide1;
   final String? slide2;
   final String? slide3;
@@ -9,6 +10,7 @@ class SlideModel {
 
   SlideModel({
     required this.id,
+    this.isActive = true,
     this.slide1,
     this.slide2,
     this.slide3,
@@ -20,6 +22,7 @@ class SlideModel {
   factory SlideModel.fromJson(Map<String, dynamic> json) {
     return SlideModel(
       id: json['id'] ?? 0,
+      isActive: json['is_active'] ?? true,
       slide1: json['slide1'],
       slide2: json['slide2'],
       slide3: json['slide3'],

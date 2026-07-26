@@ -3,6 +3,7 @@ import 'marquee_model.dart';
 import 'jadwal_sholat_model.dart';
 import 'slide_model.dart';
 import 'agenda_model.dart';
+import 'petugas_model.dart';
 
 class MyMasjidModel {
   final String currentTime;
@@ -17,6 +18,9 @@ class MyMasjidModel {
   final SlideModel? slideFinal;
   final List<AgendaModel> agenda;
   final String agendaMessage;
+  final List<PetugasModel> petugasJumat;
+  final SlideModel? jumbotronPemko;
+  final SlideModel? jumbotronMasjid;
 
   MyMasjidModel({
     required this.currentTime,
@@ -31,6 +35,9 @@ class MyMasjidModel {
     this.slideFinal,
     this.agenda = const [],
     this.agendaMessage = '',
+    this.petugasJumat = const [],
+    this.jumbotronPemko,
+    this.jumbotronMasjid,
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +54,9 @@ class MyMasjidModel {
       slideFinal: json['slide_final'] != null && json['slide_final']['data'] != null ? SlideModel.fromJson(json['slide_final']['data']) : null,
       agenda: json['agenda'] != null && json['agenda']['data'] != null ? (json['agenda']['data'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
       agendaMessage: json['agenda'] != null && json['agenda']['message'] != null ? json['agenda']['message'] : '',
+      petugasJumat: json['petugas_jumat'] != null && json['petugas_jumat']['data'] != null ? (json['petugas_jumat']['data'] as List).map((i) => PetugasModel.fromJson(i)).toList() : [],
+      jumbotronPemko: json['jumbotron_pemko'] != null && json['jumbotron_pemko']['data'] != null ? SlideModel.fromJson(json['jumbotron_pemko']['data']) : null,
+      jumbotronMasjid: json['jumbotron_masjid'] != null && json['jumbotron_masjid']['data'] != null ? SlideModel.fromJson(json['jumbotron_masjid']['data']) : null,
     );
   }
 }
