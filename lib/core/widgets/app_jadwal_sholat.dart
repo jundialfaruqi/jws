@@ -9,14 +9,14 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
   final Color backgroundColor;
   final Color textColor;
   final Color iconColor;
-  final JadwalSholatModel? jadwalSholat;
+  final List<JadwalSholatModel> jadwalSholatList;
 
   const AppJadwalSholat({
     super.key,
     required this.backgroundColor,
     required this.textColor,
     required this.iconColor,
-    this.jadwalSholat,
+    this.jadwalSholatList = const [],
   });
 
   @override
@@ -71,26 +71,28 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
 
     String activePrayer = '';
     String nextPrayer = '';
+    JadwalSholatModel? todayJadwal;
 
-    if (widget.jadwalSholat != null) {
+    if (widget.jadwalSholatList.isNotEmpty) {
+      final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      try {
+        todayJadwal = widget.jadwalSholatList.firstWhere((j) => j.date == dateStr);
+      } catch (_) {
+        todayJadwal = widget.jadwalSholatList.first;
+      }
+
       final times = [
-        {'nama': 'IMSAK', 'time': _parseTime(widget.jadwalSholat!.imsak, now)},
-        {'nama': 'SUBUH', 'time': _parseTime(widget.jadwalSholat!.subuh, now)},
-        {
-          'nama': 'TERBIT',
-          'time': _parseTime(widget.jadwalSholat!.terbit, now),
-        },
-        {'nama': 'DHUHA', 'time': _parseTime(widget.jadwalSholat!.dhuha, now)},
+        {'nama': 'IMSAK', 'time': _parseTime(todayJadwal.imsak, now)},
+        {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
+        {'nama': 'TERBIT', 'time': _parseTime(todayJadwal.terbit, now)},
+        {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
         {
           'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
-          'time': _parseTime(widget.jadwalSholat!.dzuhur, now),
+          'time': _parseTime(todayJadwal.dzuhur, now),
         },
-        {'nama': 'ASHAR', 'time': _parseTime(widget.jadwalSholat!.ashar, now)},
-        {
-          'nama': 'MAGHRIB',
-          'time': _parseTime(widget.jadwalSholat!.maghrib, now),
-        },
-        {'nama': 'ISYA', 'time': _parseTime(widget.jadwalSholat!.isya, now)},
+        {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},
+        {'nama': 'MAGHRIB', 'time': _parseTime(todayJadwal.maghrib, now)},
+        {'nama': 'ISYA', 'time': _parseTime(todayJadwal.isya, now)},
       ];
 
       for (int i = times.length - 1; i >= 0; i--) {
@@ -119,55 +121,54 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       return Colors.white; // default color
     }
 
-    // Data Jadwal Sholat Dinamis
     final List<Map<String, dynamic>> jadwal = [
       _showPrimary
           ? {
               'nama': 'IMSAK',
-              'jam': widget.jadwalSholat?.imsak ?? '--:--',
+              'jam': todayJadwal?.imsak ?? '--:--',
               'icon': TablerIcons.moon_2,
               'color': getColor('IMSAK'),
             }
           : {
               'nama': 'SUBUH',
-              'jam': widget.jadwalSholat?.subuh ?? '--:--',
+              'jam': todayJadwal?.subuh ?? '--:--',
               'icon': TablerIcons.sun_low,
               'color': getColor('SUBUH'),
             },
       _showPrimary
           ? {
               'nama': 'TERBIT',
-              'jam': widget.jadwalSholat?.terbit ?? '--:--',
+              'jam': todayJadwal?.terbit ?? '--:--',
               'icon': TablerIcons.sunrise,
               'color': getColor('TERBIT'),
             }
           : {
               'nama': 'DHUHA',
-              'jam': widget.jadwalSholat?.dhuha ?? '--:--',
+              'jam': todayJadwal?.dhuha ?? '--:--',
               'icon': TablerIcons.sun,
               'color': getColor('DHUHA'),
             },
       {
         'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
-        'jam': widget.jadwalSholat?.dzuhur ?? '--:--',
+        'jam': todayJadwal?.dzuhur ?? '--:--',
         'icon': TablerIcons.sun_high,
         'color': getColor(now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR'),
       },
       {
         'nama': 'ASHAR',
-        'jam': widget.jadwalSholat?.ashar ?? '--:--',
+        'jam': todayJadwal?.ashar ?? '--:--',
         'icon': TablerIcons.cloud,
         'color': getColor('ASHAR'),
       },
       {
         'nama': 'MAGHRIB',
-        'jam': widget.jadwalSholat?.maghrib ?? '--:--',
+        'jam': todayJadwal?.maghrib ?? '--:--',
         'icon': TablerIcons.sunset,
         'color': getColor('MAGHRIB'),
       },
       {
         'nama': 'ISYA',
-        'jam': widget.jadwalSholat?.isya ?? '--:--',
+        'jam': todayJadwal?.isya ?? '--:--',
         'icon': TablerIcons.moon_stars,
         'color': getColor('ISYA'),
       },

@@ -79,7 +79,7 @@ class Theme10Widget extends StatelessWidget {
             backgroundColor: Colors.teal.shade800,
             textColor: Colors.white,
             iconColor: Colors.tealAccent,
-            jadwalSholat: data.jadwalSholat,
+            jadwalSholatList: data.jadwalSholat,
           ),
         ),
       ],

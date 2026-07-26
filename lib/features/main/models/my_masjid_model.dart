@@ -10,7 +10,7 @@ class MyMasjidModel {
   final int? themeId;
   final ProfilMasjidModel profil;
   final MarqueeModel? marquee;
-  final JadwalSholatModel? jadwalSholat;
+  final List<JadwalSholatModel> jadwalSholat;
   final SlideModel? slides;
   final List<AgendaModel> agenda;
 
@@ -20,7 +20,7 @@ class MyMasjidModel {
     this.themeId,
     required this.profil,
     this.marquee,
-    this.jadwalSholat,
+    this.jadwalSholat = const [],
     this.slides,
     this.agenda = const [],
   });
@@ -32,7 +32,7 @@ class MyMasjidModel {
       themeId: json['theme_id'],
       profil: ProfilMasjidModel.fromJson(json['profil'] ?? {}),
       marquee: json['marquee'] != null ? MarqueeModel.fromJson(json['marquee']) : null,
-      jadwalSholat: json['jadwal_sholat'] != null ? JadwalSholatModel.fromJson(json['jadwal_sholat']) : null,
+      jadwalSholat: json['jadwal_sholat'] != null ? (json['jadwal_sholat'] as List).map((i) => JadwalSholatModel.fromJson(i)).toList() : [],
       slides: json['slides'] != null ? SlideModel.fromJson(json['slides']) : null,
       agenda: json['agenda'] != null ? (json['agenda'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
     );

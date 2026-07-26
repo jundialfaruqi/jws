@@ -89,6 +89,33 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
 
     final agenda = _activeAgendas[_currentIndex];
 
+    // Kalkulasi days_label secara dinamis berdasarkan now()
+    String dynamicDaysLabel = agenda.daysLabel;
+    if (agenda.dateRaw.isNotEmpty) {
+      try {
+        final dateParts = agenda.dateRaw.split('-');
+        final agendaDate = DateTime(
+          int.parse(dateParts[0]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[2]),
+        );
+        final today = DateTime(now.year, now.month, now.day);
+        
+        if (agendaDate.isAtSameMomentAs(today)) {
+          dynamicDaysLabel = 'Hari ini';
+        } else {
+          final diff = agendaDate.difference(today).inDays;
+          if (diff == 1) {
+            dynamicDaysLabel = 'Besok';
+          } else if (diff > 1) {
+            dynamicDaysLabel = '$diff Hari Lagi';
+          } else {
+            dynamicDaysLabel = 'Telah Berlalu';
+          }
+        }
+      } catch (_) {}
+    }
+
     String dateStr = agenda.date;
 
     return AnimatedSlide(
@@ -162,17 +189,18 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: agenda.daysLabel.toLowerCase() == 'hari ini'
+                    color: dynamicDaysLabel.toLowerCase() == 'hari ini'
                         ? Colors.red.shade400
                         : Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    agenda.daysLabel,
+                    dynamicDaysLabel,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
                     ),
                   ),
                 ),

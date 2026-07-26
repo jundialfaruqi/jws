@@ -49,7 +49,7 @@ class Theme7Widget extends StatelessWidget {
             // Info Bar Waktu Sholat & Tanggal
             AppNextPrayerBar(
               leftMargin: 600, // Menghindari card melayang di kiri
-              jadwalSholat: data.jadwalSholat,
+              jadwalSholatList: data.jadwalSholat,
             ),
 
             // Konten Utama (Tengah) - Tema 7 (Default)
@@ -95,7 +95,7 @@ class Theme7Widget extends StatelessWidget {
               backgroundColor: AppColors.bgNavy,
               textColor: AppColors.textYellow,
               iconColor: AppColors.textYellow,
-              jadwalSholat: data.jadwalSholat,
+              jadwalSholatList: data.jadwalSholat,
             ),
           ),
         ),

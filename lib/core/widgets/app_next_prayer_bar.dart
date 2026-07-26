@@ -5,12 +5,13 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
 import '../time/time_sync_service.dart';
+import 'package:hijri/hijri_calendar.dart';
 
 class AppNextPrayerBar extends ConsumerWidget {
   final double leftMargin;
-  final JadwalSholatModel? jadwalSholat;
+  final List<JadwalSholatModel> jadwalSholatList;
 
-  const AppNextPrayerBar({super.key, this.leftMargin = 0.0, this.jadwalSholat});
+  const AppNextPrayerBar({super.key, this.leftMargin = 0.0, this.jadwalSholatList = const []});
 
   DateTime _parseTime(String timeStr, DateTime now) {
     if (timeStr == '--:--' || timeStr.isEmpty) return now;
@@ -34,17 +35,35 @@ class AppNextPrayerBar extends ConsumerWidget {
 
         String nextPrayer = '...';
         Duration countdown = Duration.zero;
+        JadwalSholatModel? todayJadwal;
+        JadwalSholatModel? tomorrowJadwal;
 
-        if (jadwalSholat != null) {
+        if (jadwalSholatList.isNotEmpty) {
+          final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+          
+          try {
+            todayJadwal = jadwalSholatList.firstWhere((j) => j.date == dateStr);
+          } catch (_) {
+            todayJadwal = jadwalSholatList.first;
+          }
+
+          final tomorrow = now.add(const Duration(days: 1));
+          final tomorrowStr = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+          try {
+            tomorrowJadwal = jadwalSholatList.firstWhere((j) => j.date == tomorrowStr);
+          } catch (_) {
+            tomorrowJadwal = todayJadwal;
+          }
+
           final times = [
-            {'nama': 'IMSAK', 'time': _parseTime(jadwalSholat!.imsak, now)},
-            {'nama': 'SUBUH', 'time': _parseTime(jadwalSholat!.subuh, now)},
-            {'nama': 'TERBIT', 'time': _parseTime(jadwalSholat!.terbit, now)},
-            {'nama': 'DHUHA', 'time': _parseTime(jadwalSholat!.dhuha, now)},
-            {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(jadwalSholat!.dzuhur, now)},
-            {'nama': 'ASHAR', 'time': _parseTime(jadwalSholat!.ashar, now)},
-            {'nama': 'MAGHRIB', 'time': _parseTime(jadwalSholat!.maghrib, now)},
-            {'nama': 'ISYA', 'time': _parseTime(jadwalSholat!.isya, now)},
+            {'nama': 'IMSAK', 'time': _parseTime(todayJadwal.imsak, now)},
+            {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
+            {'nama': 'TERBIT', 'time': _parseTime(todayJadwal.terbit, now)},
+            {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
+            {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(todayJadwal.dzuhur, now)},
+            {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},
+            {'nama': 'MAGHRIB', 'time': _parseTime(todayJadwal.maghrib, now)},
+            {'nama': 'ISYA', 'time': _parseTime(todayJadwal.isya, now)},
           ];
 
           bool found = false;
@@ -60,9 +79,9 @@ class AppNextPrayerBar extends ConsumerWidget {
 
           if (!found) {
             nextPrayer = 'IMSAK';
-            final t = times[0]['time'] as DateTime;
-            final tomorrowImsak = t.add(const Duration(days: 1));
-            countdown = tomorrowImsak.difference(now);
+            // Pakai jam Imsak besok
+            final tomorrowImsakTime = _parseTime(tomorrowJadwal.imsak, tomorrow);
+            countdown = tomorrowImsakTime.difference(now);
           }
         }
 
@@ -78,8 +97,12 @@ class AppNextPrayerBar extends ConsumerWidget {
         final borderColor = isWarning && blinkOn ? Colors.red : Colors.white.withValues(alpha: 0.2);
         final textColor = isWarning && blinkOn ? Colors.white : AppColors.textYellow;
 
-        // Tanggal masehi dari jadwal, jika ada
-        final tanggalMasehi = (jadwalSholat?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
+        // Tanggal masehi dari jadwal
+        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
+        
+        // Kalkulasi Hijriah secara mandiri
+        final hijriDate = HijriCalendar.fromDate(now);
+        final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
 
         return Container(
           color: AppColors.bgNavy,
@@ -165,7 +188,7 @@ class AppNextPrayerBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    jadwalSholat?.tanggalHijriah ?? '',
+                    tanggalHijriah,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
