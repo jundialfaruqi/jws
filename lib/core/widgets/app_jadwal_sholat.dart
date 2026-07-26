@@ -232,6 +232,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                               color: itemColor,
                               fontFamily: 'Poppins',
                               height: 1.0,
+                              letterSpacing: 4.0, // Memberikan sedikit spasi antar karakter
                             ),
                             textAlign: TextAlign.left,
                           ),
