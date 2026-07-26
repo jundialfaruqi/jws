@@ -11,6 +11,7 @@ class AppMasjidTitle extends StatelessWidget {
   final String? logoMasjid;
   final String? logoPemerintah;
   final bool isRightAligned;
+  final bool showText;
 
   const AppMasjidTitle({
     super.key,
@@ -22,6 +23,7 @@ class AppMasjidTitle extends StatelessWidget {
     this.logoMasjid,
     this.logoPemerintah,
     this.isRightAligned = false,
+    this.showText = true,
   });
 
   String _getFullUrl(String? path) {
@@ -91,6 +93,14 @@ class AppMasjidTitle extends StatelessWidget {
           ),
         );
       }
+    }
+
+    if (!showText) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: logoWidgets,
+      );
     }
 
     return Container(

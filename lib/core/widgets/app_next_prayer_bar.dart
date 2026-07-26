@@ -11,12 +11,14 @@ class AppNextPrayerBar extends ConsumerWidget {
   final double leftMargin;
   final List<JadwalSholatModel> jadwalSholatList;
   final bool countdownOnly;
+  final double fontSize;
 
   const AppNextPrayerBar({
     super.key, 
     this.leftMargin = 0.0, 
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
+    this.fontSize = 28.0,
   });
 
   DateTime _parseTime(String timeStr, DateTime now) {
@@ -131,9 +133,9 @@ class AppNextPrayerBar extends ConsumerWidget {
             const SizedBox(width: 16),
             Text(
               'MENUJU $nextPrayer',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: fontSize,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
                 letterSpacing: 2.0,
@@ -156,7 +158,7 @@ class AppNextPrayerBar extends ConsumerWidget {
                 countdownStr,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 28,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'JetBrainsMono',
                 ),

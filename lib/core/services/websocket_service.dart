@@ -60,6 +60,16 @@ class WebSocketService {
           debugPrint("Triggering Data Refresh...");
           ref.invalidate(myMasjidProvider(slug));
         });
+
+        // Channel Global (Jumbotron Pemko, Marquee Global, dll)
+        final globalChannel = _pusherClient!.publicChannel('global-masjid');
+        globalChannel.subscribe();
+
+        globalChannel.bind('App\\Events\\GlobalUpdatedEvent').listen((event) {
+          debugPrint("WebSocket Event Received: GlobalUpdatedEvent");
+          debugPrint("Triggering Data Refresh...");
+          ref.invalidate(myMasjidProvider(slug));
+        });
       });
 
       _pusherClient!.connect();
