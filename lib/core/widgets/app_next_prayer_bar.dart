@@ -100,8 +100,18 @@ class AppNextPrayerBar extends ConsumerWidget {
         // Tanggal masehi dari jadwal
         final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
         
-        // Kalkulasi Hijriah secara mandiri
-        final hijriDate = HijriCalendar.fromDate(now);
+        // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
+        DateTime dateToCalculate = now;
+        if (todayJadwal != null && todayJadwal.maghrib.isNotEmpty) {
+          try {
+            final maghribTime = _parseTime(todayJadwal.maghrib, now);
+            if (now.isBefore(maghribTime)) {
+              dateToCalculate = now.subtract(const Duration(days: 1));
+            }
+          } catch (_) {}
+        }
+        
+        final hijriDate = HijriCalendar.fromDate(dateToCalculate);
         final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
 
         return Container(

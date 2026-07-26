@@ -72,13 +72,30 @@ class JumatScreen extends ConsumerWidget {
     }
 
     final now = ref.watch(timeSyncServiceProvider).now();
-    final hijriDate = HijriCalendar.fromDate(now);
+    final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    
+    DateTime dateToCalculate = now;
+    if (myMasjidData != null && myMasjidData.jadwalSholat.isNotEmpty) {
+      try {
+        final todayJadwal = myMasjidData.jadwalSholat.firstWhere((j) => j.date == dateStr);
+        if (todayJadwal.maghrib.isNotEmpty) {
+          final parts = todayJadwal.maghrib.split(':');
+          if (parts.length >= 2) {
+             final maghribTime = DateTime(now.year, now.month, now.day, int.tryParse(parts[0]) ?? 0, int.tryParse(parts[1]) ?? 0);
+             if (now.isBefore(maghribTime)) {
+                dateToCalculate = now.subtract(const Duration(days: 1));
+             }
+          }
+        }
+      } catch (_) {}
+    }
+
+    final hijriDate = HijriCalendar.fromDate(dateToCalculate);
     String tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
     tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
     final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
     final tanggalLengkap = "$tanggalHijriah\n$tanggalMasehi";
 
-    final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     PetugasModel? petugasHariIni;
     if (myMasjidData != null && myMasjidData.petugasJumat.isNotEmpty) {
       try {
