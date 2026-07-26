@@ -13,6 +13,7 @@ class MyMasjidModel {
   final List<JadwalSholatModel> jadwalSholat;
   final SlideModel? slides;
   final List<AgendaModel> agenda;
+  final String agendaMessage;
 
   MyMasjidModel({
     required this.currentTime,
@@ -23,18 +24,20 @@ class MyMasjidModel {
     this.jadwalSholat = const [],
     this.slides,
     this.agenda = const [],
+    this.agendaMessage = '',
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
     return MyMasjidModel(
-      currentTime: json['current_time'] ?? '',
-      timestamp: json['timestamp'] ?? 0,
-      themeId: json['theme_id'],
-      profil: ProfilMasjidModel.fromJson(json['profil'] ?? {}),
-      marquee: json['marquee'] != null ? MarqueeModel.fromJson(json['marquee']) : null,
-      jadwalSholat: json['jadwal_sholat'] != null ? (json['jadwal_sholat'] as List).map((i) => JadwalSholatModel.fromJson(i)).toList() : [],
-      slides: json['slides'] != null ? SlideModel.fromJson(json['slides']) : null,
-      agenda: json['agenda'] != null ? (json['agenda'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
+      currentTime: json['current_time'] != null ? json['current_time']['data'] ?? '' : '',
+      timestamp: json['timestamp'] != null ? json['timestamp']['data'] ?? 0 : 0,
+      themeId: json['theme_id'] != null ? json['theme_id']['data'] : null,
+      profil: ProfilMasjidModel.fromJson(json['profil'] != null && json['profil']['data'] != null ? json['profil']['data'] : {}),
+      marquee: json['marquee'] != null && json['marquee']['data'] != null ? MarqueeModel.fromJson(json['marquee']['data']) : null,
+      jadwalSholat: json['jadwal_sholat'] != null && json['jadwal_sholat']['data'] != null ? (json['jadwal_sholat']['data'] as List).map((i) => JadwalSholatModel.fromJson(i)).toList() : [],
+      slides: json['slides'] != null && json['slides']['data'] != null ? SlideModel.fromJson(json['slides']['data']) : null,
+      agenda: json['agenda'] != null && json['agenda']['data'] != null ? (json['agenda']['data'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
+      agendaMessage: json['agenda'] != null && json['agenda']['message'] != null ? json['agenda']['message'] : '',
     );
   }
 }
