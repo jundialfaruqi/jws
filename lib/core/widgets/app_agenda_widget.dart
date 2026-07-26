@@ -78,13 +78,12 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     
     if (cyclePosition >= activeCount * 10) {
       _isResting = true;
+      // Tetap pertahankan index terakhir yang valid agar tidak error saat animasi slide out berjalan
+      _currentIndex = activeCount - 1;
+      if (_currentIndex < 0) _currentIndex = 0;
     } else {
       _isResting = false;
       _currentIndex = cyclePosition ~/ 10;
-    }
-
-    if (_isResting) {
-      return const SizedBox.shrink();
     }
 
     final agenda = _activeAgendas[_currentIndex];
@@ -96,20 +95,24 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
       dateStr = '${parts[2]}/${parts[1]}/${parts[0]}';
     }
 
-    return Container(
-      width: 440,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.bgBlue,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 16,
-            offset: const Offset(4, 8),
-          )
-        ],
-      ),
+    return AnimatedSlide(
+      offset: _isResting ? const Offset(1.5, 0) : Offset.zero,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutCubic,
+      child: Container(
+        width: 440,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.bgBlue,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 16,
+              offset: const Offset(4, 8),
+            )
+          ],
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -172,6 +175,6 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
