@@ -164,17 +164,21 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       padding: const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center, // Ubah dari spaceEvenly ke center agar mengumpul
-        children: jadwal.map((item) {
+        children: jadwal.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          final isLast = index == jadwal.length - 1;
+          
           final itemColor = item['color'] as Color;
           final uniqueKey = ValueKey(item['nama']); // Kunci unik untuk AnimatedSwitcher
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8), // Jarak antar item diperkecil agar tidak overflow
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 8), // Hilangkan padding bawah jika item terakhir
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
-                border: Border(
+                border: isLast ? null : Border(
                   bottom: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
                 ),
               ),
