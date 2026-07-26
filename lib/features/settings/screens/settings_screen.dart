@@ -77,16 +77,28 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _SettingsItemWidget(
-            icon: Icons.update,
-            title: 'Pembaruan Perangkat Lunak',
-            subtitle: 'Versi 1.0.0 (Terbaru)',
-            onTap: () {},
+            icon: Icons.timer,
+            title: 'Simulasi Layar Iqomah (Debug)',
+            subtitle: 'Tekan untuk melihat preview layar hitung mundur Iqomah',
+            onTap: () {
+              if (context.mounted) context.pushNamed('iqomah');
+            },
           ),
           _SettingsItemWidget(
-            icon: Icons.info_outline,
-            title: 'Tentang Aplikasi',
-            subtitle: 'Jadwal Sholat Kominfo Pekanbaru',
-            onTap: () {},
+            icon: Icons.do_not_disturb_on,
+            title: 'Simulasi Layar Sholat (Debug)',
+            subtitle: 'Tekan untuk melihat preview layar saat sholat berlangsung',
+            onTap: () {
+              if (context.mounted) context.pushNamed('final');
+            },
+          ),
+          _SettingsItemWidget(
+            icon: Icons.menu_book,
+            title: 'Simulasi Layar Jumat (Debug)',
+            subtitle: 'Tekan untuk melihat preview layar saat Khutbah Jumat',
+            onTap: () {
+              if (context.mounted) context.pushNamed('jumat');
+            },
           ),
         ],
       ),

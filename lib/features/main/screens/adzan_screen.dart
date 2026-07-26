@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/api_constant.dart';
+import '../../../core/providers/selected_profil_provider.dart';
 
-class AdzanScreen extends StatelessWidget {
+class AdzanScreen extends ConsumerWidget {
   final String prayerName;
   final String prayerTime;
 
@@ -12,8 +15,43 @@ class AdzanScreen extends StatelessWidget {
     this.prayerTime = '18:30',
   });
 
+  String _getFullUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+
+    final baseUrl = ApiConstant.baseUrl;
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanPath = path.startsWith('/') ? path : '/$path';
+
+    return '$cleanBase$cleanPath';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profil = ref.watch(selectedProfilProvider);
+    final String logo1 = _getFullUrl(profil?.logoMasjid);
+    final String logo2 = _getFullUrl(profil?.logoPemerintah);
+    final bool hasLogo1 = logo1.isNotEmpty;
+    final bool hasLogo2 = logo2.isNotEmpty;
+
+    List<Widget> logoWidgets = [];
+    final double logoSize = 150.0;
+
+    if (!hasLogo1 && !hasLogo2) {
+      logoWidgets.add(Image.asset('assets/logo/logo-masjid-default.png', height: logoSize, fit: BoxFit.contain));
+      logoWidgets.add(const SizedBox(width: 24));
+      logoWidgets.add(Image.asset('assets/logo/logo-pemko-default.png', height: logoSize, fit: BoxFit.contain));
+    } else {
+      if (hasLogo1) {
+        logoWidgets.add(Image.network(logo1, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.mosque, size: logoSize, color: Colors.white)));
+      }
+      if (hasLogo2) {
+        if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
+        logoWidgets.add(Image.network(logo2, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
+      }
+    }
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD) 
     // berapapun rasio layar aslinya
     return TvScaffold(
@@ -25,10 +63,9 @@ class AdzanScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.mosque,
-                  size: 150,
-                  color: AppColors.textYellow,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: logoWidgets,
                 ),
                 const SizedBox(height: 40),
                 const Text(
