@@ -124,7 +124,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
     final times = {
       'IMSAK': todayJadwal.imsak,
-      'SHURUQ': todayJadwal.terbit,
+      'SYURUQ': todayJadwal.terbit,
       'DHUHA': todayJadwal.dhuha,
       'SHUBUH': todayJadwal.subuh,
       'DZUHUR': todayJadwal.dzuhur,
@@ -147,7 +147,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     
     // Tentukan status awal
     PrayerState initialStatus = PrayerState.adzan;
-    if (name == 'IMSAK' || name == 'SHURUQ' || name == 'DHUHA') {
+    if (name == 'IMSAK' || name == 'SYURUQ' || name == 'DHUHA') {
       initialStatus = PrayerState.alert;
     }
     
@@ -206,7 +206,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     if (status == PrayerState.alert || status == PrayerState.adzan) {
       switch (name) {
         case 'IMSAK': return durasi.adzanImsak;
-        case 'SHURUQ': return durasi.adzanShuruq;
+        case 'SYURUQ': return durasi.adzanShuruq;
         case 'DHUHA': return durasi.adzanDhuha;
         case 'SHUBUH': return durasi.adzanShubuh;
         case 'DZUHUR': return durasi.adzanDzuhur;

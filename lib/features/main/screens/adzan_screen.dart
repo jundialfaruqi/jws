@@ -86,9 +86,16 @@ class AdzanScreen extends ConsumerWidget {
       }
     }
 
+    final String displayPrayerName = transitionState.prayerName.isEmpty
+        ? 'MAGHRIB'
+        : transitionState.prayerName;
+    final int displayRemaining = transitionState.totalSeconds > 0
+        ? transitionState.remainingSeconds
+        : 90; // 1 menit 30 detik
+
     double progress = transitionState.totalSeconds > 0
         ? transitionState.remainingSeconds / transitionState.totalSeconds
-        : 0;
+        : 0.5; // 50% untuk preview
 
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD)
     // berapapun rasio layar aslinya
@@ -118,29 +125,20 @@ class AdzanScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  transitionState.prayerName,
+                  displayPrayerName,
                   style: const TextStyle(
-                    fontSize: 100,
+                    fontSize: 160,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 12,
                     fontFamily: 'Poppins',
+                    height: 1.0,
                   ),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  transitionState.prayerTime,
-                  style: const TextStyle(
-                    fontSize: 90,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textYellow,
-                    fontFamily: 'JetBrainsMono',
-                  ),
-                ),
-                const SizedBox(height: 80),
+                const SizedBox(height: 35),
                 // Progress Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 400),
+                  padding: const EdgeInsets.symmetric(horizontal: 500),
                   child: Column(
                     children: [
                       LinearProgressIndicator(
@@ -150,14 +148,15 @@ class AdzanScreen extends ConsumerWidget {
                         color: AppColors.textYellow,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 35),
                       Text(
-                        _formatCountdown(transitionState.remainingSeconds),
+                        _formatCountdown(displayRemaining),
                         style: const TextStyle(
-                          fontSize: 100,
+                          fontSize: 260,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontFamily: 'JetBrainsMono',
+                          height: 1.0,
                         ),
                       ),
                     ],

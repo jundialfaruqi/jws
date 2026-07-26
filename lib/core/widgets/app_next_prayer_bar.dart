@@ -58,7 +58,7 @@ class AppNextPrayerBar extends ConsumerWidget {
           final times = [
             {'nama': 'IMSAK', 'time': _parseTime(todayJadwal.imsak, now)},
             {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
-            {'nama': 'TERBIT', 'time': _parseTime(todayJadwal.terbit, now)},
+            {'nama': 'SYURUQ', 'time': _parseTime(todayJadwal.terbit, now)},
             {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
             {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(todayJadwal.dzuhur, now)},
             {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},

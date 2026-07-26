@@ -84,7 +84,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       final times = [
         {'nama': 'IMSAK', 'time': _parseTime(todayJadwal.imsak, now)},
         {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
-        {'nama': 'TERBIT', 'time': _parseTime(todayJadwal.terbit, now)},
+        {'nama': 'SYURUQ', 'time': _parseTime(todayJadwal.terbit, now)},
         {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
         {
           'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
@@ -137,10 +137,10 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
             },
       _showPrimary
           ? {
-              'nama': 'TERBIT',
+              'nama': 'SYURUQ',
               'jam': todayJadwal?.terbit ?? '--:--',
               'icon': TablerIcons.sunrise,
-              'color': getColor('TERBIT'),
+              'color': getColor('SYURUQ'),
             }
           : {
               'nama': 'DHUHA',

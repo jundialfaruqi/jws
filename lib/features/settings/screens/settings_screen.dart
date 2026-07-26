@@ -78,6 +78,15 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _SettingsItemWidget(
+            icon: Icons.warning_amber_rounded,
+            title: 'Simulasi Layar Peringatan (Debug)',
+            subtitle:
+                'Tekan untuk melihat preview layar peringatan (Imsak, Shuruq, Dhuha)',
+            onTap: () {
+              if (context.mounted) context.pushNamed('alert');
+            },
+          ),
+          _SettingsItemWidget(
             icon: Icons.timer,
             title: 'Simulasi Layar Iqomah (Debug)',
             subtitle: 'Tekan untuk melihat preview layar hitung mundur Iqomah',
