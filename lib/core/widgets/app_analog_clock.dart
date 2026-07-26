@@ -166,6 +166,13 @@ class AnalogClockPainter extends CustomPainter {
           fontSize: radius * 0.25, // Diperkecil agar lebih rapi
           fontWeight: FontWeight.bold,
           fontFamily: 'Poppins',
+          shadows: [
+            Shadow(
+              blurRadius: 4,
+              color: Colors.black.withValues(alpha: 0.6),
+              offset: const Offset(1, 2),
+            )
+          ],
         ),
       );
 
@@ -176,6 +183,20 @@ class AnalogClockPainter extends CustomPainter {
       );
 
       textPainter.paint(canvas, offset);
+    }
+
+    // Helper function untuk menggambar jarum beserta shadow-nya
+    void drawHandWithShadow(Offset p1, Offset p2, Paint paint) {
+      final shadowPaint = Paint()
+        ..color = Colors.black.withValues(alpha: 0.4)
+        ..strokeWidth = paint.strokeWidth
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+        
+      // Gambar shadow
+      canvas.drawLine(p1 + const Offset(2, 3), p2 + const Offset(2, 3), shadowPaint);
+      // Gambar jarum asli
+      canvas.drawLine(p1, p2, paint);
     }
 
     // Hitung Sudut Jarum Jam
@@ -192,7 +213,7 @@ class AnalogClockPainter extends CustomPainter {
       ..color = handColor
       ..strokeWidth = radius * 0.06
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
+    drawHandWithShadow(
       center,
       Offset(
         center.dx + cos(hourAngle) * (radius * 0.45),
@@ -206,7 +227,7 @@ class AnalogClockPainter extends CustomPainter {
       ..color = handColor
       ..strokeWidth = radius * 0.04
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
+    drawHandWithShadow(
       center,
       Offset(
         center.dx + cos(minuteAngle) * (radius * 0.65),
@@ -222,7 +243,7 @@ class AnalogClockPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // Ekor jarum detik
-    canvas.drawLine(
+    drawHandWithShadow(
       Offset(
         center.dx - cos(secondAngle) * (radius * 0.15),
         center.dy - sin(secondAngle) * (radius * 0.15),

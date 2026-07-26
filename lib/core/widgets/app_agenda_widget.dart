@@ -71,11 +71,12 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     // Kalkulasi index sinkron berdasarkan waktu server absolut
     final now = ref.read(timeSyncServiceProvider).now();
     final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
-    
+
     final int activeCount = _activeAgendas.length;
-    final int cycleTime = (activeCount * 10) + 5; // 10s tiap item + 5s istirahat
+    final int cycleTime =
+        (activeCount * 10) + 5; // 10s tiap item + 5s istirahat
     final int cyclePosition = currentEpoch % cycleTime;
-    
+
     if (cyclePosition >= activeCount * 10) {
       _isResting = true;
       // Tetap pertahankan index terakhir yang valid agar tidak error saat animasi slide out berjalan
@@ -87,7 +88,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     }
 
     final agenda = _activeAgendas[_currentIndex];
-    
+
     // Format YYYY-MM-DD ke DD/MM/YYYY
     String dateStr = agenda.date;
     final parts = agenda.date.split('-');
@@ -110,71 +111,81 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
               color: Colors.black.withValues(alpha: 0.5),
               blurRadius: 16,
               offset: const Offset(4, 8),
-            )
+            ),
           ],
         ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Icon(TablerIcons.calendar_event, color: Colors.white, size: 32),
-              const SizedBox(width: 16),
-              const Text(
-                'Agenda Masjid',
-                style: TextStyle(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  TablerIcons.calendar_event,
                   color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
+                  size: 32,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _truncateText(agenda.name),
-            style: const TextStyle(
-              color: AppColors.textYellow,
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Poppins',
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                dateStr,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: agenda.daysLabel.toLowerCase() == 'hari ini' ? Colors.red : Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  agenda.daysLabel,
-                  style: const TextStyle(
+                const SizedBox(width: 16),
+                const Text(
+                  'Agenda Masjid',
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _truncateText(agenda.name),
+              style: const TextStyle(
+                color: AppColors.textYellow,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                fontFamily: 'Poppins',
               ),
-            ],
-          ),
-        ],
+              maxLines: 1,
+              overflow: TextOverflow.visible,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  dateStr,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: agenda.daysLabel.toLowerCase() == 'hari ini'
+                        ? Colors.red.shade400
+                        : Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    agenda.daysLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

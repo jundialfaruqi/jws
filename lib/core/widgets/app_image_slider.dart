@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constant.dart';
+import '../time/time_sync_service.dart';
 
-class AppImageSlider extends StatefulWidget {
+class AppImageSlider extends ConsumerStatefulWidget {
   final List<String> imageUrls;
   final double leftMargin;
 
@@ -13,10 +15,10 @@ class AppImageSlider extends StatefulWidget {
   });
 
   @override
-  State<AppImageSlider> createState() => _AppImageSliderState();
+  ConsumerState<AppImageSlider> createState() => _AppImageSliderState();
 }
 
-class _AppImageSliderState extends State<AppImageSlider> {
+class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   late final PageController _pageController;
   int _currentPage = 0;
   Timer? _timer;
@@ -42,21 +44,36 @@ class _AppImageSliderState extends State<AppImageSlider> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
-      if (widget.imageUrls.isEmpty) return;
+    _timer?.cancel();
+    // Cek kalkulasi setiap 1 detik
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || widget.imageUrls.isEmpty) return;
+
+      final now = ref.read(timeSyncServiceProvider).now();
+      final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
+      final int slideCount = widget.imageUrls.length;
       
-      if (_currentPage < widget.imageUrls.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-      
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeInOutCubic,
-        );
+      // Hitung index yang seharusnya tayang berdasarkan waktu absolut (10 detik per slide)
+      final int cyclePosition = currentEpoch % (slideCount * 10);
+      final int targetIndex = cyclePosition ~/ 10;
+
+      if (targetIndex != _currentPage) {
+        setState(() {
+          _currentPage = targetIndex;
+        });
+        
+        if (_pageController.hasClients) {
+          // Lompat langsung jika perbedaan jaraknya jauh (misal saat inisialisasi)
+          if ((_pageController.page?.round() ?? 0) != _currentPage && (_pageController.page?.round() ?? 0) != _currentPage - 1 && (_pageController.page?.round() ?? 0) != _currentPage + 1) {
+            _pageController.jumpToPage(_currentPage);
+          } else {
+            _pageController.animateToPage(
+              _currentPage,
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeInOutCubic,
+            );
+          }
+        }
       }
     });
   }
