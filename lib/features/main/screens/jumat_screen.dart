@@ -4,6 +4,8 @@ import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../providers/my_masjid_provider.dart';
+import '../../../core/widgets/app_image_slider.dart';
 
 class JumatScreen extends ConsumerWidget {
   final String countdownTime;
@@ -33,6 +35,23 @@ class JumatScreen extends ConsumerWidget {
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
     final bool hasLogo2 = logo2.isNotEmpty;
+
+    final myMasjidData = profil != null ? ref.watch(myMasjidProvider(profil.slug)).value : null;
+    List<String> slideJumats = [];
+    if (myMasjidData != null && myMasjidData.slideJumat != null) {
+      final s = myMasjidData.slideJumat!;
+      if (s.slide1 != null && s.slide1!.isNotEmpty) slideJumats.add(s.slide1!);
+      if (s.slide2 != null && s.slide2!.isNotEmpty) slideJumats.add(s.slide2!);
+      if (s.slide3 != null && s.slide3!.isNotEmpty) slideJumats.add(s.slide3!);
+      if (s.slide4 != null && s.slide4!.isNotEmpty) slideJumats.add(s.slide4!);
+      if (s.slide5 != null && s.slide5!.isNotEmpty) slideJumats.add(s.slide5!);
+      if (s.slide6 != null && s.slide6!.isNotEmpty) slideJumats.add(s.slide6!);
+    }
+    
+    // Jika tidak ada data dari backend, gunakan gambar default
+    if (slideJumats.isEmpty) {
+      slideJumats.add('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000');
+    }
 
     List<Widget> logoWidgets = [];
     final double logoSize = 120.0; // Diperkecil sedikit agar tidak overflow
@@ -145,12 +164,9 @@ class JumatScreen extends ConsumerWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(48),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000', // URL valid
-                        fit: BoxFit.cover,
-                        height: double.infinity,
-                        width: double.infinity,
-                        errorBuilder: (c,e,s) => Container(color: Colors.grey),
+                      child: AppImageSlider(
+                        imageUrls: slideJumats,
+                        leftMargin: 0,
                       ),
                     ),
                   ),

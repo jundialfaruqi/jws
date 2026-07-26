@@ -4,6 +4,8 @@ import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../providers/my_masjid_provider.dart';
+import '../../../core/widgets/app_image_slider.dart';
 
 class IqomahScreen extends ConsumerWidget {
   final String prayerName;
@@ -35,6 +37,23 @@ class IqomahScreen extends ConsumerWidget {
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
     final bool hasLogo2 = logo2.isNotEmpty;
+
+    final myMasjidData = profil != null ? ref.watch(myMasjidProvider(profil.slug)).value : null;
+    List<String> slideIqomahs = [];
+    if (myMasjidData != null && myMasjidData.slideIqomah != null) {
+      final s = myMasjidData.slideIqomah!;
+      if (s.slide1 != null && s.slide1!.isNotEmpty) slideIqomahs.add(s.slide1!);
+      if (s.slide2 != null && s.slide2!.isNotEmpty) slideIqomahs.add(s.slide2!);
+      if (s.slide3 != null && s.slide3!.isNotEmpty) slideIqomahs.add(s.slide3!);
+      if (s.slide4 != null && s.slide4!.isNotEmpty) slideIqomahs.add(s.slide4!);
+      if (s.slide5 != null && s.slide5!.isNotEmpty) slideIqomahs.add(s.slide5!);
+      if (s.slide6 != null && s.slide6!.isNotEmpty) slideIqomahs.add(s.slide6!);
+    }
+    
+    // Jika tidak ada data dari backend, gunakan gambar default
+    if (slideIqomahs.isEmpty) {
+      slideIqomahs.add('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000');
+    }
 
     List<Widget> logoWidgets = [];
     final double logoSize = 150.0;
@@ -147,11 +166,9 @@ class IqomahScreen extends ConsumerWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(48),
-              child: Image.network(
-                'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
-                fit: BoxFit.cover,
-                height: double.infinity,
-                width: double.infinity,
+              child: AppImageSlider(
+                imageUrls: slideIqomahs,
+                leftMargin: 0,
               ),
             ),
           ),

@@ -12,6 +12,9 @@ class MyMasjidModel {
   final MarqueeModel? marquee;
   final List<JadwalSholatModel> jadwalSholat;
   final SlideModel? slides;
+  final SlideModel? slideIqomah;
+  final SlideModel? slideJumat;
+  final SlideModel? slideFinal;
   final List<AgendaModel> agenda;
   final String agendaMessage;
 
@@ -23,6 +26,9 @@ class MyMasjidModel {
     this.marquee,
     this.jadwalSholat = const [],
     this.slides,
+    this.slideIqomah,
+    this.slideJumat,
+    this.slideFinal,
     this.agenda = const [],
     this.agendaMessage = '',
   });
@@ -36,6 +42,9 @@ class MyMasjidModel {
       marquee: json['marquee'] != null && json['marquee']['data'] != null ? MarqueeModel.fromJson(json['marquee']['data']) : null,
       jadwalSholat: json['jadwal_sholat'] != null && json['jadwal_sholat']['data'] != null ? (json['jadwal_sholat']['data'] as List).map((i) => JadwalSholatModel.fromJson(i)).toList() : [],
       slides: json['slides'] != null && json['slides']['data'] != null ? SlideModel.fromJson(json['slides']['data']) : null,
+      slideIqomah: json['slide_iqomah'] != null && json['slide_iqomah']['data'] != null ? SlideModel.fromJson(json['slide_iqomah']['data']) : null,
+      slideJumat: json['slide_jumat'] != null && json['slide_jumat']['data'] != null ? SlideModel.fromJson(json['slide_jumat']['data']) : null,
+      slideFinal: json['slide_final'] != null && json['slide_final']['data'] != null ? SlideModel.fromJson(json['slide_final']['data']) : null,
       agenda: json['agenda'] != null && json['agenda']['data'] != null ? (json['agenda']['data'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
       agendaMessage: json['agenda'] != null && json['agenda']['message'] != null ? json['agenda']['message'] : '',
     );
