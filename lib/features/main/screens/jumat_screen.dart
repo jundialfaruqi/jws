@@ -117,28 +117,31 @@ class JumatScreen extends ConsumerWidget {
                 // Kolom Kiri: Informasi Jumat
               Expanded(
                 flex: 1,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: logoWidgets,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        tanggalLengkap,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white70,
-                          letterSpacing: 4,
-                          fontFamily: 'Poppins',
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Kelompok Atas: Logo dan Tanggal
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: logoWidgets,
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      // List Petugas Jumat
+                        const SizedBox(height: 24),
+                        Text(
+                          tanggalLengkap,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                            letterSpacing: 4,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Kelompok Tengah: List Petugas Jumat
                       SizedBox(
                         width: 750,
                         child: Column(
@@ -160,25 +163,23 @@ class JumatScreen extends ConsumerWidget {
                               _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
                               const SizedBox(height: 16),
                                 _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
-                                const SizedBox(height: 64),
-                                // Jam Digital di bawah petugas
-                                const AppLiveClock(
-                                  showDate: false,
-                                  textStyle: TextStyle(
-                                    fontSize: 80,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontFamily: 'JetBrainsMono',
-                                    letterSpacing: 8,
-                                  ),
-                                ),
                               ],
                             ),
                       ),
+                      // Kelompok Bawah: Jam Digital
+                      const AppLiveClock(
+                        showDate: false,
+                        textStyle: TextStyle(
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'JetBrainsMono',
+                          letterSpacing: 8,
+                        ),
+                      ),
                     ], // Penutup children Column
                   ), // Penutup Column
-                ), // Penutup Center
-              ), // Penutup Expanded
+                ), // Penutup Expanded
               
               const SizedBox(width: 64), // Jarak tengah (margin antar 2 layout)
               
