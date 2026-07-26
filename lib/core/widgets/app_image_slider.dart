@@ -125,7 +125,7 @@ class _KeepAliveImageState extends State<_KeepAliveImage> with AutomaticKeepAliv
     super.build(context); // Wajib dipanggil untuk AutomaticKeepAliveClientMixin
     return Image.network(
       widget.url,
-      fit: BoxFit.cover,
+      fit: BoxFit.fill,
       errorBuilder: (context, error, stackTrace) {
         return Container(
           color: Colors.blueGrey.shade900,
