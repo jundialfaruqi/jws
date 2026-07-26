@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/select_profil/screens/select_profil_screen.dart';
@@ -10,8 +11,11 @@ import '../../features/main/screens/jumat_screen.dart';
 import '../../features/main/screens/jumbotron_masjid_screen.dart';
 import '../../features/main/screens/jumbotron_pemko_screen.dart';
 import '../../features/webview/screens/webview_screen.dart';
+import '../../features/main/screens/alert_screen.dart';
 import '../providers/selected_profil_provider.dart';
 import '../providers/view_mode_provider.dart';
+
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final routerProvider = Provider<GoRouter>((ref) {
   final selectedProfil = ref.read(selectedProfilProvider);
@@ -27,6 +31,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   }
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: initial,
     routes: [
       GoRoute(
@@ -51,6 +56,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final slug = state.pathParameters['slug']!;
           return WebViewScreen(slug: slug);
         },
+      ),
+      GoRoute(
+        path: '/alert',
+        name: 'alert',
+        builder: (context, state) => const AlertScreen(),
       ),
       GoRoute(
         path: '/adzan',

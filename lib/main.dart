@@ -8,6 +8,7 @@ import 'core/routes/app_router.dart';
 import 'core/services/secure_storage_service.dart';
 import 'core/providers/selected_profil_provider.dart';
 import 'core/providers/view_mode_provider.dart';
+import 'core/services/prayer_transition_service.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
 
 // Class untuk mengabaikan verifikasi SSL secara global
@@ -54,6 +55,9 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Injeksi transition service agar mulai berdetak
+    ref.watch(prayerTransitionProvider);
+    
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

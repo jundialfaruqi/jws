@@ -4,16 +4,16 @@ import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/services/prayer_transition_service.dart';
 
 class AdzanScreen extends ConsumerWidget {
-  final String prayerName;
-  final String prayerTime;
+  const AdzanScreen({super.key});
 
-  const AdzanScreen({
-    super.key,
-    this.prayerName = 'MAGHRIB',
-    this.prayerTime = '18:30',
-  });
+  String _formatCountdown(int totalSeconds) {
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -31,6 +31,8 @@ class AdzanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
+    final transitionState = ref.watch(prayerTransitionProvider);
+    
     final String logo1 = _getFullUrl(profil?.logoMasjid);
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
@@ -52,6 +54,11 @@ class AdzanScreen extends ConsumerWidget {
         logoWidgets.add(Image.network(logo2, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
       }
     }
+    
+    double progress = transitionState.totalSeconds > 0 
+        ? transitionState.remainingSeconds / transitionState.totalSeconds 
+        : 0;
+
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD) 
     // berapapun rasio layar aslinya
     return TvScaffold(
@@ -80,7 +87,7 @@ class AdzanScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  prayerName,
+                  transitionState.prayerName,
                   style: const TextStyle(
                     fontSize: 140,
                     fontWeight: FontWeight.w900,
@@ -91,7 +98,7 @@ class AdzanScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  prayerTime,
+                  transitionState.prayerTime,
                   style: const TextStyle(
                     fontSize: 90,
                     fontWeight: FontWeight.bold,
@@ -117,6 +124,32 @@ class AdzanScreen extends ConsumerWidget {
                       color: Colors.white,
                       fontFamily: 'Poppins',
                     ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Progress Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 200),
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 12,
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.textYellow,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _formatCountdown(transitionState.remainingSeconds),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'JetBrainsMono',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

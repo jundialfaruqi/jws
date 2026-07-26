@@ -7,15 +7,16 @@ import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
 
-class IqomahScreen extends ConsumerWidget {
-  final String prayerName;
-  final String countdownTime;
+import '../../../core/services/prayer_transition_service.dart';
 
-  const IqomahScreen({
-    super.key,
-    this.prayerName = 'MAGHRIB',
-    this.countdownTime = '10:00', // Dummy hitung mundur
-  });
+class IqomahScreen extends ConsumerWidget {
+  const IqomahScreen({super.key});
+
+  String _formatCountdown(int totalSeconds) {
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -33,6 +34,8 @@ class IqomahScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
+    final transitionState = ref.watch(prayerTransitionProvider);
+    
     final String logo1 = _getFullUrl(profil?.logoMasjid);
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
@@ -104,20 +107,20 @@ class IqomahScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  prayerName,
+                  transitionState.prayerName,
                   style: const TextStyle(
-                    fontSize: 140,
+                    fontSize: 100,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 12,
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Text(
-                  countdownTime,
+                  _formatCountdown(transitionState.remainingSeconds),
                   style: const TextStyle(
-                    fontSize: 180,
+                    fontSize: 200,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textYellow,
                     fontFamily: 'JetBrainsMono',
