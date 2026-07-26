@@ -11,6 +11,7 @@ class AppNextPrayerBar extends ConsumerWidget {
   final double leftMargin;
   final List<JadwalSholatModel> jadwalSholatList;
   final bool countdownOnly;
+  final bool dateOnly;
   final double fontSize;
 
   const AppNextPrayerBar({
@@ -18,6 +19,7 @@ class AppNextPrayerBar extends ConsumerWidget {
     this.leftMargin = 0.0, 
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
+    this.dateOnly = false,
     this.fontSize = 28.0,
   });
 
@@ -171,6 +173,45 @@ class AppNextPrayerBar extends ConsumerWidget {
           return countdownWidget;
         }
 
+        final dateWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              TablerIcons.calendar_event,
+              color: Colors.white,
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              tanggalMasehi,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            const SizedBox(width: 24),
+            Container(width: 2, height: 28, color: Colors.white54),
+            const SizedBox(width: 24),
+            const Icon(
+              TablerIcons.moon_stars,
+              color: Colors.white,
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              tanggalHijriah,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        );
+
         return Container(
           color: AppColors.bgNavy,
           padding: EdgeInsets.only(
@@ -180,48 +221,10 @@ class AppNextPrayerBar extends ConsumerWidget {
             bottom: 16,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: dateOnly ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,
             children: [
-              countdownWidget,
-
-              // Kanan: Tanggal Masehi & Hijriah
-              Row(
-                children: [
-                  const Icon(
-                    TablerIcons.calendar_event,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    tanggalMasehi,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Container(width: 2, height: 28, color: Colors.white54),
-                  const SizedBox(width: 24),
-                  const Icon(
-                    TablerIcons.moon_stars,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    tanggalHijriah,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ),
+              if (!dateOnly) countdownWidget,
+              dateWidget,
             ],
           ),
         );

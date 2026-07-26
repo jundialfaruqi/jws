@@ -8,8 +8,9 @@ import '../time/time_sync_service.dart';
 
 class AppAgendaWidget extends ConsumerStatefulWidget {
   final List<AgendaModel> agendas;
+  final bool slideLeft;
 
-  const AppAgendaWidget({super.key, required this.agendas});
+  const AppAgendaWidget({super.key, required this.agendas, this.slideLeft = false});
 
   @override
   ConsumerState<AppAgendaWidget> createState() => _AppAgendaWidgetState();
@@ -135,7 +136,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     String dateStr = agenda.date;
 
     return AnimatedSlide(
-      offset: _isResting ? const Offset(1.5, 0) : Offset.zero,
+      offset: _isResting ? Offset(widget.slideLeft ? -1.5 : 1.5, 0) : Offset.zero,
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeInOutCubic,
       child: Container(
