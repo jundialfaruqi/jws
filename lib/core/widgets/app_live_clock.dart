@@ -24,7 +24,8 @@ class AppLiveClock extends ConsumerWidget {
       stream: Stream.periodic(const Duration(seconds: 1)),
       builder: (context, snapshot) {
         final now = ref.read(timeSyncServiceProvider).now();
-        final dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+        var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+        dateStr = dateStr.replaceAll('Minggu', 'Ahad');
         final timeStr = "${_formatNumber(now.hour)}:${_formatNumber(now.minute)}:${_formatNumber(now.second)}";
         
         String baseText = showDate ? '$dateStr $timeStr' : timeStr;
