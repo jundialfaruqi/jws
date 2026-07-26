@@ -6,11 +6,13 @@ import 'package:intl/intl.dart';
 class AppLiveClock extends ConsumerWidget {
   final TextStyle textStyle;
   final String prefix;
+  final bool showDate;
 
   const AppLiveClock({
     super.key,
     required this.textStyle,
     this.prefix = '',
+    this.showDate = true,
   });
 
   String _formatNumber(int number) => number.toString().padLeft(2, '0');
@@ -25,9 +27,10 @@ class AppLiveClock extends ConsumerWidget {
         final dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
         final timeStr = "${_formatNumber(now.hour)}:${_formatNumber(now.minute)}:${_formatNumber(now.second)}";
         
+        String baseText = showDate ? '$dateStr $timeStr' : timeStr;
         final displayText = prefix.isNotEmpty 
-            ? '$prefix • $dateStr $timeStr' 
-            : '$dateStr $timeStr';
+            ? '$prefix • $baseText' 
+            : baseText;
 
         return Text(
           displayText,

@@ -10,6 +10,7 @@ import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
 import '../../../core/time/time_sync_service.dart';
+import '../../../core/widgets/app_live_clock.dart';
 import '../models/petugas_model.dart';
 
 class JumatScreen extends ConsumerWidget {
@@ -158,9 +159,21 @@ class JumatScreen extends ConsumerWidget {
                               const SizedBox(height: 16),
                               _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
                               const SizedBox(height: 16),
-                              _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
-                            ],
-                          ),
+                                _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
+                                const SizedBox(height: 64),
+                                // Jam Digital di bawah petugas
+                                const AppLiveClock(
+                                  showDate: false,
+                                  textStyle: TextStyle(
+                                    fontSize: 80,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontFamily: 'JetBrainsMono',
+                                    letterSpacing: 8,
+                                  ),
+                                ),
+                              ],
+                            ),
                       ),
                     ], // Penutup children Column
                   ), // Penutup Column
