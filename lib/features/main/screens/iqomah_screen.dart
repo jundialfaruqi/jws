@@ -75,6 +75,13 @@ class IqomahScreen extends ConsumerWidget {
       }
     }
 
+    final String displayPrayerName = transitionState.prayerName.isEmpty ? 'MAGHRIB' : transitionState.prayerName;
+    final int displayRemaining = transitionState.totalSeconds > 0 ? transitionState.remainingSeconds : 300; // 5 menit default untuk preview
+    
+    double progress = transitionState.totalSeconds > 0
+        ? 1.0 - (transitionState.remainingSeconds / transitionState.totalSeconds)
+        : 0.5; // 50% untuk preview
+
     return TvScaffold(
       backgroundColor: AppColors.bgDark, 
       body: Stack(
@@ -107,7 +114,7 @@ class IqomahScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  transitionState.prayerName,
+                  displayPrayerName,
                   style: const TextStyle(
                     fontSize: 100,
                     fontWeight: FontWeight.w900,
@@ -116,34 +123,26 @@ class IqomahScreen extends ConsumerWidget {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 64),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 60,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    color: AppColors.textYellow,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Text(
-                  _formatCountdown(transitionState.remainingSeconds),
+                  _formatCountdown(displayRemaining),
                   style: const TextStyle(
                     fontSize: 200,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textYellow,
                     fontFamily: 'JetBrainsMono',
-                  ),
-                ),
-                const SizedBox(height: 80),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Text(
-                    'Mohon matikan ponsel dan luruskan shaf',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                    ),
+                    height: 1.0,
                   ),
                 ),
               ], // Penutup children Column

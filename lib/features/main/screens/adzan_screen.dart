@@ -94,7 +94,7 @@ class AdzanScreen extends ConsumerWidget {
         : 90; // 1 menit 30 detik
 
     double progress = transitionState.totalSeconds > 0
-        ? transitionState.remainingSeconds / transitionState.totalSeconds
+        ? 1.0 - (transitionState.remainingSeconds / transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD)

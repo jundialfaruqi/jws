@@ -10,6 +10,7 @@ import 'core/providers/selected_profil_provider.dart';
 import 'core/providers/view_mode_provider.dart';
 import 'core/services/prayer_transition_service.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 // Class untuk mengabaikan verifikasi SSL secara global
 class MyHttpOverrides extends HttpOverrides {
@@ -28,6 +29,7 @@ Future<void> main() async {
   
   HttpOverrides.global = MyHttpOverrides(); // Pasang HttpOverrides di sini
   await dotenv.load(fileName: ".env");
+  await initializeDateFormatting('id', null);
 
   // Membaca storage untuk cek profil terakhir
   final storage = SecureStorageService();

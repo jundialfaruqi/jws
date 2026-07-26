@@ -7,16 +7,14 @@ import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
 
-import '../../../core/services/prayer_transition_service.dart';
+
+import '../../../core/time/time_sync_service.dart';
+import 'package:intl/intl.dart';
+import 'package:hijri/hijri_calendar.dart';
+import '../models/petugas_model.dart';
 
 class JumatScreen extends ConsumerWidget {
   const JumatScreen({super.key});
-
-  String _formatCountdown(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -34,7 +32,6 @@ class JumatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
-    final transitionState = ref.watch(prayerTransitionProvider);
     
     final String logo1 = _getFullUrl(profil?.logoMasjid);
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
@@ -75,6 +72,22 @@ class JumatScreen extends ConsumerWidget {
       }
     }
 
+    final now = ref.watch(timeSyncServiceProvider).now();
+    final hijriDate = HijriCalendar.fromDate(now);
+    final tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+    final tanggalLengkap = "$tanggalMasehi | $tanggalHijriah";
+
+    final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    PetugasModel? petugasHariIni;
+    if (myMasjidData != null && myMasjidData.petugasJumat.isNotEmpty) {
+      try {
+        petugasHariIni = myMasjidData.petugasJumat.firstWhere((p) => p.hari == dateStr);
+      } catch (_) {
+        // Tidak ada petugas hari ini
+      }
+    }
+
     return TvScaffold(
       backgroundColor: AppColors.bgDark, 
       body: Stack(
@@ -95,57 +108,38 @@ class JumatScreen extends ConsumerWidget {
                         children: logoWidgets,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'PERSIAPAN KHUTBAH',
-                        style: TextStyle(
+                      Text(
+                        tanggalLengkap,
+                        style: const TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.w600,
                           color: Colors.white70,
-                          letterSpacing: 8,
+                          letterSpacing: 4,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'JUMAT',
-                        style: TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 12,
-                          fontFamily: 'Poppins',
+                      const SizedBox(height: 32),
+                      // List Petugas Jumat
+                      Column(
+                        children: [
+                            const Text(
+                              'PETUGAS JUMAT HARI INI',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textYellow,
+                                letterSpacing: 4,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            _buildPetugasRow('Khatib', petugasHariIni?.khatib ?? '-'),
+                            const SizedBox(height: 16),
+                            _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
+                            const SizedBox(height: 16),
+                            _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        _formatCountdown(transitionState.remainingSeconds),
-                        style: const TextStyle(
-                          fontSize: 180,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textYellow,
-                          fontFamily: 'JetBrainsMono',
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            width: 2,
-                          ),
-                        ),
-                        child: const Text(
-                          'Mohon segera bersiap dan masuk ke dalam masjid',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                      ),
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Center
@@ -177,6 +171,57 @@ class JumatScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPetugasRow(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 180,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 32,
+                color: Colors.white70,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+          const Text(
+            ': ',
+            style: TextStyle(
+              fontSize: 32,
+              color: Colors.white70,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          SizedBox(
+            width: 350,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontFamily: 'Poppins',
+              ),
             ),
           ),
         ],
