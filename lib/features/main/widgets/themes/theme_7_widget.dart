@@ -40,7 +40,7 @@ class Theme7Widget extends StatelessWidget {
               logoMasjid: data.profil.logoMasjid,
               logoPemerintah: data.profil.logoPemerintah,
               backgroundColor: AppColors.bgBlue,
-              textColor: AppColors.textYellow,
+              textColor: AppColors.textInverse,
               addressColor: AppColors.textInverse,
               isRightAligned: true,
             ),
@@ -54,10 +54,12 @@ class Theme7Widget extends StatelessWidget {
             // Konten Utama (Tengah) - Tema 7 (Default)
             Expanded(
               child: Container(
-                color: AppColors.bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
+                color: AppColors
+                    .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
                 child: AppImageSlider(
                   imageUrls: slideUrls,
-                  leftMargin: 500, // Geser slider ke kanan agar tidak banyak tertutup
+                  leftMargin:
+                      500, // Geser slider ke kanan agar tidak banyak tertutup
                 ),
               ),
             ),
