@@ -30,8 +30,7 @@ class MainContentWidget extends ConsumerWidget {
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.slug));
 
-    return Expanded(
-      child: myMasjidAsync.when(
+    return myMasjidAsync.when(
         loading: () => const Center(
           child: AppLoadingSpinner(message: 'Memuat data masjid...'),
         ),
@@ -63,8 +62,7 @@ class MainContentWidget extends ConsumerWidget {
             child: _buildThemeWidget(themeId, data),
           );
         },
-      ),
-    );
+      );
   }
 
   Widget _buildThemeWidget(int themeId, MyMasjidModel data) {

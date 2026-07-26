@@ -85,12 +85,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/jumbotron-masjid',
         name: 'jumbotron-masjid',
-        builder: (context, state) => const JumbotronMasjidScreen(),
+        builder: (context, state) => const JumbotronMasjidScreen(imageUrl: 'https://picsum.photos/1920/1080'),
       ),
       GoRoute(
         path: '/jumbotron-pemko',
         name: 'jumbotron-pemko',
-        builder: (context, state) => const JumbotronPemkoScreen(),
+        builder: (context, state) => const JumbotronPemkoScreen(imageUrl: 'https://picsum.photos/1920/1080'),
       ),
     ],
   );

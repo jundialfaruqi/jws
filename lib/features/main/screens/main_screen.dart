@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/app_offline_banner.dart';
 import '../../../core/widgets/app_confirm_exit.dart';
 import '../../../core/widgets/tv_scaffold.dart';
-import '../widgets/main_content_widget.dart';
+import '../widgets/idle_screen_manager.dart';
 
 import 'package:flutter/services.dart';
 import '../../../core/widgets/tv_drawer_menu.dart';
@@ -27,6 +27,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return AppConfirmExit(
       child: Focus(
         focusNode: _mainScreenFocusNode,
@@ -48,7 +49,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       // Reload logika di sini
                     },
                   ),
-                  const MainContentWidget(),
+                  const IdleScreenManager(),
                 ],
               ),
               TvDrawerMenu(

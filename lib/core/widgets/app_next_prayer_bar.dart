@@ -10,8 +10,14 @@ import 'package:hijri/hijri_calendar.dart';
 class AppNextPrayerBar extends ConsumerWidget {
   final double leftMargin;
   final List<JadwalSholatModel> jadwalSholatList;
+  final bool countdownOnly;
 
-  const AppNextPrayerBar({super.key, this.leftMargin = 0.0, this.jadwalSholatList = const []});
+  const AppNextPrayerBar({
+    super.key, 
+    this.leftMargin = 0.0, 
+    this.jadwalSholatList = const [],
+    this.countdownOnly = false,
+  });
 
   DateTime _parseTime(String timeStr, DateTime now) {
     if (timeStr == '--:--' || timeStr.isEmpty) return now;
@@ -114,6 +120,55 @@ class AppNextPrayerBar extends ConsumerWidget {
         final hijriDate = HijriCalendar.fromDate(dateToCalculate);
         final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
 
+        final countdownWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _RingingBellIcon(
+              icon: TablerIcons.bell_ringing,
+              color: Colors.white,
+              size: 36,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'MENUJU $nextPrayer',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                letterSpacing: 2.0,
+              ),
+            ),
+            const SizedBox(width: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: borderColor,
+                ),
+              ),
+              child: Text(
+                countdownStr,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'JetBrainsMono',
+                ),
+              ),
+            ),
+          ],
+        );
+
+        if (countdownOnly) {
+          return countdownWidget;
+        }
+
         return Container(
           color: AppColors.bgNavy,
           padding: EdgeInsets.only(
@@ -125,50 +180,7 @@ class AppNextPrayerBar extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Kiri: Waktu Sholat yang akan masuk
-              Row(
-                children: [
-                  const _RingingBellIcon(
-                    icon: TablerIcons.bell_ringing,
-                    color: Colors.white,
-                    size: 36,
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    'MENUJU $nextPrayer',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: borderColor,
-                      ),
-                    ),
-                    child: Text(
-                      countdownStr,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'JetBrainsMono',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              countdownWidget,
 
               // Kanan: Tanggal Masehi & Hijriah
               Row(
