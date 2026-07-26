@@ -118,9 +118,8 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
       return;
     }
 
-    final currentHm = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
-    // Trigger hanya di detik 0 agar tidak berulang
-    if (now.second != 0) return;
+    final isFriday = now.weekday == DateTime.friday;
+    final durasi = data.durasi ?? DurasiModel();
 
     final times = {
       'IMSAK': todayJadwal.imsak,
@@ -134,31 +133,79 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     };
 
     for (var entry in times.entries) {
-      if (entry.value == currentHm) {
-        // Masuk waktu!
-        _startTransition(entry.key, entry.value, data.durasi ?? DurasiModel(), now.weekday == DateTime.friday);
-        break;
+      final name = entry.key;
+      final timeStr = entry.value;
+      if (timeStr.length != 5) continue; // Pastikan format HH:mm
+
+      final parts = timeStr.split(':');
+      final hour = int.tryParse(parts[0]) ?? 0;
+      final minute = int.tryParse(parts[1]) ?? 0;
+
+      // Titik awal waktu sholat
+      DateTime phaseStart = DateTime(now.year, now.month, now.day, hour, minute, 0);
+      
+      // Fase 1: Alert / Adzan
+      PrayerState phase1State = (name == 'IMSAK' || name == 'SYURUQ' || name == 'DHUHA') ? PrayerState.alert : PrayerState.adzan;
+      int phase1Mins = _getDurationForState(phase1State, name, durasi);
+      DateTime phase1End = phaseStart.add(Duration(minutes: phase1Mins));
+
+      if (now.compareTo(phaseStart) >= 0 && now.isBefore(phase1End)) {
+        // Sedang berada di Fase 1
+        _jumpToState(phase1State, name, timeStr, phase1Mins * 60, phase1End.difference(now).inSeconds);
+        return;
+      }
+
+      // Lanjut ke Fase 2 & 3 jika ini bukan sholat sunnah (bukan alert)
+      if (phase1State == PrayerState.adzan) {
+        if (name == 'DZUHUR' && isFriday) {
+          // Fase Jumat (khusus dzuhur di hari jumat)
+          int jumatMins = _getDurationForState(PrayerState.jumat, name, durasi);
+          DateTime jumatEnd = phase1End.add(Duration(minutes: jumatMins));
+          
+          if (now.compareTo(phase1End) >= 0 && now.isBefore(jumatEnd)) {
+             _jumpToState(PrayerState.jumat, name, timeStr, jumatMins * 60, jumatEnd.difference(now).inSeconds);
+             return;
+          }
+        } else {
+          // Fase Iqomah
+          int iqomahMins = _getDurationForState(PrayerState.iqomah, name, durasi);
+          DateTime iqomahEnd = phase1End.add(Duration(minutes: iqomahMins));
+          
+          if (now.compareTo(phase1End) >= 0 && now.isBefore(iqomahEnd)) {
+             _jumpToState(PrayerState.iqomah, name, timeStr, iqomahMins * 60, iqomahEnd.difference(now).inSeconds);
+             return;
+          }
+
+          // Fase Final Screen
+          int finalMins = _getDurationForState(PrayerState.finalScreen, name, durasi);
+          DateTime finalEnd = iqomahEnd.add(Duration(minutes: finalMins));
+          
+          if (now.compareTo(iqomahEnd) >= 0 && now.isBefore(finalEnd)) {
+             _jumpToState(PrayerState.finalScreen, name, timeStr, finalMins * 60, finalEnd.difference(now).inSeconds);
+             return;
+          }
+        }
       }
     }
   }
 
-  void _startTransition(String name, String time, DurasiModel durasi, bool isFriday) {
-    _playSound();
+  void _jumpToState(PrayerState status, String name, String time, int totalSeconds, int remainingSeconds) {
+    if (remainingSeconds <= 0) return;
     
-    // Tentukan status awal
-    PrayerState initialStatus = PrayerState.adzan;
-    if (name == 'IMSAK' || name == 'SYURUQ' || name == 'DHUHA') {
-      initialStatus = PrayerState.alert;
+    // Reset status bunyi beep khusus iqomah
+    _hasPlayedIqomahBeep = false;
+    
+    // Bunyikan beep HANYA JIKA baru mulai (selisih <= 2 detik dari awal fase)
+    if (totalSeconds - remainingSeconds <= 2) {
+       _playSound();
     }
     
-    int durationMinutes = _getDurationForState(initialStatus, name, durasi);
-    
     state = PrayerTransitionState(
-      status: initialStatus,
+      status: status,
       prayerName: name,
       prayerTime: time,
-      totalSeconds: durationMinutes * 60,
-      remainingSeconds: durationMinutes * 60,
+      totalSeconds: totalSeconds,
+      remainingSeconds: remainingSeconds,
     );
     
     _navigateToCurrentState();
