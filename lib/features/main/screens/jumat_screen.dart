@@ -32,13 +32,15 @@ class JumatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
-    
+
     final String logo1 = _getFullUrl(profil?.logoMasjid);
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
     final bool hasLogo2 = logo2.isNotEmpty;
 
-    final myMasjidData = profil != null ? ref.watch(myMasjidProvider(profil.slug)).value : null;
+    final myMasjidData = profil != null
+        ? ref.watch(myMasjidProvider(profil.slug)).value
+        : null;
     List<String> slideJumats = [];
     if (myMasjidData != null && myMasjidData.slideJumat != null) {
       final s = myMasjidData.slideJumat!;
@@ -49,43 +51,85 @@ class JumatScreen extends ConsumerWidget {
       if (s.slide5 != null && s.slide5!.isNotEmpty) slideJumats.add(s.slide5!);
       if (s.slide6 != null && s.slide6!.isNotEmpty) slideJumats.add(s.slide6!);
     }
-    
+
     // Jika tidak ada data dari backend, gunakan gambar default
     if (slideJumats.isEmpty) {
-      slideJumats.add('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000');
+      slideJumats.add(
+        'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
+      );
     }
 
     List<Widget> logoWidgets = [];
     final double logoSize = 120.0; // Diperkecil sedikit agar tidak overflow
 
     if (!hasLogo1 && !hasLogo2) {
-      logoWidgets.add(Image.asset('assets/logo/logo-masjid-default.png', height: logoSize, fit: BoxFit.contain));
+      logoWidgets.add(
+        Image.asset(
+          'assets/logo/logo-masjid-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      );
       logoWidgets.add(const SizedBox(width: 24));
-      logoWidgets.add(Image.asset('assets/logo/logo-pemko-default.png', height: logoSize, fit: BoxFit.contain));
+      logoWidgets.add(
+        Image.asset(
+          'assets/logo/logo-pemko-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      );
     } else {
       if (hasLogo1) {
-        logoWidgets.add(CachedNetworkImage(imageUrl: logo1, height: logoSize, fit: BoxFit.contain, errorWidget: (c,url,e) => Icon(Icons.mosque, size: logoSize, color: Colors.white)));
+        logoWidgets.add(
+          CachedNetworkImage(
+            imageUrl: logo1,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorWidget: (c, url, e) =>
+                Icon(Icons.mosque, size: logoSize, color: Colors.white),
+          ),
+        );
       }
       if (hasLogo2) {
         if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
-        logoWidgets.add(CachedNetworkImage(imageUrl: logo2, height: logoSize, fit: BoxFit.contain, errorWidget: (c,url,e) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
+        logoWidgets.add(
+          CachedNetworkImage(
+            imageUrl: logo2,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorWidget: (c, url, e) => Icon(
+              Icons.account_balance,
+              size: logoSize,
+              color: Colors.white,
+            ),
+          ),
+        );
       }
     }
 
     final now = ref.watch(timeSyncServiceProvider).now();
-    final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    
+    final dateStr =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
     DateTime dateToCalculate = now;
     if (myMasjidData != null && myMasjidData.jadwalSholat.isNotEmpty) {
       try {
-        final todayJadwal = myMasjidData.jadwalSholat.firstWhere((j) => j.date == dateStr);
+        final todayJadwal = myMasjidData.jadwalSholat.firstWhere(
+          (j) => j.date == dateStr,
+        );
         if (todayJadwal.maghrib.isNotEmpty) {
           final parts = todayJadwal.maghrib.split(':');
           if (parts.length >= 2) {
-             final maghribTime = DateTime(now.year, now.month, now.day, int.tryParse(parts[0]) ?? 0, int.tryParse(parts[1]) ?? 0);
-             if (now.isBefore(maghribTime)) {
-                dateToCalculate = now.subtract(const Duration(days: 1));
-             }
+            final maghribTime = DateTime(
+              now.year,
+              now.month,
+              now.day,
+              int.tryParse(parts[0]) ?? 0,
+              int.tryParse(parts[1]) ?? 0,
+            );
+            if (now.isBefore(maghribTime)) {
+              dateToCalculate = now.subtract(const Duration(days: 1));
+            }
           }
         }
       } catch (_) {}
@@ -94,20 +138,23 @@ class JumatScreen extends ConsumerWidget {
     final hijriDate = HijriCalendar.fromDate(dateToCalculate);
     String tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
     tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
-    final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+    final tanggalHijriah =
+        "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
     final tanggalLengkap = "$tanggalHijriah\n$tanggalMasehi";
 
     PetugasModel? petugasHariIni;
     if (myMasjidData != null && myMasjidData.petugasJumat.isNotEmpty) {
       try {
-        petugasHariIni = myMasjidData.petugasJumat.firstWhere((p) => p.hari == dateStr);
+        petugasHariIni = myMasjidData.petugasJumat.firstWhere(
+          (p) => p.hari == dateStr,
+        );
       } catch (_) {
         // Tidak ada petugas hari ini
       }
     }
 
     return TvScaffold(
-      backgroundColor: AppColors.bgDark, 
+      backgroundColor: AppColors.bgDark,
       body: Stack(
         children: [
           Padding(
@@ -115,56 +162,65 @@ class JumatScreen extends ConsumerWidget {
             child: Row(
               children: [
                 // Kolom Kiri: Informasi Jumat
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Kelompok Atas: Logo dan Tanggal
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: logoWidgets,
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          tanggalLengkap,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white70,
-                            letterSpacing: 4,
-                            fontFamily: 'Poppins',
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Kelompok Atas: Logo dan Tanggal
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: logoWidgets,
                           ),
-                        ),
-                      ],
-                    ),
-                    // Kelompok Tengah: List Petugas Jumat
+                          const SizedBox(height: 24),
+                          Text(
+                            tanggalLengkap,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              letterSpacing: 4,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Kelompok Tengah: List Petugas Jumat
                       SizedBox(
                         width: 750,
                         child: Column(
                           children: [
-                              const Text(
-                                'PETUGAS JUMAT HARI INI',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textYellow,
-                                  letterSpacing: 4,
-                                  fontFamily: 'Poppins',
-                                ),
+                            const Text(
+                              'PETUGAS JUMAT HARI INI',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textYellow,
+                                letterSpacing: 4,
+                                fontFamily: 'Poppins',
                               ),
-                              const SizedBox(height: 24),
-                              _buildPetugasRow('Khatib', petugasHariIni?.khatib ?? '-'),
-                              const SizedBox(height: 16),
-                              _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
-                              const SizedBox(height: 16),
-                                _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
-                              ],
                             ),
+                            const SizedBox(height: 24),
+                            _buildPetugasRow(
+                              'Khatib',
+                              petugasHariIni?.khatib ?? '-',
+                            ),
+                            const SizedBox(height: 16),
+                            _buildPetugasRow(
+                              'Imam',
+                              petugasHariIni?.imam ?? '-',
+                            ),
+                            const SizedBox(height: 16),
+                            _buildPetugasRow(
+                              'Muadzin',
+                              petugasHariIni?.muadzin ?? '-',
+                            ),
+                          ],
+                        ),
                       ),
                       // Kelompok Bawah: Jam Digital
                       const AppLiveClock(
@@ -180,21 +236,22 @@ class JumatScreen extends ConsumerWidget {
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Expanded
-              
-              const SizedBox(width: 64), // Jarak tengah (margin antar 2 layout)
-              
-              // Kolom Kanan: Gambar Rounded (Dummy)
-              Expanded(
-                flex: 1,
-                child: Container(
-                  decoration: BoxDecoration(
+
+                const SizedBox(
+                  width: 64,
+                ), // Jarak tengah (margin antar 2 layout)
+                // Kolom Kanan: Gambar Rounded (Dummy)
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(48),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 32,
                           offset: const Offset(8, 16),
-                        )
+                        ),
                       ],
                     ),
                     child: ClipRRect(
