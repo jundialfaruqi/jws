@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
@@ -84,11 +85,11 @@ class IqomahScreen extends ConsumerWidget {
     } else {
       if (hasLogo1) {
         logoWidgets.add(
-          Image.network(
-            logo1,
+          CachedNetworkImage(
+            imageUrl: logo1,
             height: logoSize,
             fit: BoxFit.contain,
-            errorBuilder: (c, e, s) =>
+            errorWidget: (c, url, e) =>
                 Icon(Icons.mosque, size: logoSize, color: Colors.white),
           ),
         );
@@ -96,11 +97,11 @@ class IqomahScreen extends ConsumerWidget {
       if (hasLogo2) {
         if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
         logoWidgets.add(
-          Image.network(
-            logo2,
+          CachedNetworkImage(
+            imageUrl: logo2,
             height: logoSize,
             fit: BoxFit.contain,
-            errorBuilder: (c, e, s) => Icon(
+            errorWidget: (c, url, e) => Icon(
               Icons.account_balance,
               size: logoSize,
               color: Colors.white,

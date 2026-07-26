@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
 
 class AppMasjidTitle extends StatelessWidget {
@@ -66,11 +67,11 @@ class AppMasjidTitle extends StatelessWidget {
     } else {
       if (hasLogo1) {
         logoWidgets.add(
-          Image.network(
-            logo1,
+          CachedNetworkImage(
+            imageUrl: logo1,
             height: logoSize,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
+            errorWidget: (context, url, error) =>
                 Icon(Icons.mosque, size: logoSize, color: Colors.white),
           ),
         );
@@ -78,11 +79,11 @@ class AppMasjidTitle extends StatelessWidget {
       if (hasLogo2) {
         if (hasLogo1) logoWidgets.add(const SizedBox(width: 4));
         logoWidgets.add(
-          Image.network(
-            logo2,
+          CachedNetworkImage(
+            imageUrl: logo2,
             height: logoSize,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Icon(
+            errorWidget: (context, url, error) => Icon(
               Icons.account_balance,
               size: logoSize,
               color: Colors.white,

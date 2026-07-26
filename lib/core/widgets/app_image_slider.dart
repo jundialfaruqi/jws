@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
 import '../time/time_sync_service.dart';
 
@@ -140,10 +141,10 @@ class _KeepAliveImageState extends State<_KeepAliveImage> with AutomaticKeepAliv
   @override
   Widget build(BuildContext context) {
     super.build(context); // Wajib dipanggil untuk AutomaticKeepAliveClientMixin
-    return Image.network(
-      widget.url,
+    return CachedNetworkImage(
+      imageUrl: widget.url,
       fit: BoxFit.fill,
-      errorBuilder: (context, error, stackTrace) {
+      errorWidget: (context, url, error) {
         return Container(
           color: Colors.blueGrey.shade900,
           child: const Center(

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
+import 'package:hijri/hijri_calendar.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
-
-
 import '../../../core/time/time_sync_service.dart';
-import 'package:intl/intl.dart';
-import 'package:hijri/hijri_calendar.dart';
 import '../models/petugas_model.dart';
 
 class JumatScreen extends ConsumerWidget {
@@ -64,11 +63,11 @@ class JumatScreen extends ConsumerWidget {
       logoWidgets.add(Image.asset('assets/logo/logo-pemko-default.png', height: logoSize, fit: BoxFit.contain));
     } else {
       if (hasLogo1) {
-        logoWidgets.add(Image.network(logo1, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.mosque, size: logoSize, color: Colors.white)));
+        logoWidgets.add(CachedNetworkImage(imageUrl: logo1, height: logoSize, fit: BoxFit.contain, errorWidget: (c,url,e) => Icon(Icons.mosque, size: logoSize, color: Colors.white)));
       }
       if (hasLogo2) {
         if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
-        logoWidgets.add(Image.network(logo2, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
+        logoWidgets.add(CachedNetworkImage(imageUrl: logo2, height: logoSize, fit: BoxFit.contain, errorWidget: (c,url,e) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
       }
     }
 

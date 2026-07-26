@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
@@ -37,11 +38,11 @@ class JumbotronMasjidScreen extends ConsumerWidget {
         fit: BoxFit.contain,
       );
     } else {
-      logoWidget = Image.network(
-        logo,
+      logoWidget = CachedNetworkImage(
+        imageUrl: logo,
         height: logoSize,
         fit: BoxFit.contain,
-        errorBuilder: (c, e, s) => Icon(
+        errorWidget: (c, url, e) => Icon(
           Icons.mosque,
           size: logoSize,
           color: Colors.white,
