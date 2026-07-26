@@ -64,22 +64,41 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_activeAgendas.isEmpty) {
+    // Kalkulasi waktu server
+    final now = ref.read(timeSyncServiceProvider).now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Filter agenda: hanya yang aktif & belum lewat hari ini
+    final List<AgendaModel> validAgendas = _activeAgendas.where((agenda) {
+      if (agenda.dateRaw.isEmpty) return true;
+      try {
+        final dateParts = agenda.dateRaw.split('-');
+        final agendaDate = DateTime(
+          int.parse(dateParts[0]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[2]),
+        );
+        return !agendaDate.isBefore(today); // true jika >= hari ini
+      } catch (_) {
+        return true;
+      }
+    }).toList();
+
+    if (validAgendas.isEmpty) {
       return const SizedBox.shrink();
     }
 
     // Kalkulasi index sinkron berdasarkan waktu server absolut
-    final now = ref.read(timeSyncServiceProvider).now();
     final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
 
-    final int activeCount = _activeAgendas.length;
+    final int activeCount = validAgendas.length;
     final int cycleTime =
         (activeCount * 10) + 5; // 10s tiap item + 5s istirahat
     final int cyclePosition = currentEpoch % cycleTime;
 
     if (cyclePosition >= activeCount * 10) {
       _isResting = true;
-      // Tetap pertahankan index terakhir yang valid agar tidak error saat animasi slide out berjalan
+      // Tetap pertahankan index terakhir yang valid
       _currentIndex = activeCount - 1;
       if (_currentIndex < 0) _currentIndex = 0;
     } else {
@@ -87,7 +106,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
       _currentIndex = cyclePosition ~/ 10;
     }
 
-    final agenda = _activeAgendas[_currentIndex];
+    final agenda = validAgendas[_currentIndex];
 
     // Kalkulasi days_label secara dinamis berdasarkan now()
     String dynamicDaysLabel = agenda.daysLabel;
@@ -99,7 +118,6 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
           int.parse(dateParts[1]),
           int.parse(dateParts[2]),
         );
-        final today = DateTime(now.year, now.month, now.day);
         
         if (agendaDate.isAtSameMomentAs(today)) {
           dynamicDaysLabel = 'Hari ini';
@@ -109,8 +127,6 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
             dynamicDaysLabel = 'Besok';
           } else if (diff > 1) {
             dynamicDaysLabel = '$diff Hari Lagi';
-          } else {
-            dynamicDaysLabel = 'Telah Berlalu';
           }
         }
       } catch (_) {}
