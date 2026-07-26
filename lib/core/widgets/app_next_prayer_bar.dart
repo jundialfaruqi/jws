@@ -72,6 +72,12 @@ class AppNextPrayerBar extends ConsumerWidget {
         final seconds = twoDigits(countdown.inSeconds.remainder(60));
         final countdownStr = '- $hours:$minutes:$seconds';
 
+        final isWarning = countdown.inSeconds > 0 && countdown.inSeconds <= 600;
+        final blinkOn = now.second % 2 == 0;
+        final cardColor = isWarning && blinkOn ? Colors.redAccent : Colors.white.withValues(alpha: 0.1);
+        final borderColor = isWarning && blinkOn ? Colors.red : Colors.white.withValues(alpha: 0.2);
+        final textColor = isWarning && blinkOn ? Colors.white : AppColors.textYellow;
+
         // Tanggal masehi dari jadwal, jika ada
         final tanggalMasehi = (jadwalSholat?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
 
@@ -112,16 +118,16 @@ class AppNextPrayerBar extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: borderColor,
                       ),
                     ),
                     child: Text(
                       countdownStr,
-                      style: const TextStyle(
-                        color: AppColors.textYellow,
+                      style: TextStyle(
+                        color: textColor,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'JetBrainsMono',

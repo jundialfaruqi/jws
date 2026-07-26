@@ -71,7 +71,8 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsItemWidget(
             icon: Icons.notifications_active,
             title: 'Simulasi Layar Adzan (Debug)',
-            subtitle: 'Tekan untuk melihat preview layar saat adzan berkumandang',
+            subtitle:
+                'Tekan untuk melihat preview layar saat adzan berkumandang',
             onTap: () {
               if (context.mounted) context.pushNamed('adzan');
             },
@@ -87,7 +88,8 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsItemWidget(
             icon: Icons.do_not_disturb_on,
             title: 'Simulasi Layar Sholat (Debug)',
-            subtitle: 'Tekan untuk melihat preview layar saat sholat berlangsung',
+            subtitle:
+                'Tekan untuk melihat preview layar saat sholat berlangsung',
             onTap: () {
               if (context.mounted) context.pushNamed('final');
             },
@@ -103,7 +105,8 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsItemWidget(
             icon: Icons.mosque,
             title: 'Simulasi Jumbotron Masjid (Debug)',
-            subtitle: 'Tekan untuk melihat preview Splash/Jumbotron Logo Masjid',
+            subtitle:
+                'Tekan untuk melihat preview Splash/Jumbotron Logo Masjid',
             onTap: () {
               if (context.mounted) context.pushNamed('jumbotron-masjid');
             },
