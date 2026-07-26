@@ -32,7 +32,7 @@ class AdzanScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
     final transitionState = ref.watch(prayerTransitionProvider);
-    
+
     final String logo1 = _getFullUrl(profil?.logoMasjid);
     final String logo2 = _getFullUrl(profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
@@ -42,24 +42,55 @@ class AdzanScreen extends ConsumerWidget {
     final double logoSize = 150.0;
 
     if (!hasLogo1 && !hasLogo2) {
-      logoWidgets.add(Image.asset('assets/logo/logo-masjid-default.png', height: logoSize, fit: BoxFit.contain));
+      logoWidgets.add(
+        Image.asset(
+          'assets/logo/logo-masjid-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      );
       logoWidgets.add(const SizedBox(width: 24));
-      logoWidgets.add(Image.asset('assets/logo/logo-pemko-default.png', height: logoSize, fit: BoxFit.contain));
+      logoWidgets.add(
+        Image.asset(
+          'assets/logo/logo-pemko-default.png',
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      );
     } else {
       if (hasLogo1) {
-        logoWidgets.add(Image.network(logo1, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.mosque, size: logoSize, color: Colors.white)));
+        logoWidgets.add(
+          Image.network(
+            logo1,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorBuilder: (c, e, s) =>
+                Icon(Icons.mosque, size: logoSize, color: Colors.white),
+          ),
+        );
       }
       if (hasLogo2) {
         if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
-        logoWidgets.add(Image.network(logo2, height: logoSize, fit: BoxFit.contain, errorBuilder: (c,e,s) => Icon(Icons.account_balance, size: logoSize, color: Colors.white)));
+        logoWidgets.add(
+          Image.network(
+            logo2,
+            height: logoSize,
+            fit: BoxFit.contain,
+            errorBuilder: (c, e, s) => Icon(
+              Icons.account_balance,
+              size: logoSize,
+              color: Colors.white,
+            ),
+          ),
+        );
       }
     }
-    
-    double progress = transitionState.totalSeconds > 0 
-        ? transitionState.remainingSeconds / transitionState.totalSeconds 
+
+    double progress = transitionState.totalSeconds > 0
+        ? transitionState.remainingSeconds / transitionState.totalSeconds
         : 0;
 
-    // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD) 
+    // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD)
     // berapapun rasio layar aslinya
     return TvScaffold(
       backgroundColor: AppColors.bgDark, // Menggunakan background gelap/hitam
@@ -76,7 +107,7 @@ class AdzanScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 40),
                 const Text(
-                  'SAATNYA MENGUMANDANGKAN ADZAN',
+                  'WAKTUNYA ADZAN',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w600,
@@ -89,7 +120,7 @@ class AdzanScreen extends ConsumerWidget {
                 Text(
                   transitionState.prayerName,
                   style: const TextStyle(
-                    fontSize: 140,
+                    fontSize: 100,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 12,
@@ -107,43 +138,23 @@ class AdzanScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 80),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Text(
-                    'Mohon bersiap dan luruskan shaf',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
                 // Progress Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 400),
                   child: Column(
                     children: [
                       LinearProgressIndicator(
                         value: progress,
-                        minHeight: 12,
+                        minHeight: 60,
                         backgroundColor: Colors.white.withValues(alpha: 0.2),
                         color: AppColors.textYellow,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         _formatCountdown(transitionState.remainingSeconds),
                         style: const TextStyle(
-                          fontSize: 48,
+                          fontSize: 100,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontFamily: 'JetBrainsMono',
