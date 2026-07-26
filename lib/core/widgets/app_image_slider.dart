@@ -28,6 +28,19 @@ class _AppImageSliderState extends State<AppImageSlider> {
     _startTimer();
   }
 
+  @override
+  void didUpdateWidget(AppImageSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageUrls.length != oldWidget.imageUrls.length) {
+      if (_currentPage >= widget.imageUrls.length && widget.imageUrls.isNotEmpty) {
+        _currentPage = widget.imageUrls.length - 1;
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(_currentPage);
+        }
+      }
+    }
+  }
+
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 8), (timer) {
       if (widget.imageUrls.isEmpty) return;
@@ -88,20 +101,39 @@ class _AppImageSliderState extends State<AppImageSlider> {
         itemCount: widget.imageUrls.length,
         itemBuilder: (context, index) {
           final fullUrl = _getFullUrl(widget.imageUrls[index]);
-          return Image.network(
-            fullUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.blueGrey.shade900,
-                child: const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
-                ),
-              );
-            },
-          );
+          return _KeepAliveImage(url: fullUrl);
         },
       ),
+    );
+  }
+}
+
+class _KeepAliveImage extends StatefulWidget {
+  final String url;
+  const _KeepAliveImage({required this.url});
+
+  @override
+  State<_KeepAliveImage> createState() => _KeepAliveImageState();
+}
+
+class _KeepAliveImageState extends State<_KeepAliveImage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Wajib dipanggil untuk AutomaticKeepAliveClientMixin
+    return Image.network(
+      widget.url,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: Colors.blueGrey.shade900,
+          child: const Center(
+            child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+          ),
+        );
+      },
     );
   }
 }
