@@ -74,9 +74,10 @@ class JumatScreen extends ConsumerWidget {
 
     final now = ref.watch(timeSyncServiceProvider).now();
     final hijriDate = HijriCalendar.fromDate(now);
-    final tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    String tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
     final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
-    final tanggalLengkap = "$tanggalMasehi | $tanggalHijriah";
+    final tanggalLengkap = "$tanggalHijriah\n$tanggalMasehi";
 
     final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     PetugasModel? petugasHariIni;
@@ -110,6 +111,7 @@ class JumatScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       Text(
                         tanggalLengkap,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.w600,
@@ -120,26 +122,30 @@ class JumatScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 32),
                       // List Petugas Jumat
-                      Column(
-                        children: [
-                            const Text(
-                              'PETUGAS JUMAT HARI INI',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textYellow,
-                                letterSpacing: 4,
-                                fontFamily: 'Poppins',
+                      SizedBox(
+                        width: 750,
+                        child: Column(
+                          children: [
+                              const Text(
+                                'PETUGAS JUMAT HARI INI',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textYellow,
+                                  letterSpacing: 4,
+                                  fontFamily: 'Poppins',
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            _buildPetugasRow('Khatib', petugasHariIni?.khatib ?? '-'),
-                            const SizedBox(height: 16),
-                            _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
-                            const SizedBox(height: 16),
-                            _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
-                          ],
-                        ),
+                              const SizedBox(height: 24),
+                              _buildPetugasRow('Khatib', petugasHariIni?.khatib ?? '-'),
+                              const SizedBox(height: 16),
+                              _buildPetugasRow('Imam', petugasHariIni?.imam ?? '-'),
+                              const SizedBox(height: 16),
+                              _buildPetugasRow('Muadzin', petugasHariIni?.muadzin ?? '-'),
+                            ],
+                          ),
+                      ),
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Center
@@ -190,7 +196,6 @@ class JumatScreen extends ConsumerWidget {
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
@@ -212,8 +217,7 @@ class JumatScreen extends ConsumerWidget {
               fontFamily: 'Poppins',
             ),
           ),
-          SizedBox(
-            width: 350,
+          Expanded(
             child: Text(
               value,
               style: const TextStyle(
