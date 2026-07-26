@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/providers/main_slide_index_provider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
@@ -107,11 +108,13 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         final currentPos = epochSeconds % totalDuration;
 
         int accumulated = 0;
+        int activeBlockStart = 0;
         Map<String, dynamic>? activeBlock;
         for (final b in blocks) {
           int duration = b['duration'] as int;
           if (currentPos >= accumulated && currentPos < accumulated + duration) {
             activeBlock = b;
+            activeBlockStart = accumulated;
             break;
           }
           accumulated += duration;
@@ -129,7 +132,16 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             imageUrl: activeBlock['slide'],
           );
         } else {
-          currentWidget = const MainContentWidget(key: ValueKey('main'));
+          int relativeTime = currentPos - activeBlockStart;
+          int mainSlideIndex = relativeTime ~/ 10;
+          
+          currentWidget = ProviderScope(
+            key: const ValueKey('main'),
+            overrides: [
+              mainSlideIndexProvider.overrideWithValue(mainSlideIndex),
+            ],
+            child: const MainContentWidget(),
+          );
         }
 
         return Expanded(

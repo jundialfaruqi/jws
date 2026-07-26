@@ -3,16 +3,18 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
-import '../time/time_sync_service.dart';
+import '../providers/main_slide_index_provider.dart';
 
 class AppImageSlider extends ConsumerStatefulWidget {
   final List<String> imageUrls;
   final double leftMargin;
+  final bool externalSync; // Default false. Jika true, disetir oleh mainSlideIndexProvider.
 
   const AppImageSlider({
     super.key,
     this.imageUrls = const [],
     this.leftMargin = 0.0,
+    this.externalSync = false,
   });
 
   @override
@@ -27,13 +29,61 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   @override
   void initState() {
     super.initState();
+    // Inisialisasi awal aman
     _pageController = PageController(initialPage: 0);
-    _startTimer();
+    
+    if (widget.externalSync) {
+      // Gunakan post-frame untuk mendapatkan initial index dari provider
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final initialIndex = ref.read(mainSlideIndexProvider);
+          if (initialIndex < widget.imageUrls.length && initialIndex != 0) {
+            setState(() {
+              _currentPage = initialIndex;
+            });
+            if (_pageController.hasClients) {
+              _pageController.jumpToPage(_currentPage);
+            }
+          }
+        }
+      });
+    } else {
+      // Internal timer fallback untuk screen seperti Iqomah/Jumat
+      _startLocalTimer();
+    }
+  }
+
+  void _startLocalTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!mounted || widget.imageUrls.isEmpty) return;
+      
+      final nextIndex = (_currentPage + 1) % widget.imageUrls.length;
+      setState(() {
+        _currentPage = nextIndex;
+      });
+      
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+    });
   }
 
   @override
   void didUpdateWidget(AppImageSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.externalSync != oldWidget.externalSync) {
+      if (widget.externalSync) {
+        _timer?.cancel();
+      } else {
+        _startLocalTimer();
+      }
+    }
+    
     if (widget.imageUrls.length != oldWidget.imageUrls.length) {
       if (_currentPage >= widget.imageUrls.length && widget.imageUrls.isNotEmpty) {
         _currentPage = widget.imageUrls.length - 1;
@@ -42,41 +92,6 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
         }
       }
     }
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    // Cek kalkulasi setiap 1 detik
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted || widget.imageUrls.isEmpty) return;
-
-      final now = ref.read(timeSyncServiceProvider).now();
-      final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
-      final int slideCount = widget.imageUrls.length;
-      
-      // Hitung index yang seharusnya tayang berdasarkan waktu absolut (10 detik per slide)
-      final int cyclePosition = currentEpoch % (slideCount * 10);
-      final int targetIndex = cyclePosition ~/ 10;
-
-      if (targetIndex != _currentPage) {
-        setState(() {
-          _currentPage = targetIndex;
-        });
-        
-        if (_pageController.hasClients) {
-          // Lompat langsung jika perbedaan jaraknya jauh (misal saat inisialisasi)
-          if ((_pageController.page?.round() ?? 0) != _currentPage && (_pageController.page?.round() ?? 0) != _currentPage - 1 && (_pageController.page?.round() ?? 0) != _currentPage + 1) {
-            _pageController.jumpToPage(_currentPage);
-          } else {
-            _pageController.animateToPage(
-              _currentPage,
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.easeInOutCubic,
-            );
-          }
-        }
-      }
-    });
   }
 
   @override
@@ -109,6 +124,29 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
           child: Icon(Icons.image_not_supported, color: Colors.white24, size: 64),
         ),
       );
+    }
+
+    if (widget.externalSync) {
+      ref.listen<int>(mainSlideIndexProvider, (previous, next) {
+        if (next != _currentPage && next < widget.imageUrls.length && mounted) {
+          setState(() {
+            _currentPage = next;
+          });
+          if (_pageController.hasClients) {
+            if ((_pageController.page?.round() ?? 0) != _currentPage && 
+                (_pageController.page?.round() ?? 0) != _currentPage - 1 && 
+                (_pageController.page?.round() ?? 0) != _currentPage + 1) {
+              _pageController.jumpToPage(_currentPage);
+            } else {
+              _pageController.animateToPage(
+                _currentPage,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeInOutCubic,
+              );
+            }
+          }
+        }
+      });
     }
 
     return Padding(
