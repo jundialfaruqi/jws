@@ -21,6 +21,14 @@ class Theme7Widget extends StatelessWidget {
     final speedMultiplier = data.marquee?.marqueeSpeed ?? 1.0;
     final calculatedVelocity = 120.0 * speedMultiplier;
 
+    final slideUrls = (data.slides?.validSlides.isNotEmpty == true)
+        ? data.slides!.validSlides
+        : [
+            'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000',
+            'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000',
+            'https://images.unsplash.com/photo-1584551246679-0daf3d275d05?q=80&w=2000',
+          ];
+
     return Stack(
       children: [
         Column(
@@ -46,11 +54,10 @@ class Theme7Widget extends StatelessWidget {
             // Konten Utama (Tengah) - Tema 7 (Default)
             Expanded(
               child: Container(
-                color: AppColors
-                    .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
-                child: const AppImageSlider(
-                  leftMargin:
-                      500, // Geser slider ke kanan agar tidak banyak tertutup
+                color: AppColors.bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
+                child: AppImageSlider(
+                  imageUrls: slideUrls,
+                  leftMargin: 500, // Geser slider ke kanan agar tidak banyak tertutup
                 ),
               ),
             ),

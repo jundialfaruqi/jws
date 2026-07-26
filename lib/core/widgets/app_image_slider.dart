@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../constants/api_constant.dart';
 
 class AppImageSlider extends StatefulWidget {
   final List<String> imageUrls;
@@ -7,11 +8,7 @@ class AppImageSlider extends StatefulWidget {
 
   const AppImageSlider({
     super.key,
-    this.imageUrls = const [
-      'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000', // Dummy masjid 1
-      'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000', // Dummy masjid 2
-      'https://images.unsplash.com/photo-1584551246679-0daf3d275d05?q=80&w=2000', // Dummy masjid 3
-    ],
+    this.imageUrls = const [],
     this.leftMargin = 0.0,
   });
 
@@ -58,10 +55,29 @@ class _AppImageSliderState extends State<AppImageSlider> {
     super.dispose();
   }
 
+  String _getFullUrl(String path) {
+    if (path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+
+    final baseUrl = ApiConstant.baseUrl;
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanPath = path.startsWith('/') ? path : '/$path';
+
+    return '$cleanBase$cleanPath';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.imageUrls.isEmpty) {
-      return const SizedBox.shrink();
+      // Tampilkan default/dummy atau biarkan kosong jika benar-benar tak ada slide
+      return Container(
+        color: Colors.blueGrey.shade900,
+        child: const Center(
+          child: Icon(Icons.image_not_supported, color: Colors.white24, size: 64),
+        ),
+      );
     }
 
     return Padding(
@@ -71,8 +87,9 @@ class _AppImageSliderState extends State<AppImageSlider> {
         physics: const NeverScrollableScrollPhysics(), // Biarkan timer yang scroll
         itemCount: widget.imageUrls.length,
         itemBuilder: (context, index) {
+          final fullUrl = _getFullUrl(widget.imageUrls[index]);
           return Image.network(
-            widget.imageUrls[index],
+            fullUrl,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(

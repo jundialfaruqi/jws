@@ -1,6 +1,7 @@
 import '../../select_profil/models/profil_masjid_model.dart';
 import 'marquee_model.dart';
 import 'jadwal_sholat_model.dart';
+import 'slide_model.dart';
 
 class MyMasjidModel {
   final String currentTime;
@@ -9,6 +10,7 @@ class MyMasjidModel {
   final ProfilMasjidModel profil;
   final MarqueeModel? marquee;
   final JadwalSholatModel? jadwalSholat;
+  final SlideModel? slides;
 
   MyMasjidModel({
     required this.currentTime,
@@ -17,6 +19,7 @@ class MyMasjidModel {
     required this.profil,
     this.marquee,
     this.jadwalSholat,
+    this.slides,
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,7 @@ class MyMasjidModel {
       profil: ProfilMasjidModel.fromJson(json['profil'] ?? {}),
       marquee: json['marquee'] != null ? MarqueeModel.fromJson(json['marquee']) : null,
       jadwalSholat: json['jadwal_sholat'] != null ? JadwalSholatModel.fromJson(json['jadwal_sholat']) : null,
+      slides: json['slides'] != null ? SlideModel.fromJson(json['slides']) : null,
     );
   }
 }
