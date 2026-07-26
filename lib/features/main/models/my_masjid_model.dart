@@ -5,6 +5,7 @@ import 'slide_model.dart';
 import 'agenda_model.dart';
 import 'petugas_model.dart';
 import 'durasi_model.dart';
+import 'laporan_keuangan_model.dart';
 
 class MyMasjidModel {
   final String currentTime;
@@ -23,6 +24,7 @@ class MyMasjidModel {
   final SlideModel? jumbotronPemko;
   final SlideModel? jumbotronMasjid;
   final DurasiModel? durasi;
+  final List<LaporanKeuanganGroupModel> laporanKeuangan;
 
   MyMasjidModel({
     required this.currentTime,
@@ -41,6 +43,7 @@ class MyMasjidModel {
     this.jumbotronPemko,
     this.jumbotronMasjid,
     this.durasi,
+    this.laporanKeuangan = const [],
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -61,6 +64,7 @@ class MyMasjidModel {
       jumbotronPemko: json['jumbotron_pemko'] != null && json['jumbotron_pemko']['data'] != null ? SlideModel.fromJson(json['jumbotron_pemko']['data']) : null,
       jumbotronMasjid: json['jumbotron_masjid'] != null && json['jumbotron_masjid']['data'] != null ? SlideModel.fromJson(json['jumbotron_masjid']['data']) : null,
       durasi: json['durasi'] != null && json['durasi']['data'] != null ? DurasiModel.fromJson(json['durasi']['data']) : DurasiModel(),
+      laporanKeuangan: json['laporan_keuangan'] != null && json['laporan_keuangan']['data'] != null ? (json['laporan_keuangan']['data'] as List).map((i) => LaporanKeuanganGroupModel.fromJson(i)).toList() : [],
     );
   }
 }
