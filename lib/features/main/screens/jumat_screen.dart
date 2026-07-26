@@ -35,7 +35,7 @@ class JumatScreen extends ConsumerWidget {
     final bool hasLogo2 = logo2.isNotEmpty;
 
     List<Widget> logoWidgets = [];
-    final double logoSize = 150.0;
+    final double logoSize = 120.0; // Diperkecil sedikit agar tidak overflow
 
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(Image.asset('assets/logo/logo-masjid-default.png', height: logoSize, fit: BoxFit.contain));
@@ -55,9 +55,11 @@ class JumatScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgDark, 
       body: Stack(
         children: [
-          Row(
-            children: [
-              // Kolom Kiri: Informasi Jumat
+          Padding(
+            padding: const EdgeInsets.all(64.0),
+            child: Row(
+              children: [
+                // Kolom Kiri: Informasi Jumat
               Expanded(
                 flex: 1,
                 child: Center(
@@ -68,39 +70,39 @@ class JumatScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: logoWidgets,
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
                       const Text(
                         'PERSIAPAN KHUTBAH',
                         style: TextStyle(
-                          fontSize: 48,
+                          fontSize: 40,
                           fontWeight: FontWeight.w600,
                           color: Colors.white70,
                           letterSpacing: 8,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       const Text(
                         "SHOLAT JUM'AT",
                         style: TextStyle(
-                          fontSize: 100, // Sedikit diperkecil dari Iqomah agar muat
+                          fontSize: 80, // Diperkecil agar muat
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
                           letterSpacing: 12,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       Text(
                         countdownTime,
                         style: const TextStyle(
-                          fontSize: 180,
+                          fontSize: 160,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textYellow,
                           fontFamily: 'JetBrainsMono',
                         ),
                       ),
-                      const SizedBox(height: 80),
+                      const SizedBox(height: 48),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
                         decoration: BoxDecoration(
@@ -114,7 +116,7 @@ class JumatScreen extends ConsumerWidget {
                         child: const Text(
                           'Mohon segera bersiap dan masuk ke dalam masjid',
                           style: TextStyle(
-                            fontSize: 32,
+                            fontSize: 28,
                             color: Colors.white,
                             fontFamily: 'Poppins',
                           ),
@@ -125,13 +127,13 @@ class JumatScreen extends ConsumerWidget {
                 ), // Penutup Center
               ), // Penutup Expanded
               
+              const SizedBox(width: 64), // Jarak tengah (margin antar 2 layout)
+              
               // Kolom Kanan: Gambar Rounded (Dummy)
               Expanded(
                 flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.all(64.0),
-                  child: Container(
-                    decoration: BoxDecoration(
+                child: Container(
+                  decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(48),
                       boxShadow: [
                         BoxShadow(
@@ -153,8 +155,8 @@ class JumatScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

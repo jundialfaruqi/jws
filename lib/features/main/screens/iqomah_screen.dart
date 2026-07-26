@@ -57,9 +57,11 @@ class IqomahScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgDark, 
       body: Stack(
         children: [
-          Row(
-            children: [
-              // Kolom Kiri: Informasi Iqomah
+          Padding(
+            padding: const EdgeInsets.all(64.0),
+            child: Row(
+              children: [
+                // Kolom Kiri: Informasi Iqomah
               Expanded(
                 flex: 1,
                 child: Center(
@@ -126,37 +128,38 @@ class IqomahScreen extends ConsumerWidget {
             ), // Penutup Column
           ), // Penutup Center
         ), // Penutup Expanded
-              // Kolom Kanan: Gambar Rounded (Dummy)
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.all(64.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(48),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 32,
-                          offset: const Offset(8, 16),
-                        )
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(48),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
-                        fit: BoxFit.cover,
-                        height: double.infinity,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
-                ),
+        
+        const SizedBox(width: 64), // Jarak tengah (margin antar 2 layout)
+        
+        // Kolom Kanan: Gambar Rounded (Dummy)
+        Expanded(
+          flex: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(48),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  blurRadius: 32,
+                  offset: const Offset(8, 16),
+                )
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(48),
+              child: Image.network(
+                'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
+                fit: BoxFit.cover,
+                height: double.infinity,
+                width: double.infinity,
               ),
-            ],
+            ),
           ),
-        ],
+        ),
+      ],
+    ),
+  ),
+],
       ),
     );
   }
