@@ -7,6 +7,8 @@ import '../../features/main/screens/adzan_screen.dart';
 import '../../features/main/screens/iqomah_screen.dart';
 import '../../features/main/screens/final_screen.dart';
 import '../../features/main/screens/jumat_screen.dart';
+import '../../features/main/screens/jumbotron_masjid_screen.dart';
+import '../../features/main/screens/jumbotron_pemko_screen.dart';
 import '../../features/webview/screens/webview_screen.dart';
 import '../providers/selected_profil_provider.dart';
 import '../providers/view_mode_provider.dart';
@@ -69,6 +71,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/jumat',
         name: 'jumat',
         builder: (context, state) => const JumatScreen(),
+      ),
+      GoRoute(
+        path: '/jumbotron-masjid',
+        name: 'jumbotron-masjid',
+        builder: (context, state) => const JumbotronMasjidScreen(),
+      ),
+      GoRoute(
+        path: '/jumbotron-pemko',
+        name: 'jumbotron-pemko',
+        builder: (context, state) => const JumbotronPemkoScreen(),
       ),
     ],
   );

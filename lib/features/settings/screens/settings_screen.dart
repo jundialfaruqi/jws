@@ -100,6 +100,22 @@ class SettingsScreen extends ConsumerWidget {
               if (context.mounted) context.pushNamed('jumat');
             },
           ),
+          _SettingsItemWidget(
+            icon: Icons.mosque,
+            title: 'Simulasi Jumbotron Masjid (Debug)',
+            subtitle: 'Tekan untuk melihat preview Splash/Jumbotron Logo Masjid',
+            onTap: () {
+              if (context.mounted) context.pushNamed('jumbotron-masjid');
+            },
+          ),
+          _SettingsItemWidget(
+            icon: Icons.account_balance,
+            title: 'Simulasi Jumbotron Pemko (Debug)',
+            subtitle: 'Tekan untuk melihat preview Splash/Jumbotron Logo Pemko',
+            onTap: () {
+              if (context.mounted) context.pushNamed('jumbotron-pemko');
+            },
+          ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/routes/app_router.dart';
@@ -20,6 +21,10 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Mengaktifkan Fullscreen (Menyembunyikan Status Bar & Nav Bar)
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  
   HttpOverrides.global = MyHttpOverrides(); // Pasang HttpOverrides di sini
   await dotenv.load(fileName: ".env");
 
