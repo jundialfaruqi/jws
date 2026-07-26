@@ -83,6 +83,7 @@ class Theme4Widget extends StatelessWidget {
             backgroundColor: Colors.blueGrey.shade800,
             textColor: Colors.white,
             iconColor: Colors.orange,
+            jadwalSholat: data.jadwalSholat,
           ),
         ),
       ],

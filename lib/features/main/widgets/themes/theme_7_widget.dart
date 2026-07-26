@@ -80,10 +80,11 @@ class Theme7Widget extends StatelessWidget {
             elevation: 16.0,
             shadowColor: Colors.black,
             clipBehavior: Clip.antiAlias,
-            child: const AppJadwalSholat(
+            child: AppJadwalSholat(
               backgroundColor: AppColors.bgNavy,
               textColor: AppColors.textYellow,
               iconColor: AppColors.textYellow,
+              jadwalSholat: data.jadwalSholat,
             ),
           ),
         ),
