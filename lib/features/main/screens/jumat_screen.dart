@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -140,7 +141,6 @@ class JumatScreen extends ConsumerWidget {
     tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
     final tanggalHijriah =
         "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
-    final tanggalLengkap = "$tanggalHijriah\n$tanggalMasehi";
 
     PetugasModel? petugasHariIni;
     if (myMasjidData != null && myMasjidData.petugasJumat.isNotEmpty) {
@@ -175,16 +175,50 @@ class JumatScreen extends ConsumerWidget {
                             children: logoWidgets,
                           ),
                           const SizedBox(height: 24),
-                          Text(
-                            tanggalLengkap,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              letterSpacing: 4,
-                              fontFamily: 'Poppins',
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                TablerIcons.moon_stars,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                tanggalHijriah,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  letterSpacing: 4,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                TablerIcons.calendar_event,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                tanggalMasehi,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  letterSpacing: 4,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -291,7 +325,7 @@ class JumatScreen extends ConsumerWidget {
               label,
               style: const TextStyle(
                 fontSize: 32,
-                color: Colors.white70,
+                color: Colors.white,
                 fontFamily: 'Poppins',
               ),
             ),
@@ -300,7 +334,7 @@ class JumatScreen extends ConsumerWidget {
             ': ',
             style: TextStyle(
               fontSize: 32,
-              color: Colors.white70,
+              color: Colors.white,
               fontFamily: 'Poppins',
             ),
           ),
