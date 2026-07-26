@@ -5,6 +5,7 @@ import 'package:jws/core/widgets/app_jadwal_sholat.dart';
 import 'package:jws/core/widgets/app_next_prayer_bar.dart';
 import 'package:jws/core/widgets/app_image_slider.dart';
 import 'package:jws/core/widgets/app_analog_clock.dart';
+import 'package:jws/core/widgets/app_agenda_widget.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -106,6 +107,13 @@ class Theme7Widget extends StatelessWidget {
           top: 0,
           bottom: 0,
           child: const Center(child: AppAnalogClock(size: 380)),
+        ),
+
+        // Widget Agenda (Kanan Bawah di atas Marquee)
+        Positioned(
+          right: 32,
+          bottom: 160, // Dinaikkan agar tidak terlalu mepet dengan marquee
+          child: AppAgendaWidget(agendas: data.agenda),
         ),
       ],
     );

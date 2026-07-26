@@ -2,6 +2,7 @@ import '../../select_profil/models/profil_masjid_model.dart';
 import 'marquee_model.dart';
 import 'jadwal_sholat_model.dart';
 import 'slide_model.dart';
+import 'agenda_model.dart';
 
 class MyMasjidModel {
   final String currentTime;
@@ -11,6 +12,7 @@ class MyMasjidModel {
   final MarqueeModel? marquee;
   final JadwalSholatModel? jadwalSholat;
   final SlideModel? slides;
+  final List<AgendaModel> agenda;
 
   MyMasjidModel({
     required this.currentTime,
@@ -20,6 +22,7 @@ class MyMasjidModel {
     this.marquee,
     this.jadwalSholat,
     this.slides,
+    this.agenda = const [],
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +34,7 @@ class MyMasjidModel {
       marquee: json['marquee'] != null ? MarqueeModel.fromJson(json['marquee']) : null,
       jadwalSholat: json['jadwal_sholat'] != null ? JadwalSholatModel.fromJson(json['jadwal_sholat']) : null,
       slides: json['slides'] != null ? SlideModel.fromJson(json['slides']) : null,
+      agenda: json['agenda'] != null ? (json['agenda'] as List).map((i) => AgendaModel.fromJson(i)).toList() : [],
     );
   }
 }
