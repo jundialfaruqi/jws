@@ -89,12 +89,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
 
     final agenda = _activeAgendas[_currentIndex];
 
-    // Format YYYY-MM-DD ke DD/MM/YYYY
     String dateStr = agenda.date;
-    final parts = agenda.date.split('-');
-    if (parts.length == 3) {
-      dateStr = '${parts[2]}/${parts[1]}/${parts[0]}';
-    }
 
     return AnimatedSlide(
       offset: _isResting ? const Offset(1.5, 0) : Offset.zero,
