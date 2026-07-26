@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/select_profil/screens/select_profil_screen.dart';
 import '../../features/main/screens/main_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/main/screens/adzan_screen.dart';
 import '../../features/webview/screens/webview_screen.dart';
 import '../providers/selected_profil_provider.dart';
 import '../providers/view_mode_provider.dart';
@@ -45,6 +46,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           final slug = state.pathParameters['slug']!;
           return WebViewScreen(slug: slug);
         },
+      ),
+      GoRoute(
+        path: '/adzan',
+        name: 'adzan',
+        builder: (context, state) => const AdzanScreen(),
       ),
     ],
   );

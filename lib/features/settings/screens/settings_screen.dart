@@ -69,10 +69,12 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _SettingsItemWidget(
-            icon: Icons.language,
-            title: 'Bahasa',
-            subtitle: 'Indonesia (Dummy)',
-            onTap: () {},
+            icon: Icons.notifications_active,
+            title: 'Simulasi Layar Adzan (Debug)',
+            subtitle: 'Tekan untuk melihat preview layar saat adzan berkumandang',
+            onTap: () {
+              if (context.mounted) context.pushNamed('adzan');
+            },
           ),
           _SettingsItemWidget(
             icon: Icons.update,
