@@ -3,14 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../time/time_sync_service.dart';
+import '../constants/app_colors.dart';
 
 class AppAnalogClock extends ConsumerStatefulWidget {
   final double size;
 
-  const AppAnalogClock({
-    super.key,
-    this.size = 350,
-  });
+  const AppAnalogClock({super.key, this.size = 350});
 
   @override
   ConsumerState<AppAnalogClock> createState() => _AppAnalogClockState();
@@ -67,7 +65,32 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Canvas jam analog
+          // Jam digital di bagian tengah bawah (dirender lebih dulu agar berada di belakang)
+          Positioned(
+            bottom: widget.size * 0.29, // Dinaikkan sedikit lebih ke atas lagi
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.size * 0.04,
+                vertical: widget.size * 0.01,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.bgPrimary,
+                borderRadius: BorderRadius.circular(widget.size * 0.04),
+              ),
+              child: Text(
+                formattedTime,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: widget.size * 0.09,
+                  fontWeight:
+                      FontWeight.w900, // Dibuat lebih tebal dari sekadar bold
+                  fontFamily: 'JetBrainsMono',
+                ),
+              ),
+            ),
+          ),
+
+          // Canvas jam analog (dirender terakhir agar jarum berada di depan)
           CustomPaint(
             size: Size(widget.size, widget.size),
             painter: AnalogClockPainter(
@@ -75,20 +98,6 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
               handColor: Colors.white,
               secondHandColor: Colors.red,
               tickColor: Colors.white,
-            ),
-          ),
-          
-          // Jam digital di bagian tengah bawah
-          Positioned(
-            bottom: widget.size * 0.25,
-            child: Text(
-              formattedTime,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: widget.size * 0.09,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'JetBrainsMono',
-              ),
             ),
           ),
         ],
@@ -211,7 +220,7 @@ class AnalogClockPainter extends CustomPainter {
       ..color = secondHandColor
       ..strokeWidth = radius * 0.02
       ..strokeCap = StrokeCap.round;
-      
+
     // Ekor jarum detik
     canvas.drawLine(
       Offset(
