@@ -72,7 +72,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
         {'nama': 'SUBUH', 'time': _parseTime(widget.jadwalSholat!.subuh, now)},
         {'nama': 'TERBIT', 'time': _parseTime(widget.jadwalSholat!.terbit, now)},
         {'nama': 'DHUHA', 'time': _parseTime(widget.jadwalSholat!.dhuha, now)},
-        {'nama': 'DZUHUR', 'time': _parseTime(widget.jadwalSholat!.dzuhur, now)},
+        {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(widget.jadwalSholat!.dzuhur, now)},
         {'nama': 'ASHAR', 'time': _parseTime(widget.jadwalSholat!.ashar, now)},
         {'nama': 'MAGHRIB', 'time': _parseTime(widget.jadwalSholat!.maghrib, now)},
         {'nama': 'ISYA', 'time': _parseTime(widget.jadwalSholat!.isya, now)},
@@ -133,10 +133,10 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               'color': getColor('DHUHA'),
             },
       {
-        'nama': 'DZUHUR',
+        'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
         'jam': widget.jadwalSholat?.dzuhur ?? '--:--',
         'icon': TablerIcons.sun_high,
-        'color': getColor('DZUHUR'),
+        'color': getColor(now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR'),
       },
       {
         'nama': 'ASHAR',

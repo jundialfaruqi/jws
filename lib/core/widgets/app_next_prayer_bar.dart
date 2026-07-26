@@ -41,7 +41,7 @@ class AppNextPrayerBar extends ConsumerWidget {
             {'nama': 'SUBUH', 'time': _parseTime(jadwalSholat!.subuh, now)},
             {'nama': 'TERBIT', 'time': _parseTime(jadwalSholat!.terbit, now)},
             {'nama': 'DHUHA', 'time': _parseTime(jadwalSholat!.dhuha, now)},
-            {'nama': 'DZUHUR', 'time': _parseTime(jadwalSholat!.dzuhur, now)},
+            {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(jadwalSholat!.dzuhur, now)},
             {'nama': 'ASHAR', 'time': _parseTime(jadwalSholat!.ashar, now)},
             {'nama': 'MAGHRIB', 'time': _parseTime(jadwalSholat!.maghrib, now)},
             {'nama': 'ISYA', 'time': _parseTime(jadwalSholat!.isya, now)},
@@ -73,7 +73,7 @@ class AppNextPrayerBar extends ConsumerWidget {
         final countdownStr = '- $hours:$minutes:$seconds';
 
         // Tanggal masehi dari jadwal, jika ada
-        final tanggalMasehi = jadwalSholat?.tanggal ?? '26 Juli 2026';
+        final tanggalMasehi = (jadwalSholat?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
 
         return Container(
           color: AppColors.bgNavy,

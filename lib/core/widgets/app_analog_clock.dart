@@ -144,13 +144,16 @@ class AnalogClockPainter extends CustomPainter {
 
     // Draw Numbers (Angka 1-12)
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    int currentHour12 = dateTime.hour % 12;
+    if (currentHour12 == 0) currentHour12 = 12;
+
     for (int i = 1; i <= 12; i++) {
       final angle = (i * 30 - 90) * pi / 180;
 
       textPainter.text = TextSpan(
         text: i.toString(),
         style: TextStyle(
-          color: i == 12 ? Colors.red : Colors.white,
+          color: i == currentHour12 ? Colors.red : Colors.white,
           fontSize: radius * 0.25, // Diperkecil agar lebih rapi
           fontWeight: FontWeight.bold,
           fontFamily: 'Poppins',
