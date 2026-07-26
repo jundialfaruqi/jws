@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../time/time_sync_service.dart';
 
-class AppAnalogClock extends StatefulWidget {
+class AppAnalogClock extends ConsumerStatefulWidget {
   final double size;
 
   const AppAnalogClock({
@@ -11,20 +13,22 @@ class AppAnalogClock extends StatefulWidget {
   });
 
   @override
-  State<AppAnalogClock> createState() => _AppAnalogClockState();
+  ConsumerState<AppAnalogClock> createState() => _AppAnalogClockState();
 }
 
-class _AppAnalogClockState extends State<AppAnalogClock> {
+class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
   late Timer _timer;
-  DateTime _now = DateTime.now();
+  late DateTime _now;
 
   @override
   void initState() {
     super.initState();
+    // Inisialisasi awal
+    _now = ref.read(timeSyncServiceProvider).now();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
-          _now = DateTime.now();
+          _now = ref.read(timeSyncServiceProvider).now();
         });
       }
     });

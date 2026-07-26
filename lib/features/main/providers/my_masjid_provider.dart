@@ -1,8 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/my_masjid_model.dart';
 import '../services/my_masjid_service.dart';
+import '../../../core/time/time_sync_service.dart';
 
 final myMasjidProvider = FutureProvider.family<MyMasjidModel, String>((ref, slug) async {
   final service = ref.read(myMasjidServiceProvider);
-  return await service.getMyMasjid(slug);
+  final data = await service.getMyMasjid(slug);
+  
+  // Sinkronisasi waktu menggunakan timestamp dari server
+  ref.read(timeSyncServiceProvider).sync(data.timestamp);
+  
+  return data;
 });

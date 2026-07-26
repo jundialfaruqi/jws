@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_colors.dart';
+import '../time/time_sync_service.dart';
 
-class AppMarquee extends StatefulWidget {
+class AppMarquee extends ConsumerStatefulWidget {
   final String text;
   final double height;
   final Color backgroundColor;
@@ -25,10 +27,10 @@ class AppMarquee extends StatefulWidget {
   });
 
   @override
-  State<AppMarquee> createState() => _AppMarqueeState();
+  ConsumerState<AppMarquee> createState() => _AppMarqueeState();
 }
 
-class _AppMarqueeState extends State<AppMarquee> with SingleTickerProviderStateMixin {
+class _AppMarqueeState extends ConsumerState<AppMarquee> with SingleTickerProviderStateMixin {
   late Ticker _ticker;
   double _textWidth = 0.0;
   double _offsetX = 0.0;
@@ -44,7 +46,7 @@ class _AppMarqueeState extends State<AppMarquee> with SingleTickerProviderStateM
       if (!_isReady || _textWidth == 0.0) return;
 
       // Logika Sinkronisasi Jam Dunia (Keajaiban Sinkronisasi)
-      final int nowMs = DateTime.now().millisecondsSinceEpoch;
+      final int nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
       
       // Jarak = (waktu_berjalan_dalam_detik) * kecepatan
       final double distance = (nowMs / 1000.0) * widget.velocity;
