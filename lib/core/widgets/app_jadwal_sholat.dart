@@ -119,27 +119,39 @@ class _AppJadwalSholatState extends State<AppJadwalSholat> {
                   bottom: BorderSide(color: Colors.white.withValues(alpha: 0.15), width: 1.0),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Icon Paling Kiri
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    child: Icon(item['icon'] as IconData, color: itemColor, size: 48, key: uniqueKey),
-                  ),
-                  const SizedBox(width: 32),
-                  // Column Nama dan Jam di Kanannya
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          child: Text(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 800),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  final offsetAnimation = Tween<Offset>(
+                    begin: const Offset(-0.3, 0.0), // Muncul dari agak kiri (horizontal)
+                    end: Offset.zero,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Row(
+                  key: uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Icon Paling Kiri
+                    Icon(item['icon'] as IconData, color: itemColor, size: 48),
+                    const SizedBox(width: 32),
+                    // Column Nama dan Jam di Kanannya
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
                             item['nama'] as String,
-                            key: uniqueKey,
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -148,13 +160,9 @@ class _AppJadwalSholatState extends State<AppJadwalSholat> {
                               letterSpacing: 4.0,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4), // Kembalikan spasi antara judul dan jam
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          child: Text(
+                          const SizedBox(height: 4), // Kembalikan spasi antara judul dan jam
+                          Text(
                             item['jam'] as String,
-                            key: ValueKey('${item['nama']}_jam'),
                             style: TextStyle(
                               fontSize: 72, // Jam diperbesar
                               fontWeight: FontWeight.bold,
@@ -164,11 +172,11 @@ class _AppJadwalSholatState extends State<AppJadwalSholat> {
                             ),
                             textAlign: TextAlign.left,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
