@@ -105,10 +105,10 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
 
     return Container(
       width: 500,
-      margin: const EdgeInsets.only(top: 0, bottom: 0, left: 12, right: 12),
+      margin: const EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 0),
       decoration: BoxDecoration(
         color: AppColors.bgNavy.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(0),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
@@ -120,8 +120,8 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             decoration: BoxDecoration(
               color: AppColors.bgDark.withValues(alpha: 0.8),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(0),
+                topRight: Radius.circular(0),
               ),
             ),
             child: Text(

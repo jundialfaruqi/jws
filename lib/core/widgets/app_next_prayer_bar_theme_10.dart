@@ -213,12 +213,16 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
         );
 
         return Container(
-          color: AppColors.bgNavy,
-          padding: EdgeInsets.only(
+          margin: EdgeInsets.only(
             left: leftMargin + 32,
-            right: 48,
-            top: 16,
-            bottom: 16,
+            right: 32,
+            top: 24,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white24),
           ),
           child: Row(
             mainAxisAlignment: dateOnly ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,

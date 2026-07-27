@@ -47,36 +47,43 @@ class Theme10Widget extends StatelessWidget {
               isLeftAligned: true,
             ),
 
-            // Info Bar Waktu Sholat & Tanggal
-            AppNextPrayerBarTheme10(
-              leftMargin: 600, // Menghindari card melayang di kiri
-              jadwalSholatList: data.jadwalSholat,
-            ),
-
-            // Konten Utama (Tengah) - Tema 10 (Default)
+            // Konten Utama (Tengah) - Tema 10 dengan Floating Bar
             Expanded(
-              child: Container(
-                color: AppColors.bgNavy, // Dasar warna navy
-                child: Row(
-                  children: [
-                    // Sisi Kiri: Widget Laporan Keuangan (500px)
-                    SizedBox(
-                      width: 500,
-                      child: AppKeuanganWidget(
-                        laporanData: data.laporanKeuangan,
-                        scrollSpeed: data.durasi?.financeScrollSpeed ?? 0,
-                      ),
+              child: Stack(
+                children: [
+                  // Dasar (Widget Keuangan & Image Slider)
+                  Container(
+                    color: AppColors.bgNavy,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 500,
+                          child: AppKeuanganWidget(
+                            laporanData: data.laporanKeuangan,
+                            scrollSpeed: data.durasi?.financeScrollSpeed ?? 0,
+                          ),
+                        ),
+                        Expanded(
+                          child: AppImageSlider(
+                            imageUrls: slideUrls,
+                            externalSync: true,
+                          ),
+                        ),
+                      ],
                     ),
-                    // Sisi Kanan: Gambar Slide
-                    Expanded(
-                      child: AppImageSlider(
-                        imageUrls: slideUrls,
-                        externalSync: true,
-                        // leftMargin dihapus karena ukurannya sudah ditahan oleh SizedBox 500px di kiri
-                      ),
+                  ),
+                  
+                  // Floating Next Prayer Bar (Melayang di atas slider)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: AppNextPrayerBarTheme10(
+                      leftMargin: 500, // Lebar widget keuangan adalah 500px
+                      jadwalSholatList: data.jadwalSholat,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
