@@ -150,16 +150,12 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
       rowChildren = [
         ...logoWidgets,
         const SizedBox(width: 24),
-        Expanded(
-          child: buildTextColumn(CrossAxisAlignment.start, TextAlign.left),
-        ),
+        buildTextColumn(CrossAxisAlignment.start, TextAlign.left),
       ];
     } else if (isRightAligned) {
       // TEKS -> LOGO (KANAN)
       rowChildren = [
-        Expanded(
-          child: buildTextColumn(CrossAxisAlignment.end, TextAlign.right),
-        ),
+        buildTextColumn(CrossAxisAlignment.end, TextAlign.right),
         const SizedBox(width: 24),
         ...logoWidgets,
       ];
@@ -179,10 +175,15 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
     }
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 24),
-      color: backgroundColor,
+      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 32),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: const BorderRadius.only(
+          bottomRight: Radius.circular(24),
+        ),
+      ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: rowChildren,
       ),

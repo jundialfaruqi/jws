@@ -35,18 +35,6 @@ class Theme10Widget extends StatelessWidget {
       children: [
         Column(
           children: [
-            // Judul Masjid
-            AppMasjidTitleTheme10(
-              title: data.profil.name,
-              address: data.profil.address,
-              logoMasjid: data.profil.logoMasjid,
-              logoPemerintah: data.profil.logoPemerintah,
-              backgroundColor: AppColors.bgBlue,
-              textColor: AppColors.textInverse,
-              addressColor: AppColors.textInverse,
-              isLeftAligned: true,
-            ),
-
             // Konten Utama (Tengah) - Tema 10 dengan Floating Bar
             Expanded(
               child: Stack(
@@ -72,7 +60,7 @@ class Theme10Widget extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Floating Next Prayer Bar (Melayang di atas slider)
                   Positioned(
                     top: 0,
@@ -149,6 +137,24 @@ class Theme10Widget extends StatelessWidget {
           bottom:
               270, // BAGIAN INI: Mengatur jarak / menaikkan kotak agenda dari bawah layar
           child: AppAgendaWidget(agendas: data.agenda),
+        ),
+
+        // Judul Masjid (Melayang di atas)
+        Positioned(
+          top: 0,
+          left: 0,
+          child: AppMasjidTitleTheme10(
+            title: data.profil.name,
+            address: data.profil.address,
+            logoMasjid: data.profil.logoMasjid,
+            logoPemerintah: data.profil.logoPemerintah,
+            backgroundColor: AppColors.bgBlue.withValues(
+              alpha: 0.8,
+            ), // Sedikit transparan agar konten di belakangnya samar-samar terlihat
+            textColor: AppColors.textInverse,
+            addressColor: AppColors.textInverse,
+            isLeftAligned: true,
+          ),
         ),
       ],
     );
