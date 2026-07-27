@@ -1,0 +1,200 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/main/models/jadwal_sholat_model.dart';
+import '../time/time_sync_service.dart';
+import '../constants/app_colors.dart';
+
+class AppJadwalSholatHorizontal extends ConsumerStatefulWidget {
+  final List<JadwalSholatModel> jadwalSholatList;
+
+  const AppJadwalSholatHorizontal({
+    super.key,
+    this.jadwalSholatList = const [],
+  });
+
+  @override
+  ConsumerState<AppJadwalSholatHorizontal> createState() => _AppJadwalSholatHorizontalState();
+}
+
+class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHorizontal> {
+  Timer? _timer;
+  bool _showPrimary = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Berdetak setiap 1 detik agar highlight warna sholat akurat
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        final now = ref.read(timeSyncServiceProvider).now();
+        final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
+        
+        // 1 Siklus total = 14 detik (7 detik Imsak/Terbit, 7 detik Subuh/Dhuha)
+        final int cyclePosition = epochSeconds % 14;
+        
+        setState(() {
+          _showPrimary = cyclePosition < 7;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  DateTime _parseTime(String timeStr, DateTime now) {
+    if (timeStr == '--:--' || timeStr.isEmpty) return now;
+    final parts = timeStr.split(':');
+    if (parts.length != 2) return now;
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.tryParse(parts[0]) ?? 0,
+      int.tryParse(parts[1]) ?? 0,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = ref.read(timeSyncServiceProvider).now();
+
+    String activePrayer = '';
+    String nextPrayer = '';
+    JadwalSholatModel? todayJadwal;
+
+    if (widget.jadwalSholatList.isNotEmpty) {
+      final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      try {
+        todayJadwal = widget.jadwalSholatList.firstWhere((j) => j.date == dateStr);
+      } catch (_) {
+        todayJadwal = widget.jadwalSholatList.first;
+      }
+
+      final times = [
+        {'nama': 'IMSAK', 'time': _parseTime(todayJadwal.imsak, now)},
+        {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
+        {'nama': 'SYURUQ', 'time': _parseTime(todayJadwal.terbit, now)},
+        {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
+        {
+          'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+          'time': _parseTime(todayJadwal.dzuhur, now),
+        },
+        {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},
+        {'nama': 'MAGHRIB', 'time': _parseTime(todayJadwal.maghrib, now)},
+        {'nama': 'ISYA', 'time': _parseTime(todayJadwal.isya, now)},
+      ];
+
+      // Tentukan waktu sholat aktif dan selanjutnya
+      for (int i = times.length - 1; i >= 0; i--) {
+        final t = times[i]['time'] as DateTime;
+        if (now.isAfter(t) || now.isAtSameMomentAs(t)) {
+          activePrayer = times[i]['nama'] as String;
+          if (i < times.length - 1) {
+            nextPrayer = times[i + 1]['nama'] as String;
+          } else {
+            nextPrayer = times[0]['nama'] as String; // Besok Imsak
+          }
+          break;
+        }
+      }
+
+      if (activePrayer.isEmpty) {
+        activePrayer = 'ISYA';
+        nextPrayer = 'IMSAK';
+      }
+    }
+
+    final List<Map<String, String>> prayersToDisplay = [];
+    if (todayJadwal != null) {
+      if (_showPrimary) {
+        prayersToDisplay.add({'label': 'IMSAK', 'time': todayJadwal.imsak});
+        prayersToDisplay.add({'label': 'SYURUQ', 'time': todayJadwal.terbit});
+      } else {
+        prayersToDisplay.add({'label': 'SUBUH', 'time': todayJadwal.subuh});
+        prayersToDisplay.add({'label': 'DHUHA', 'time': todayJadwal.dhuha});
+      }
+
+      prayersToDisplay.addAll([
+        {'label': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': todayJadwal.dzuhur},
+        {'label': 'ASHAR', 'time': todayJadwal.ashar},
+        {'label': 'MAGHRIB', 'time': todayJadwal.maghrib},
+        {'label': 'ISYA', 'time': todayJadwal.isya},
+      ]);
+    }
+
+    return Container(
+      width: double.infinity,
+      color: Colors.transparent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: prayersToDisplay.map((prayer) {
+          final isHighlight = activePrayer == prayer['label'];
+          final isNext = nextPrayer == prayer['label'];
+          // Khusus Terbit/Syuruq, jika IMSAK adalah active/next, maka mereka bisa terbawa jika labelnya tidak muncul, 
+          // tapi logika di atas aman karena nama label sudah persis.
+          return _buildPrayerItem(
+            label: prayer['label']!,
+            time: prayer['time']!,
+            isHighlight: isHighlight,
+            isNext: isNext,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildPrayerItem({
+    required String label,
+    required String time,
+    required bool isHighlight,
+    required bool isNext,
+  }) {
+    Color getTextColor() {
+      if (isHighlight) return Colors.red;
+      if (isNext) return Colors.yellow;
+      return Colors.white; // default
+    }
+
+    final textColor = getTextColor();
+
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.bgBlue,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: TextStyle(
+                fontFamily: 'JetBrainsMono',
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
-import 'package:jws/core/widgets/app_jadwal_sholat.dart';
+import 'package:jws/core/widgets/app_jadwal_sholat_horizontal.dart';
 import 'package:jws/core/widgets/app_next_prayer_bar.dart';
 import 'package:jws/core/widgets/app_image_slider.dart';
 import 'package:jws/core/widgets/app_analog_clock.dart';
@@ -66,6 +66,16 @@ class Theme10Widget extends StatelessWidget {
               ),
             ),
 
+            // Baris Horizontal Jadwal Sholat
+            Container(
+              height: 120,
+              color: AppColors.bgNavy.withValues(alpha: 0.9),
+              padding: const EdgeInsets.only(left: 500, right: 16, top: 8, bottom: 8),
+              child: AppJadwalSholatHorizontal(
+                jadwalSholatList: data.jadwalSholat,
+              ),
+            ),
+
             // Widget Marquee (Bawah)
             AppMarquee(
               text: marqueeText,
@@ -81,25 +91,7 @@ class Theme10Widget extends StatelessWidget {
           ],
         ),
 
-        // Jadwal Sholat Melayang di Kiri
-        Positioned(
-          left: 0,
-          top: 0,
-          bottom: 0,
-          child: PhysicalShape(
-            clipper: JadwalCurveClipper(),
-            color: AppColors.bgNavy,
-            elevation: 16.0,
-            shadowColor: Colors.black,
-            clipBehavior: Clip.antiAlias,
-            child: AppJadwalSholat(
-              backgroundColor: AppColors.bgNavy,
-              textColor: AppColors.textYellow,
-              iconColor: AppColors.textYellow,
-              jadwalSholatList: data.jadwalSholat,
-            ),
-          ),
-        ),
+
 
         // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
         Positioned(
