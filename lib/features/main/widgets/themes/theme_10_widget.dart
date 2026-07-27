@@ -55,13 +55,20 @@ class Theme10Widget extends StatelessWidget {
             // Konten Utama (Tengah) - Tema 10 (Default)
             Expanded(
               child: Container(
-                color: AppColors
-                    .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
-                child: AppImageSlider(
-                  imageUrls: slideUrls,
-                  externalSync: true,
-                  leftMargin:
-                      500, // Geser slider ke kanan agar tidak banyak tertutup
+                color: AppColors.bgNavy, // Dasar warna navy
+                child: Row(
+                  children: [
+                    // Sisi Kiri: Ruang kosong 500px (Bisa diisi komponen lain ke depannya)
+                    const SizedBox(width: 500),
+                    // Sisi Kanan: Gambar Slide
+                    Expanded(
+                      child: AppImageSlider(
+                        imageUrls: slideUrls,
+                        externalSync: true,
+                        // leftMargin dihapus karena ukurannya sudah ditahan oleh SizedBox 500px di kiri
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
