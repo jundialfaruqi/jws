@@ -8,12 +8,14 @@ class AppKeuanganWidget extends StatefulWidget {
   final LaporanKeuanganDataModel? laporanData;
   final int scrollSpeed;
   final EdgeInsetsGeometry? margin;
+  final bool showRightBorder;
 
   const AppKeuanganWidget({
     super.key,
     required this.laporanData,
     this.scrollSpeed = 40,
     this.margin,
+    this.showRightBorder = true,
   });
 
   @override
@@ -113,12 +115,14 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
       decoration: BoxDecoration(
         color: AppColors.bgNavy.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(0),
-        border: Border(
-          right: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1.0,
-          ),
-        ),
+        border: widget.showRightBorder
+            ? Border(
+                right: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1.0,
+                ),
+              )
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -287,28 +291,27 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     bool isBold = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 26,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 4),
           Text(
             amount,
+            textAlign: TextAlign.right,
             style: TextStyle(
               color: color,
-              fontSize: 30,
+              fontSize: 50,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -335,56 +338,56 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
               : Colors.redAccent.withValues(alpha: 0.3),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(
-            isMasuk ? Icons.arrow_downward : Icons.arrow_upward,
-            color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-            size: 32,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.uraian,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.tanggal,
-                  style: const TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                fmt.format(item.saldo),
-                style: TextStyle(
-                  color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30,
-                ),
+              Icon(
+                isMasuk ? Icons.arrow_downward : Icons.arrow_upward,
+                color: isMasuk ? Colors.greenAccent : Colors.redAccent,
+                size: 32,
               ),
-              const SizedBox(height: 4),
-              Text(
-                isMasuk ? "Masuk" : "Keluar",
-                style: TextStyle(
-                  color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-                  fontSize: 24,
-                  fontStyle: FontStyle.italic,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.uraian,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.tanggal,
+                      style: const TextStyle(color: Colors.white, fontSize: 24),
+                    ),
+                  ],
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  fmt.format(item.saldo),
+                  style: TextStyle(
+                    color: isMasuk ? Colors.greenAccent : Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

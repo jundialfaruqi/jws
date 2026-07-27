@@ -167,6 +167,7 @@ class Theme12Widget extends StatelessWidget {
                                 scrollSpeed:
                                     data.durasi?.financeScrollSpeed ?? 0,
                                 margin: EdgeInsets.zero,
+                                showRightBorder: false,
                               ),
                             ),
                             // Pembatas Horisontal Dihapus
