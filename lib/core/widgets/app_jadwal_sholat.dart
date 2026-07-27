@@ -17,6 +17,8 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
   final double? timeFontSize;
   final bool useCardVariant;
   final Color? cardColor;
+  final Color? nextTextColor;
+  final Color? nextCardColor;
 
   const AppJadwalSholat({
     super.key,
@@ -31,6 +33,8 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
     this.timeFontSize,
     this.useCardVariant = false,
     this.cardColor,
+    this.nextTextColor,
+    this.nextCardColor,
   });
 
   @override
@@ -137,9 +141,22 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     }
 
     Color getColor(String nama) {
+      if (widget.useCardVariant) {
+        if (nama == nextPrayer) return widget.nextTextColor ?? Colors.white;
+        return Colors.white; // Pada mode card, teks dan icon aktif/lainnya putih
+      }
       if (nama == activePrayer) return Colors.red;
       if (nama == nextPrayer) return Colors.yellow;
       return Colors.white; // default color
+    }
+
+    Color getBgColor(String nama) {
+      if (widget.useCardVariant) {
+        if (nama == activePrayer) return Colors.red;
+        if (nama == nextPrayer) return widget.nextCardColor ?? Colors.orange.shade500;
+        return widget.cardColor ?? Colors.white.withValues(alpha: 0.05);
+      }
+      return Colors.transparent;
     }
 
     final List<Map<String, dynamic>> jadwal = [
@@ -149,12 +166,14 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               'jam': todayJadwal?.imsak ?? '--:--',
               'icon': TablerIcons.moon_2,
               'color': getColor('IMSAK'),
+              'bgColor': getBgColor('IMSAK'),
             }
           : {
               'nama': 'SUBUH',
               'jam': todayJadwal?.subuh ?? '--:--',
               'icon': TablerIcons.sun_low,
               'color': getColor('SUBUH'),
+              'bgColor': getBgColor('SUBUH'),
             },
       _showPrimary
           ? {
@@ -162,36 +181,44 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               'jam': todayJadwal?.terbit ?? '--:--',
               'icon': TablerIcons.sunrise,
               'color': getColor('SYURUQ'),
+              'bgColor': getBgColor('SYURUQ'),
             }
           : {
               'nama': 'DHUHA',
               'jam': todayJadwal?.dhuha ?? '--:--',
               'icon': TablerIcons.sun,
               'color': getColor('DHUHA'),
+              'bgColor': getBgColor('DHUHA'),
             },
       {
         'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
         'jam': todayJadwal?.dzuhur ?? '--:--',
         'icon': TablerIcons.sun_high,
         'color': getColor(now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR'),
+        'bgColor': getBgColor(
+          now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+        ),
       },
       {
         'nama': 'ASHAR',
         'jam': todayJadwal?.ashar ?? '--:--',
         'icon': TablerIcons.cloud,
         'color': getColor('ASHAR'),
+        'bgColor': getBgColor('ASHAR'),
       },
       {
         'nama': 'MAGHRIB',
         'jam': todayJadwal?.maghrib ?? '--:--',
         'icon': TablerIcons.sunset,
         'color': getColor('MAGHRIB'),
+        'bgColor': getBgColor('MAGHRIB'),
       },
       {
         'nama': 'ISYA',
         'jam': todayJadwal?.isya ?? '--:--',
         'icon': TablerIcons.moon_stars,
         'color': getColor('ISYA'),
+        'bgColor': getBgColor('ISYA'),
       },
     ];
 
@@ -210,14 +237,15 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
           final isLast = index == jadwal.length - 1;
 
           final itemColor = item['color'] as Color;
+          final itemBgColor = item['bgColor'] as Color;
           final uniqueKey = ValueKey(
             item['nama'],
           ); // Kunci unik untuk AnimatedSwitcher
 
           return Padding(
-            padding: EdgeInsets.only(
-              bottom: isLast ? 0 : (widget.useCardVariant ? 8 : 8),
-            ), // Hilangkan padding bawah jika item terakhir
+            padding: widget.useCardVariant
+                ? EdgeInsets.only(bottom: isLast ? 0 : 16)
+                : EdgeInsets.only(bottom: isLast ? 0 : 8),
             child: Container(
               padding: EdgeInsets.symmetric(
                 vertical: widget.useCardVariant ? 19 : 20,
@@ -225,7 +253,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               ),
               decoration: widget.useCardVariant
                   ? BoxDecoration(
-                      color: widget.cardColor ?? Colors.white.withValues(alpha: 0.05),
+                      color: itemBgColor,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(

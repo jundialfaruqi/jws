@@ -290,29 +290,58 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     Color color, {
     bool isBold = false,
   }) {
+    final cleanAmount = amount.replaceAll('Rp', '').trim();
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             title,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              color: Colors.white70, // Label lebih pudar
+              fontSize: 24, // Sedikit lebih kecil
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          Text(
-            amount,
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: color,
-              fontSize: 50,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1), // Badge tipis
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    "Rp",
+                    style: TextStyle(
+                      color: color.withValues(alpha: 0.8),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    cleanAmount,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 44, // Diperkecil dari 50
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1, // Merapatkan sedikit agar dinamis
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

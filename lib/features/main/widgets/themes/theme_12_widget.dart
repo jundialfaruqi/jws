@@ -46,7 +46,7 @@ class Theme12Widget extends StatelessWidget {
               children: [
                 // 1. App Jam Digital
                 Container(
-                  margin: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   decoration: BoxDecoration(
                     color: AppColors.bgNavy,
                     borderRadius: BorderRadius.circular(24),
@@ -80,7 +80,7 @@ class Theme12Widget extends StatelessWidget {
                     child: AppJadwalSholat(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
+                        horizontal: 16,
                         vertical: 16,
                       ),
                       iconSize: 56,
@@ -91,7 +91,9 @@ class Theme12Widget extends StatelessWidget {
                       iconColor: AppColors.textYellow,
                       jadwalSholatList: data.jadwalSholat,
                       useCardVariant: true,
-                      cardColor: AppColors.bgNavy,
+                      cardColor: AppColors.bgBlue,
+                      nextTextColor: AppColors.textYellow,
+                      nextCardColor: AppColors.bgNavy,
                     ),
                   ),
                 ),
