@@ -7,11 +7,13 @@ import '../constants/app_colors.dart';
 class AppKeuanganWidget extends StatefulWidget {
   final LaporanKeuanganDataModel? laporanData;
   final int scrollSpeed;
+  final EdgeInsetsGeometry? margin;
 
   const AppKeuanganWidget({
     super.key,
     required this.laporanData,
     this.scrollSpeed = 40,
+    this.margin,
   });
 
   @override
@@ -105,7 +107,9 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
 
     return Container(
       width: 500,
-      margin: const EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 0),
+      margin:
+          widget.margin ??
+          const EdgeInsets.only(top: 0, bottom: 0, left: 0, right: 0),
       decoration: BoxDecoration(
         color: AppColors.bgNavy.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(0),

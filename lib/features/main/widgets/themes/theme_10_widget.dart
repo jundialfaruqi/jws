@@ -50,6 +50,12 @@ class Theme10Widget extends StatelessWidget {
                           child: AppKeuanganWidget(
                             laporanData: data.laporanKeuangan,
                             scrollSpeed: data.durasi?.financeScrollSpeed ?? 0,
+                            margin: const EdgeInsets.only(
+                              top: 148,
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                            ),
                           ),
                         ),
                         Expanded(
@@ -84,10 +90,8 @@ class Theme10Widget extends StatelessWidget {
                   // Floating Next Prayer Bar (Melayang di atas slider)
                   Positioned(
                     top: 0,
-                    left: 0,
                     right: 0,
                     child: AppNextPrayerBarTheme10(
-                      leftMargin: 500, // Lebar widget keuangan adalah 500px
                       jadwalSholatList: data.jadwalSholat,
                     ),
                   ),
@@ -153,9 +157,8 @@ class Theme10Widget extends StatelessWidget {
             address: data.profil.address,
             logoMasjid: data.profil.logoMasjid,
             logoPemerintah: data.profil.logoPemerintah,
-            backgroundColor: AppColors.bgBlue.withValues(
-              alpha: 0.8,
-            ), // Sedikit transparan agar konten di belakangnya samar-samar terlihat
+            backgroundColor: AppColors
+                .bgNavy, // Transparansi gradient sudah diatur di dalam widget AppMasjidTitleTheme10
             textColor: AppColors.textInverse,
             addressColor: AppColors.textInverse,
             isLeftAligned: true,

@@ -213,22 +213,21 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
         );
 
         return Container(
-          margin: EdgeInsets.only(
-            left: leftMargin + 32,
-            right: 32,
-            top: 24,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+            ),
             border: Border.all(color: Colors.white24),
           ),
-          child: Row(
-            mainAxisAlignment: dateOnly ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (!dateOnly) countdownWidget,
               dateWidget,
+              if (!dateOnly) const SizedBox(height: 12),
+              if (!dateOnly) countdownWidget,
             ],
           ),
         );

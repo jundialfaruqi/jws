@@ -175,11 +175,28 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 32),
+      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 100),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            backgroundColor.withValues(alpha: 1.0), // Kiri solid penuh
+            backgroundColor.withValues(
+              alpha: 1.0,
+            ), // Tetap solid sampai menjelang kanan
+            backgroundColor.withValues(
+              alpha: 0.1,
+            ), // Memudar cepat di ujung kanan
+          ],
+          stops: const [
+            0.0,
+            0.50,
+            1.0,
+          ], // Transparan baru mulai di 85% lebar kotak
+        ),
         borderRadius: const BorderRadius.only(
-          bottomRight: Radius.circular(24),
+          bottomRight: Radius.circular(130),
         ),
       ),
       child: Row(
