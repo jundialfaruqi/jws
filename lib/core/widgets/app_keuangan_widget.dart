@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 import '../../features/main/models/laporan_keuangan_model.dart';
 import '../constants/app_colors.dart';
 
@@ -152,7 +153,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(0),
               itemBuilder: (context, index) {
                 final itemIndex = index % scrollItems.length;
                 return scrollItems[itemIndex];
@@ -166,7 +167,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
 
   Widget _buildGrandTotalSection(GrandTotalsModel totals, NumberFormat fmt) {
     return Container(
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         // color: AppColors.bgPrimary.withValues(alpha: 0.1),
         // borderRadius: BorderRadius.circular(12),
@@ -212,74 +213,82 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // NAMA KATEGORI
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.bgBlue,
-              borderRadius: BorderRadius.circular(8),
+      child: StickyHeader(
+        header: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.bgBlue,
+            borderRadius: BorderRadius.circular(0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            group.categoryName.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
             ),
-            child: Text(
-              group.categoryName.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
+          ),
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // const SizedBox(height: 16),
+            // SUMMARY KATEGORI
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.bgPrimary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(0),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+              ),
+              child: Column(
+                children: [
+                  _buildSummaryRow(
+                    "Pemasukan",
+                    fmt.format(group.sumMasuk),
+                    Colors.greenAccent,
+                  ),
+                  _buildSummaryRow(
+                    "Pengeluaran",
+                    fmt.format(group.sumKeluar),
+                    Colors.redAccent,
+                  ),
+                  const Divider(color: Colors.white24, height: 16),
+                  _buildSummaryRow(
+                    "Total",
+                    fmt.format(group.ending),
+                    Colors.white,
+                  ),
+                  _buildSummaryRow(
+                    "Saldo Sebelumnya",
+                    fmt.format(group.saldoSebelumnya),
+                    Colors.white,
+                  ),
+                  const Divider(color: Colors.white24, height: 16),
+                  _buildSummaryRow(
+                    "Saldo Akhir",
+                    fmt.format(group.saldoAkhir),
+                    AppColors.textYellow,
+                    isBold: true,
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // SUMMARY KATEGORI
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.bgPrimary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: Column(
-              children: [
-                _buildSummaryRow(
-                  "Pemasukan",
-                  fmt.format(group.sumMasuk),
-                  Colors.greenAccent,
-                ),
-                _buildSummaryRow(
-                  "Pengeluaran",
-                  fmt.format(group.sumKeluar),
-                  Colors.redAccent,
-                ),
-                const Divider(color: Colors.white24, height: 16),
-                _buildSummaryRow(
-                  "Total",
-                  fmt.format(group.ending),
-                  Colors.white,
-                ),
-                _buildSummaryRow(
-                  "Saldo Sebelumnya",
-                  fmt.format(group.saldoSebelumnya),
-                  Colors.white,
-                ),
-                const Divider(color: Colors.white24, height: 16),
-                _buildSummaryRow(
-                  "Saldo Akhir",
-                  fmt.format(group.saldoAkhir),
-                  AppColors.textYellow,
-                  isBold: true,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // TRANSAKSI
-          ...group.items.map((item) => _buildTransactionItem(item, fmt)),
-        ],
+            // TRANSAKSI
+            ...group.items.map((item) => _buildTransactionItem(item, fmt)),
+          ],
+        ),
       ),
     );
   }
@@ -331,7 +340,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                   cleanAmount,
                   style: TextStyle(
                     color: color,
-                    fontSize: 44, // Diperkecil dari 50
+                    fontSize: 50,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -1, // Merapatkan sedikit agar dinamis
                   ),
@@ -354,13 +363,10 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.bgPrimary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isMasuk
-              ? Colors.greenAccent.withValues(alpha: 0.3)
-              : Colors.redAccent.withValues(alpha: 0.3),
-        ),
+        color: isMasuk
+            ? Colors.greenAccent.withValues(alpha: 0.1)
+            : Colors.redAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -407,7 +413,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                   style: TextStyle(
                     color: isMasuk ? Colors.greenAccent : Colors.redAccent,
                     fontWeight: FontWeight.bold,
-                    fontSize: 30,
+                    fontSize: 40,
                   ),
                 ),
               ],

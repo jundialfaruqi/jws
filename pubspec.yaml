@@ -21,6 +21,7 @@ dependencies:
   go_router: ^17.2.3
   hijri: ^3.0.1
   intl: ^0.20.3
+  sticky_headers: ^0.3.0+2
   webview_flutter: ^4.13.1
 
 dev_dependencies:
