@@ -170,7 +170,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             "TOTAL KESELURUHAN",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 26,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -217,7 +217,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
               group.categoryName.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
@@ -254,7 +254,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                 _buildSummaryRow(
                   "Saldo Sebelumnya",
                   fmt.format(group.saldoSebelumnya),
-                  Colors.white54,
+                  Colors.white,
                 ),
                 const Divider(color: Colors.white24, height: 16),
                 _buildSummaryRow(
@@ -289,8 +289,8 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
           Text(
             title,
             style: TextStyle(
-              color: Colors.white70,
-              fontSize: 22,
+              color: Colors.white,
+              fontSize: 26,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -298,7 +298,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             amount,
             style: TextStyle(
               color: color,
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -343,13 +343,13 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                    fontSize: 28,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item.tanggal,
-                  style: TextStyle(color: Colors.white54, fontSize: 20),
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ],
             ),
@@ -362,7 +362,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                 style: TextStyle(
                   color: isMasuk ? Colors.greenAccent : Colors.redAccent,
                   fontWeight: FontWeight.bold,
-                  fontSize: 26,
+                  fontSize: 30,
                 ),
               ),
               const SizedBox(height: 4),
@@ -370,7 +370,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                 isMasuk ? "Masuk" : "Keluar",
                 style: TextStyle(
                   color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-                  fontSize: 20,
+                  fontSize: 24,
                   fontStyle: FontStyle.italic,
                 ),
               ),
