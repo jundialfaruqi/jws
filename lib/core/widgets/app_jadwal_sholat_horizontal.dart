@@ -15,10 +15,12 @@ class AppJadwalSholatHorizontal extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AppJadwalSholatHorizontal> createState() => _AppJadwalSholatHorizontalState();
+  ConsumerState<AppJadwalSholatHorizontal> createState() =>
+      _AppJadwalSholatHorizontalState();
 }
 
-class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHorizontal> {
+class _AppJadwalSholatHorizontalState
+    extends ConsumerState<AppJadwalSholatHorizontal> {
   Timer? _timer;
   bool _showPrimary = true;
 
@@ -30,10 +32,10 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
       if (mounted) {
         final now = ref.read(timeSyncServiceProvider).now();
         final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
-        
+
         // 1 Siklus total = 14 detik (7 detik Imsak/Terbit, 7 detik Subuh/Dhuha)
         final int cyclePosition = epochSeconds % 14;
-        
+
         setState(() {
           _showPrimary = cyclePosition < 7;
         });
@@ -69,9 +71,12 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
     JadwalSholatModel? todayJadwal;
 
     if (widget.jadwalSholatList.isNotEmpty) {
-      final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       try {
-        todayJadwal = widget.jadwalSholatList.firstWhere((j) => j.date == dateStr);
+        todayJadwal = widget.jadwalSholatList.firstWhere(
+          (j) => j.date == dateStr,
+        );
       } catch (_) {
         todayJadwal = widget.jadwalSholatList.first;
       }
@@ -113,17 +118,45 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
     final List<Map<String, dynamic>> prayersToDisplay = [];
     if (todayJadwal != null) {
       if (_showPrimary) {
-        prayersToDisplay.add({'label': 'IMSAK', 'time': todayJadwal.imsak, 'icon': TablerIcons.moon_2});
-        prayersToDisplay.add({'label': 'SYURUQ', 'time': todayJadwal.terbit, 'icon': TablerIcons.sunrise});
+        prayersToDisplay.add({
+          'label': 'IMSAK',
+          'time': todayJadwal.imsak,
+          'icon': TablerIcons.moon_2,
+        });
+        prayersToDisplay.add({
+          'label': 'SYURUQ',
+          'time': todayJadwal.terbit,
+          'icon': TablerIcons.sunrise,
+        });
       } else {
-        prayersToDisplay.add({'label': 'SUBUH', 'time': todayJadwal.subuh, 'icon': TablerIcons.sun_low});
-        prayersToDisplay.add({'label': 'DHUHA', 'time': todayJadwal.dhuha, 'icon': TablerIcons.sun});
+        prayersToDisplay.add({
+          'label': 'SUBUH',
+          'time': todayJadwal.subuh,
+          'icon': TablerIcons.sun_low,
+        });
+        prayersToDisplay.add({
+          'label': 'DHUHA',
+          'time': todayJadwal.dhuha,
+          'icon': TablerIcons.sun,
+        });
       }
 
       prayersToDisplay.addAll([
-        {'label': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': todayJadwal.dzuhur, 'icon': TablerIcons.sun_high},
-        {'label': 'ASHAR', 'time': todayJadwal.ashar, 'icon': TablerIcons.sun_low},
-        {'label': 'MAGHRIB', 'time': todayJadwal.maghrib, 'icon': TablerIcons.sunset},
+        {
+          'label': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+          'time': todayJadwal.dzuhur,
+          'icon': TablerIcons.sun_high,
+        },
+        {
+          'label': 'ASHAR',
+          'time': todayJadwal.ashar,
+          'icon': TablerIcons.sun_low,
+        },
+        {
+          'label': 'MAGHRIB',
+          'time': todayJadwal.maghrib,
+          'icon': TablerIcons.sunset,
+        },
         {'label': 'ISYA', 'time': todayJadwal.isya, 'icon': TablerIcons.moon},
       ]);
     }
@@ -136,7 +169,7 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
         children: prayersToDisplay.map((prayer) {
           final isHighlight = activePrayer == prayer['label'];
           final isNext = nextPrayer == prayer['label'];
-          // Khusus Terbit/Syuruq, jika IMSAK adalah active/next, maka mereka bisa terbawa jika labelnya tidak muncul, 
+          // Khusus Terbit/Syuruq, jika IMSAK adalah active/next, maka mereka bisa terbawa jika labelnya tidak muncul,
           // tapi logika di atas aman karena nama label sudah persis.
           return _buildPrayerItem(
             label: prayer['label'] as String,
@@ -164,8 +197,12 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
     }
 
     Color getTextColor() {
-      if (isHighlight) return Colors.white;
-      if (isNext) return Colors.black; // Teks hitam agar kontras dengan latar kuning
+      if (isHighlight) {
+        return Colors.white;
+      }
+      if (isNext) {
+        return Colors.black; // Teks hitam agar kontras dengan latar kuning
+      }
       return Colors.white; // default
     }
 
@@ -174,8 +211,10 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
 
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+        // Margin horizontal digunakan untuk mengatur jarak renggang antar kotak jadwal
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        // Padding digunakan untuk mengatur spasi ke dalam (menjauhkan teks & icon dari tepi kotak)
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(12),
@@ -191,10 +230,7 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
             ).animate(animation);
             return FadeTransition(
               opacity: animation,
-              child: SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              ),
+              child: SlideTransition(position: offsetAnimation, child: child),
             );
           },
           child: Row(

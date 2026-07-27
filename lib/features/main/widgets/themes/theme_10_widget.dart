@@ -68,13 +68,13 @@ class Theme10Widget extends StatelessWidget {
 
             // Baris Horizontal Jadwal Sholat
             Container(
-              height: 90,
+              height: 120,
               color: AppColors.bgNavy.withValues(alpha: 0.9),
               padding: const EdgeInsets.only(
                 left: 500,
                 right: 6,
-                top: 4,
-                bottom: 4,
+                top: 12,
+                bottom: 12,
               ),
               child: AppJadwalSholatHorizontal(
                 jadwalSholatList: data.jadwalSholat,
@@ -105,10 +105,11 @@ class Theme10Widget extends StatelessWidget {
           child: const Center(child: AppAnalogClock(size: 380)),
         ),
 
-        // Widget Agenda (Kanan Bawah di atas Marquee)
+        // Widget Agenda (Kanan Bawah di atas Marquee dan Jadwal Sholat)
         Positioned(
           right: 32,
-          bottom: 160, // Dinaikkan agar tidak terlalu mepet dengan marquee
+          bottom:
+              270, // BAGIAN INI: Mengatur jarak / menaikkan kotak agenda dari bawah layar
           child: AppAgendaWidget(agendas: data.agenda),
         ),
       ],
