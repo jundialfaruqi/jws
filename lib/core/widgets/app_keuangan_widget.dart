@@ -1,5 +1,6 @@
-import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import '../../features/main/models/laporan_keuangan_model.dart';
 import '../constants/app_colors.dart';
@@ -18,77 +19,63 @@ class AppKeuanganWidget extends StatefulWidget {
   State<AppKeuanganWidget> createState() => _AppKeuanganWidgetState();
 }
 
-class _AppKeuanganWidgetState extends State<AppKeuanganWidget> {
+class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  bool _isScrolling = false;
+  late Ticker _ticker;
+  Duration _lastElapsed = Duration.zero;
+  double _currentSpeed = 30.0;
+  double _targetSpeed = 30.0;
 
   @override
   void initState() {
     super.initState();
+    _targetSpeed = _calculateSpeed(widget.scrollSpeed);
+    _currentSpeed = _targetSpeed;
+    
+    _ticker = createTicker(_onTick);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startScrolling();
+      if (mounted) _ticker.start();
     });
   }
 
-  void _startScrolling() async {
-    if (!mounted) return;
-    _isScrolling = true;
-    _scrollLoop();
+  double _calculateSpeed(int speedValue) {
+    final double baseSpeed = 30.0;
+    final double multiplier = (speedValue > 0) ? speedValue.toDouble() : 1.0;
+    return baseSpeed * multiplier;
   }
 
-  void _scrollLoop() async {
-    if (!mounted || !_isScrolling || !_scrollController.hasClients) return;
+  @override
+  void didUpdateWidget(AppKeuanganWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollSpeed != widget.scrollSpeed) {
+      _targetSpeed = _calculateSpeed(widget.scrollSpeed);
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    if (!mounted || !_scrollController.hasClients) return;
     
-    // Hitung durasi berdasarkan kecepatan (pixels per second)
-    // Anggap base speed adalah 30.0
-    // Jika API mengirim scrollSpeed = 3, maka speed = 90.0 (makin cepat)
-    final double baseSpeed = 30.0;
-    final double multiplier =
-        (widget.scrollSpeed > 0) ? widget.scrollSpeed.toDouble() : 1.0;
-    final double speed = baseSpeed * multiplier;
+    final delta = elapsed - _lastElapsed;
+    _lastElapsed = elapsed;
     
-    final double maxScroll = _scrollController.position.maxScrollExtent;
-    final double currentScroll = _scrollController.position.pixels;
+    final dt = delta.inMilliseconds / 1000.0; // waktu dalam detik
+    if (dt <= 0) return;
 
-    // Jika seluruh konten muat di layar (tidak perlu scroll)
-    if (maxScroll <= 0) {
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted && _isScrolling) _scrollLoop();
-      return;
+    // Transisi kecepatan secara bertahap (Ramp up / Ramp down)
+    if ((_targetSpeed - _currentSpeed).abs() > 0.1) {
+      // Menyesuaikan kecepatan sedikit demi sedikit setiap frame
+      _currentSpeed += (_targetSpeed - _currentSpeed) * 2.0 * dt; 
+    } else {
+      _currentSpeed = _targetSpeed;
     }
 
-    // Jika sudah mencapai dasar scroll
-    if (currentScroll >= maxScroll) {
-      await Future.delayed(const Duration(seconds: 3)); // Istirahat di bawah
-      if (mounted && _scrollController.hasClients) {
-        _scrollController.jumpTo(0); // Langsung lompat ke atas
-      }
-      if (mounted && _isScrolling) _scrollLoop();
-      return;
-    }
-
-    // Target scroll adalah maxScrollExtent (sampai mentok ke bawah)
-    final double remainingDistance = maxScroll - currentScroll;
-    // Hitung waktu yang dibutuhkan secara proporsional sesuai jarak tersisa
-    final int durationMs = ((remainingDistance / speed) * 1000).round();
-
-    try {
-      await _scrollController.animateTo(
-        maxScroll,
-        duration: Duration(milliseconds: durationMs),
-        curve: Curves.linear,
-      );
-    } catch (_) {}
-
-    // Setelah animasi selesai (sampai ke dasar), panggil loop lagi
-    if (mounted && _isScrolling) {
-      _scrollLoop();
-    }
+    final double dx = _currentSpeed * dt;
+    _scrollController.jumpTo(_scrollController.offset + dx);
   }
 
   @override
   void dispose() {
-    _isScrolling = false;
+    _ticker.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -104,6 +91,14 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> {
 
     final data = widget.laporanData!;
     final grandTotals = data.grandTotals;
+
+    List<Widget> scrollItems = [
+      _buildGrandTotalSection(grandTotals, currencyFormatter),
+      const SizedBox(height: 32),
+    ];
+    for (var group in data.categories) {
+      scrollItems.add(_buildCategorySection(group, currencyFormatter));
+    }
 
     return Container(
       width: 500,
@@ -137,24 +132,15 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> {
             ),
           ),
 
-          // SCROLLING CONTENT
+          // SCROLLING CONTENT INFINITE
           Expanded(
-            child: SingleChildScrollView(
+            child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // GRAND TOTALS
-                  _buildGrandTotalSection(grandTotals, currencyFormatter),
-                  const SizedBox(height: 32),
-                  
-                  // CATEGORIES & TRANSACTIONS
-                  ...data.categories.map((group) {
-                     return _buildCategorySection(group, currencyFormatter);
-                  }),
-                ],
-              ),
+              itemBuilder: (context, index) {
+                final itemIndex = index % scrollItems.length;
+                return scrollItems[itemIndex];
+              },
             ),
           ),
         ],
