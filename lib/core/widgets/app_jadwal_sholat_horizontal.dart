@@ -254,9 +254,10 @@ class _AppJadwalSholatHorizontalState
                   Text(
                     time,
                     style: TextStyle(
-                      fontFamily: 'JetBrainsMono',
+                      fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
                       fontSize: 28,
+                      letterSpacing: 2.0,
                       color: textColor,
                     ),
                   ),
