@@ -110,7 +110,7 @@ class Theme10Widget extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(400),
+                  topLeft: Radius.zero,
                   topRight: Radius.circular(400),
                   bottomRight: Radius.circular(400),
                   bottomLeft: Radius.zero,
