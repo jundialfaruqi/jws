@@ -15,6 +15,8 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
   final double? iconSize;
   final double? titleFontSize;
   final double? timeFontSize;
+  final bool useCardVariant;
+  final Color? cardColor;
 
   const AppJadwalSholat({
     super.key,
@@ -27,6 +29,8 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
     this.iconSize,
     this.titleFontSize,
     this.timeFontSize,
+    this.useCardVariant = false,
+    this.cardColor,
   });
 
   @override
@@ -46,10 +50,10 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       if (mounted) {
         final now = ref.read(timeSyncServiceProvider).now();
         final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
-        
+
         // 1 Siklus total = 14 detik (7 detik Imsak, 7 detik Syuruq)
         final int cyclePosition = epochSeconds % 14;
-        
+
         setState(() {
           // true (0-6) tampilkan Imsak/Terbit
           // false (7-13) tampilkan Subuh/Dhuha
@@ -88,9 +92,12 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     JadwalSholatModel? todayJadwal;
 
     if (widget.jadwalSholatList.isNotEmpty) {
-      final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       try {
-        todayJadwal = widget.jadwalSholatList.firstWhere((j) => j.date == dateStr);
+        todayJadwal = widget.jadwalSholatList.firstWhere(
+          (j) => j.date == dateStr,
+        );
       } catch (_) {
         todayJadwal = widget.jadwalSholatList.first;
       }
@@ -191,7 +198,9 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     return Container(
       width: widget.width ?? 700, // Default 700, bisa dioverride
       color: widget.backgroundColor,
-      padding: widget.padding ?? const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
+      padding:
+          widget.padding ??
+          const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment
             .center, // Ubah dari spaceEvenly ke center agar mengumpul
@@ -207,21 +216,36 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
 
           return Padding(
             padding: EdgeInsets.only(
-              bottom: isLast ? 0 : 8,
+              bottom: isLast ? 0 : (widget.useCardVariant ? 8 : 8),
             ), // Hilangkan padding bawah jika item terakhir
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-              decoration: BoxDecoration(
-                color: widget.backgroundColor,
-                border: isLast
-                    ? null
-                    : Border(
-                        bottom: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          width: 1.0,
-                        ),
-                      ),
+              padding: EdgeInsets.symmetric(
+                vertical: widget.useCardVariant ? 19 : 20,
+                horizontal: 24,
               ),
+              decoration: widget.useCardVariant
+                  ? BoxDecoration(
+                      color: widget.cardColor ?? Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    )
+                  : BoxDecoration(
+                      color: widget.backgroundColor,
+                      border: isLast
+                          ? null
+                          : Border(
+                              bottom: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                width: 1.0,
+                              ),
+                            ),
+                    ),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 800),
                 switchInCurve: Curves.easeOutCubic,
@@ -249,7 +273,11 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Icon Paling Kiri
-                    Icon(item['icon'] as IconData, color: itemColor, size: widget.iconSize ?? 48),
+                    Icon(
+                      item['icon'] as IconData,
+                      color: itemColor,
+                      size: widget.iconSize ?? 48,
+                    ),
                     const SizedBox(width: 32),
                     // Column Nama dan Jam di Kanannya
                     Expanded(
@@ -273,7 +301,8 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                           Text(
                             item['jam'] as String,
                             style: TextStyle(
-                              fontSize: widget.timeFontSize ?? 72, // Jam diperbesar
+                              fontSize:
+                                  widget.timeFontSize ?? 72, // Jam diperbesar
                               fontWeight: FontWeight.bold,
                               color: itemColor,
                               fontFamily: 'Poppins',

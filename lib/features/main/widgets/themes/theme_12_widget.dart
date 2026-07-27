@@ -46,8 +46,19 @@ class Theme12Widget extends StatelessWidget {
               children: [
                 // 1. App Jam Digital
                 Container(
-                  color: AppColors.bgNavy,
-                  padding: const EdgeInsets.symmetric(vertical: 36),
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgNavy,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        blurRadius: 12,
+                        offset: const Offset(4, 6),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 20),
                   alignment: Alignment.center,
                   child: AppLiveClock(
                     showSeconds: false,
@@ -65,17 +76,22 @@ class Theme12Widget extends StatelessWidget {
                 // 3. App Jadwal Sholat
                 Expanded(
                   child: Container(
-                    color: AppColors.bgNavy,
+                    color: AppColors.bgDark,
                     child: AppJadwalSholat(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      iconSize: 36,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      iconSize: 56,
                       titleFontSize: 24,
                       timeFontSize: 56,
-                      backgroundColor: AppColors.bgNavy,
+                      backgroundColor: AppColors.bgDark,
                       textColor: Colors.white,
                       iconColor: AppColors.textYellow,
                       jadwalSholatList: data.jadwalSholat,
+                      useCardVariant: true,
+                      cardColor: AppColors.bgNavy,
                     ),
                   ),
                 ),
@@ -142,7 +158,10 @@ class Theme12Widget extends StatelessWidget {
                             Container(
                               color: AppColors.bgNavy,
                               alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 24,
+                                horizontal: 32,
+                              ),
                               child: AppNextPrayerBar(
                                 jadwalSholatList: data.jadwalSholat,
                                 countdownOnly: true,
