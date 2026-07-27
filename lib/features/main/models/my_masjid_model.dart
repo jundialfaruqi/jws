@@ -24,7 +24,7 @@ class MyMasjidModel {
   final SlideModel? jumbotronPemko;
   final SlideModel? jumbotronMasjid;
   final DurasiModel? durasi;
-  final List<LaporanKeuanganGroupModel> laporanKeuangan;
+  final LaporanKeuanganDataModel? laporanKeuangan;
 
   MyMasjidModel({
     required this.currentTime,
@@ -43,7 +43,7 @@ class MyMasjidModel {
     this.jumbotronPemko,
     this.jumbotronMasjid,
     this.durasi,
-    this.laporanKeuangan = const [],
+    this.laporanKeuangan,
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -64,7 +64,7 @@ class MyMasjidModel {
       jumbotronPemko: json['jumbotron_pemko'] != null && json['jumbotron_pemko']['data'] != null ? SlideModel.fromJson(json['jumbotron_pemko']['data']) : null,
       jumbotronMasjid: json['jumbotron_masjid'] != null && json['jumbotron_masjid']['data'] != null ? SlideModel.fromJson(json['jumbotron_masjid']['data']) : null,
       durasi: json['durasi'] != null && json['durasi']['data'] != null ? DurasiModel.fromJson(json['durasi']['data']) : DurasiModel(),
-      laporanKeuangan: json['laporan_keuangan'] != null && json['laporan_keuangan']['data'] != null ? (json['laporan_keuangan']['data'] as List).map((i) => LaporanKeuanganGroupModel.fromJson(i)).toList() : [],
+      laporanKeuangan: json['laporan_keuangan'] != null && json['laporan_keuangan']['data'] != null ? LaporanKeuanganDataModel.fromJson(json['laporan_keuangan']['data']) : null,
     );
   }
 }

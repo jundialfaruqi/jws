@@ -63,7 +63,7 @@ class Theme10Widget extends StatelessWidget {
                     SizedBox(
                       width: 500,
                       child: AppKeuanganWidget(
-                        laporanKeuangan: data.laporanKeuangan,
+                        laporanData: data.laporanKeuangan,
                         scrollSpeed: data.durasi?.financeScrollSpeed ?? 0,
                       ),
                     ),
