@@ -407,13 +407,27 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             alignment: Alignment.centerRight,
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  fmt.format(item.saldo),
+                  "Rp",
+                  style: TextStyle(
+                    color: isMasuk
+                        ? Colors.greenAccent.withValues(alpha: 0.8)
+                        : Colors.redAccent.withValues(alpha: 0.8),
+                    fontSize: 20, // Rp lebih kecil
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  fmt.format(item.saldo).replaceAll('Rp', '').trim(),
                   style: TextStyle(
                     color: isMasuk ? Colors.greenAccent : Colors.redAccent,
                     fontWeight: FontWeight.bold,
                     fontSize: 40,
+                    letterSpacing: -1,
                   ),
                 ),
               ],
