@@ -39,10 +39,11 @@ class Theme10Widget extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-                  // Dasar (Widget Keuangan & Image Slider)
+                  // Dasar (Widget Keuangan & Image Slider + Jadwal)
                   Container(
                     color: AppColors.bgNavy,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         SizedBox(
                           width: 500,
@@ -52,9 +53,28 @@ class Theme10Widget extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                          child: AppImageSlider(
-                            imageUrls: slideUrls,
-                            externalSync: true,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: AppImageSlider(
+                                  imageUrls: slideUrls,
+                                  externalSync: true,
+                                ),
+                              ),
+                              Container(
+                                height: 120,
+                                padding: const EdgeInsets.only(
+                                  left: 6,
+                                  right: 6,
+                                  top: 12,
+                                  bottom: 12,
+                                ),
+                                child: AppJadwalSholatHorizontal(
+                                  jadwalSholatList: data.jadwalSholat,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -72,21 +92,6 @@ class Theme10Widget extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            // Baris Horizontal Jadwal Sholat
-            Container(
-              height: 120,
-              color: AppColors.bgNavy,
-              padding: const EdgeInsets.only(
-                left: 500,
-                right: 6,
-                top: 12,
-                bottom: 12,
-              ),
-              child: AppJadwalSholatHorizontal(
-                jadwalSholatList: data.jadwalSholat,
               ),
             ),
 
