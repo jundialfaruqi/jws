@@ -72,21 +72,43 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> {
     if (!mounted || !_isScrolling || !_scrollController.hasClients) return;
     
     // Hitung durasi berdasarkan kecepatan (pixels per second)
-    // Default kecepatan: 40 pixels/s (jika 0 atau tidak ada)
     final double speed =
         (widget.scrollSpeed > 0) ? widget.scrollSpeed.toDouble() : 40.0;
     
-    // Waktu yang dibutuhkan untuk menggulir sejauh 1000 pixel
-    final int durationSeconds = (1000 / speed).round();
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    final double currentScroll = _scrollController.position.pixels;
+
+    // Jika seluruh konten muat di layar (tidak perlu scroll)
+    if (maxScroll <= 0) {
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted && _isScrolling) _scrollLoop();
+      return;
+    }
+
+    // Jika sudah mencapai dasar scroll
+    if (currentScroll >= maxScroll) {
+      await Future.delayed(const Duration(seconds: 3)); // Istirahat di bawah
+      if (mounted && _scrollController.hasClients) {
+        _scrollController.jumpTo(0); // Langsung lompat ke atas
+      }
+      if (mounted && _isScrolling) _scrollLoop();
+      return;
+    }
+
+    // Target scroll adalah maxScrollExtent (sampai mentok ke bawah)
+    final double remainingDistance = maxScroll - currentScroll;
+    // Hitung waktu yang dibutuhkan secara proporsional sesuai jarak tersisa
+    final int durationMs = ((remainingDistance / speed) * 1000).round();
 
     try {
       await _scrollController.animateTo(
-        _scrollController.offset + 1000,
-        duration: Duration(seconds: durationSeconds),
+        maxScroll,
+        duration: Duration(milliseconds: durationMs),
         curve: Curves.linear,
       );
     } catch (_) {}
 
+    // Setelah animasi selesai (sampai ke dasar), panggil loop lagi
     if (mounted && _isScrolling) {
       _scrollLoop();
     }
