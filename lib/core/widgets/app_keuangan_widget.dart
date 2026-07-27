@@ -125,7 +125,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
               "PERIODE ${data.periodeString.toUpperCase()}",
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -163,7 +163,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             "TOTAL KESELURUHAN",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -194,7 +194,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
               group.categoryName.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
@@ -241,7 +241,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             title,
             style: TextStyle(
               color: Colors.white70,
-              fontSize: 16,
+              fontSize: 22,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -249,7 +249,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             amount,
             style: TextStyle(
               color: color,
-              fontSize: 18,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -279,7 +279,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
           Icon(
             isMasuk ? Icons.arrow_downward : Icons.arrow_upward,
             color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-            size: 24,
+            size: 32,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -291,7 +291,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 24,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -299,7 +299,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
                   item.tanggal,
                   style: TextStyle(
                     color: Colors.white54,
-                    fontSize: 16,
+                    fontSize: 20,
                   ),
                 ),
               ],
@@ -313,7 +313,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
                 style: TextStyle(
                   color: isMasuk ? Colors.greenAccent : Colors.redAccent,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 26,
                 ),
               ),
               const SizedBox(height: 4),
@@ -321,7 +321,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
                 isMasuk ? "Masuk" : "Keluar",
                 style: TextStyle(
                   color: isMasuk ? Colors.greenAccent : Colors.redAccent,
-                  fontSize: 16,
+                  fontSize: 20,
                   fontStyle: FontStyle.italic,
                 ),
               ),
