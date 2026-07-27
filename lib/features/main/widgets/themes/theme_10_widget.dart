@@ -69,7 +69,7 @@ class Theme10Widget extends StatelessWidget {
             // Baris Horizontal Jadwal Sholat
             Container(
               height: 120,
-              color: AppColors.bgNavy.withValues(alpha: 0.9),
+              color: AppColors.bgNavy,
               padding: const EdgeInsets.only(
                 left: 500,
                 right: 6,
@@ -96,13 +96,25 @@ class Theme10Widget extends StatelessWidget {
           ],
         ),
 
-        // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
+        // Jam Analog Melayang di Kiri Bawah
         Positioned(
-          left:
-              370, // Digeser lebih jauh ke kiri (merasuk lebih dalam ke card jadwal sholat)
-          top: 0,
+          left: 0,
           bottom: 0,
-          child: const Center(child: AppAnalogClock(size: 380)),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(400),
+                  topRight: Radius.circular(400),
+                  bottomRight: Radius.circular(400),
+                  bottomLeft: Radius.zero,
+                ),
+                color: AppColors.bgNavy,
+              ),
+              child: const AppAnalogClock(size: 380),
+            ),
+          ),
         ),
 
         // Widget Agenda (Kanan Bawah di atas Marquee dan Jadwal Sholat)
