@@ -69,7 +69,7 @@ class Theme10Widget extends StatelessWidget {
                                 ),
                               ),
                               Container(
-                                height: 120,
+                                height: 150,
                                 padding: const EdgeInsets.only(
                                   left: 6,
                                   right: 6,
@@ -144,7 +144,7 @@ class Theme10Widget extends StatelessWidget {
         Positioned(
           right: 32,
           bottom:
-              270, // BAGIAN INI: Mengatur jarak / menaikkan kotak agenda dari bawah layar
+              300, // BAGIAN INI: Mengatur jarak / menaikkan kotak agenda dari bawah layar
           child: AppAgendaWidget(agendas: data.agenda),
         ),
 

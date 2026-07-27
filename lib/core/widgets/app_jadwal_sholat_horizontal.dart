@@ -247,7 +247,7 @@ class _AppJadwalSholatHorizontalState
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 27,
                       color: textColor,
                     ),
                   ),
@@ -256,7 +256,7 @@ class _AppJadwalSholatHorizontalState
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
-                      fontSize: 28,
+                      fontSize: 37,
                       letterSpacing: 2.0,
                       color: textColor,
                     ),

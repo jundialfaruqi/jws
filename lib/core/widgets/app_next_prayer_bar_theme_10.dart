@@ -145,7 +145,7 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
         final countdownWidget = Container(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: AppColors.bgDark.withValues(alpha: 0.5),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(0),
               bottomLeft: Radius.circular(60),
@@ -202,7 +202,7 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
         final dateWidget = Container(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.6),
+            color: AppColors.bgDark.withValues(alpha: 0.6),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(0),
               bottomLeft: Radius.circular(24),

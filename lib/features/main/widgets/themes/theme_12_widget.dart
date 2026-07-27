@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
-import 'package:jws/core/widgets/app_live_clock.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat.dart';
+import 'package:jws/core/widgets/app_next_prayer_bar.dart';
+import 'package:jws/core/widgets/app_image_slider.dart';
+import 'package:jws/core/widgets/app_analog_clock.dart';
+import 'package:jws/core/widgets/app_agenda_widget.dart';
+import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
 
@@ -18,6 +22,14 @@ class Theme12Widget extends StatelessWidget {
     final speedMultiplier = data.marquee?.marqueeSpeed ?? 1.0;
     final calculatedVelocity = 120.0 * speedMultiplier;
 
+    final slideUrls = (data.slides?.validSlides.isNotEmpty == true)
+        ? data.slides!.validSlides
+        : [
+            'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000',
+            'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000',
+            'https://images.unsplash.com/photo-1584551246679-0daf3d275d05?q=80&w=2000',
+          ];
+
     return Stack(
       children: [
         Column(
@@ -28,34 +40,28 @@ class Theme12Widget extends StatelessWidget {
               address: data.profil.address,
               logoMasjid: data.profil.logoMasjid,
               logoPemerintah: data.profil.logoPemerintah,
-              backgroundColor: Colors.deepPurple.shade900,
-              textColor: Colors.white,
+              backgroundColor: AppColors.bgBlue,
+              textColor: AppColors.textInverse,
+              addressColor: AppColors.textInverse,
+              isRightAligned: true,
             ),
 
-            // Konten Utama (Tengah) - Tema 12
+            // Info Bar Waktu Sholat & Tanggal
+            AppNextPrayerBar(
+              leftMargin: 600, // Menghindari card melayang di kiri
+              jadwalSholatList: data.jadwalSholat,
+            ),
+
+            // Konten Utama (Tengah) - Tema 7 (Default)
             Expanded(
               child: Container(
-                color: Colors.deepPurple.shade50,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.mosque,
-                        size: 150,
-                        color: Colors.deepPurple,
-                      ),
-                      const SizedBox(height: 16),
-                      AppLiveClock(
-                        prefix: 'Tema 12',
-                        textStyle: const TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 28,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                    ],
-                  ),
+                color: AppColors
+                    .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
+                child: AppImageSlider(
+                  imageUrls: slideUrls,
+                  externalSync: true,
+                  leftMargin:
+                      500, // Geser slider ke kanan agar tidak banyak tertutup
                 ),
               ),
             ),
@@ -64,11 +70,12 @@ class Theme12Widget extends StatelessWidget {
             AppMarquee(
               text: marqueeText,
               velocity: calculatedVelocity,
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: AppColors.bgDark,
               textStyle: const TextStyle(
+                fontFamily: 'Poppins',
                 fontWeight: FontWeight.bold,
                 fontSize: 64,
-                color: Colors.white,
+                color: AppColors.textYellow,
               ),
             ),
           ],
@@ -79,14 +86,60 @@ class Theme12Widget extends StatelessWidget {
           left: 0,
           top: 0,
           bottom: 0,
-          child: AppJadwalSholat(
-            backgroundColor: Colors.deepPurple.shade800,
-            textColor: Colors.white,
-            iconColor: Colors.deepPurpleAccent,
-            jadwalSholatList: data.jadwalSholat,
+          child: PhysicalShape(
+            clipper: JadwalCurveClipper12(),
+            color: AppColors.bgNavy,
+            elevation: 16.0,
+            shadowColor: Colors.black,
+            clipBehavior: Clip.antiAlias,
+            child: AppJadwalSholat(
+              backgroundColor: AppColors.bgNavy,
+              textColor: AppColors.textYellow,
+              iconColor: AppColors.textYellow,
+              jadwalSholatList: data.jadwalSholat,
+            ),
           ),
+        ),
+
+        // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
+        Positioned(
+          left:
+              370, // Digeser lebih jauh ke kiri (merasuk lebih dalam ke card jadwal sholat)
+          top: 0,
+          bottom: 0,
+          child: const Center(child: AppAnalogClock(size: 380)),
+        ),
+
+        // Widget Agenda (Kanan Bawah di atas Marquee)
+        Positioned(
+          right: 32,
+          bottom: 160, // Dinaikkan agar tidak terlalu mepet dengan marquee
+          child: AppAgendaWidget(agendas: data.agenda),
         ),
       ],
     );
   }
+}
+
+class JadwalCurveClipper12 extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    // Tarik garis dari kiri atas ke kanan atas (mundur 150px untuk memberi ruang kurva)
+    path.lineTo(size.width - 230, 0);
+    // Buat kurva melengkung ke kanan tengah maksimal menyentuh batas container, lalu kembali ke kiri bawah
+    path.quadraticBezierTo(
+      size.width,
+      size.height / 2, // Titik kontrol menyentuh ujung kanan
+      size.width - 230,
+      size.height, // Titik akhir kurva di bawah
+    );
+    // Tarik garis kembali ke kiri bawah
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
