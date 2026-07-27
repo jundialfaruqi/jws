@@ -135,7 +135,7 @@ class Theme10Widget extends StatelessWidget {
                 ),
                 color: AppColors.bgNavy,
               ),
-              child: const AppAnalogClock(size: 240),
+              child: const AppAnalogClock(size: 340),
             ),
           ),
         ),

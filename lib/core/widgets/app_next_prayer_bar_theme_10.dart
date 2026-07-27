@@ -15,8 +15,8 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
   final double fontSize;
 
   const AppNextPrayerBarTheme10({
-    super.key, 
-    this.leftMargin = 0.0, 
+    super.key,
+    this.leftMargin = 0.0,
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
     this.dateOnly = false,
@@ -49,8 +49,9 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
         JadwalSholatModel? tomorrowJadwal;
 
         if (jadwalSholatList.isNotEmpty) {
-          final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-          
+          final dateStr =
+              "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
           try {
             todayJadwal = jadwalSholatList.firstWhere((j) => j.date == dateStr);
           } catch (_) {
@@ -58,9 +59,12 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
           }
 
           final tomorrow = now.add(const Duration(days: 1));
-          final tomorrowStr = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+          final tomorrowStr =
+              "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
           try {
-            tomorrowJadwal = jadwalSholatList.firstWhere((j) => j.date == tomorrowStr);
+            tomorrowJadwal = jadwalSholatList.firstWhere(
+              (j) => j.date == tomorrowStr,
+            );
           } catch (_) {
             tomorrowJadwal = todayJadwal;
           }
@@ -70,7 +74,10 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
             {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
             {'nama': 'SYURUQ', 'time': _parseTime(todayJadwal.terbit, now)},
             {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
-            {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(todayJadwal.dzuhur, now)},
+            {
+              'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+              'time': _parseTime(todayJadwal.dzuhur, now),
+            },
             {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},
             {'nama': 'MAGHRIB', 'time': _parseTime(todayJadwal.maghrib, now)},
             {'nama': 'ISYA', 'time': _parseTime(todayJadwal.isya, now)},
@@ -90,7 +97,10 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
           if (!found) {
             nextPrayer = 'IMSAK';
             // Pakai jam Imsak besok
-            final tomorrowImsakTime = _parseTime(tomorrowJadwal.imsak, tomorrow);
+            final tomorrowImsakTime = _parseTime(
+              tomorrowJadwal.imsak,
+              tomorrow,
+            );
             countdown = tomorrowImsakTime.difference(now);
           }
         }
@@ -103,13 +113,20 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
 
         final isWarning = countdown.inSeconds > 0 && countdown.inSeconds <= 600;
         final blinkOn = now.second % 2 == 0;
-        final cardColor = isWarning && blinkOn ? Colors.redAccent : Colors.white.withValues(alpha: 0.1);
-        final borderColor = isWarning && blinkOn ? Colors.red : Colors.white.withValues(alpha: 0.2);
-        final textColor = isWarning && blinkOn ? Colors.white : AppColors.textYellow;
+        final cardColor = isWarning && blinkOn
+            ? Colors.redAccent
+            : Colors.white.withValues(alpha: 0.1);
+        final borderColor = isWarning && blinkOn
+            ? Colors.red
+            : Colors.white.withValues(alpha: 0.2);
+        final textColor = isWarning && blinkOn
+            ? Colors.white
+            : AppColors.textYellow;
 
         // Tanggal masehi dari jadwal
-        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
-        
+        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026')
+            .replaceAll('Minggu', 'Ahad');
+
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
         if (todayJadwal != null && todayJadwal.maghrib.isNotEmpty) {
@@ -120,116 +137,121 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
             }
           } catch (_) {}
         }
-        
-        final hijriDate = HijriCalendar.fromDate(dateToCalculate);
-        final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
 
-        final countdownWidget = Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const _RingingBellIcon(
-              icon: TablerIcons.bell_ringing,
-              color: Colors.white,
-              size: 36,
+        final hijriDate = HijriCalendar.fromDate(dateToCalculate);
+        final tanggalHijriah =
+            "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+
+        final countdownWidget = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.2),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(0),
+              bottomLeft: Radius.circular(60),
             ),
-            const SizedBox(width: 16),
-            Text(
-              'MENUJU $nextPrayer',
-              style: TextStyle(
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const _RingingBellIcon(
+                icon: TablerIcons.bell_ringing,
                 color: Colors.white,
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
-                letterSpacing: 2.0,
+                size: 36,
               ),
-            ),
-            const SizedBox(width: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: borderColor,
-                ),
-              ),
-              child: Text(
-                countdownStr,
+              const SizedBox(width: 16),
+              Text(
+                'MENUJU $nextPrayer',
                 style: TextStyle(
-                  color: textColor,
+                  color: Colors.white,
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'JetBrainsMono',
+                  fontFamily: 'Poppins',
+                  letterSpacing: 2.0,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Text(
+                  countdownStr,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'JetBrainsMono',
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
 
         if (countdownOnly) {
           return countdownWidget;
         }
 
-        final dateWidget = Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              TablerIcons.calendar_event,
-              color: Colors.white,
-              size: 32,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              tanggalMasehi,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            const SizedBox(width: 24),
-            Container(width: 2, height: 28, color: Colors.white54),
-            const SizedBox(width: 24),
-            const Icon(
-              TablerIcons.moon_stars,
-              color: Colors.white,
-              size: 32,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              tanggalHijriah,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
-        );
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        final dateWidget = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.6),
             borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(0),
               bottomLeft: Radius.circular(24),
             ),
-            border: Border.all(color: Colors.white24),
           ),
-          child: Column(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              dateWidget,
-              if (!dateOnly) const SizedBox(height: 12),
-              if (!dateOnly) countdownWidget,
+              const Icon(
+                TablerIcons.calendar_event,
+                color: Colors.white,
+                size: 36,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                tanggalMasehi,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              const SizedBox(width: 24),
+              Container(width: 2, height: 28, color: Colors.white54),
+              const SizedBox(width: 24),
+              const Icon(TablerIcons.moon_stars, color: Colors.white, size: 36),
+              const SizedBox(width: 12),
+              Text(
+                tanggalHijriah,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
             ],
           ),
+        );
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            dateWidget,
+            if (!dateOnly) const SizedBox(height: 0),
+            if (!dateOnly) countdownWidget,
+          ],
         );
       },
     );
