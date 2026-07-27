@@ -113,7 +113,12 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
       decoration: BoxDecoration(
         color: AppColors.bgNavy.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border(
+          right: BorderSide(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1.0,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -286,14 +291,19 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             amount,
             style: TextStyle(
