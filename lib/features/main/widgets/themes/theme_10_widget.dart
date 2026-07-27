@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
-import 'package:jws/core/widgets/app_masjid_title.dart';
+import 'package:jws/core/widgets/app_masjid_title_theme_10.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat_horizontal.dart';
 import 'package:jws/core/widgets/app_next_prayer_bar_theme_10.dart';
 import 'package:jws/core/widgets/app_image_slider.dart';
@@ -36,7 +36,7 @@ class Theme10Widget extends StatelessWidget {
         Column(
           children: [
             // Judul Masjid
-            AppMasjidTitle(
+            AppMasjidTitleTheme10(
               title: data.profil.name,
               address: data.profil.address,
               logoMasjid: data.profil.logoMasjid,
