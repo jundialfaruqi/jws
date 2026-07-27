@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
 import '../time/time_sync_service.dart';
 import '../constants/app_colors.dart';
@@ -109,21 +110,21 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
       }
     }
 
-    final List<Map<String, String>> prayersToDisplay = [];
+    final List<Map<String, dynamic>> prayersToDisplay = [];
     if (todayJadwal != null) {
       if (_showPrimary) {
-        prayersToDisplay.add({'label': 'IMSAK', 'time': todayJadwal.imsak});
-        prayersToDisplay.add({'label': 'SYURUQ', 'time': todayJadwal.terbit});
+        prayersToDisplay.add({'label': 'IMSAK', 'time': todayJadwal.imsak, 'icon': TablerIcons.moon_2});
+        prayersToDisplay.add({'label': 'SYURUQ', 'time': todayJadwal.terbit, 'icon': TablerIcons.sunrise});
       } else {
-        prayersToDisplay.add({'label': 'SUBUH', 'time': todayJadwal.subuh});
-        prayersToDisplay.add({'label': 'DHUHA', 'time': todayJadwal.dhuha});
+        prayersToDisplay.add({'label': 'SUBUH', 'time': todayJadwal.subuh, 'icon': TablerIcons.sun_low});
+        prayersToDisplay.add({'label': 'DHUHA', 'time': todayJadwal.dhuha, 'icon': TablerIcons.sun});
       }
 
       prayersToDisplay.addAll([
-        {'label': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': todayJadwal.dzuhur},
-        {'label': 'ASHAR', 'time': todayJadwal.ashar},
-        {'label': 'MAGHRIB', 'time': todayJadwal.maghrib},
-        {'label': 'ISYA', 'time': todayJadwal.isya},
+        {'label': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': todayJadwal.dzuhur, 'icon': TablerIcons.sun_high},
+        {'label': 'ASHAR', 'time': todayJadwal.ashar, 'icon': TablerIcons.sun_low},
+        {'label': 'MAGHRIB', 'time': todayJadwal.maghrib, 'icon': TablerIcons.sunset},
+        {'label': 'ISYA', 'time': todayJadwal.isya, 'icon': TablerIcons.moon},
       ]);
     }
 
@@ -138,8 +139,9 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
           // Khusus Terbit/Syuruq, jika IMSAK adalah active/next, maka mereka bisa terbawa jika labelnya tidak muncul, 
           // tapi logika di atas aman karena nama label sudah persis.
           return _buildPrayerItem(
-            label: prayer['label']!,
-            time: prayer['time']!,
+            label: prayer['label'] as String,
+            time: prayer['time'] as String,
+            iconData: prayer['icon'] as IconData,
             isHighlight: isHighlight,
             isNext: isNext,
           );
@@ -151,6 +153,7 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
   Widget _buildPrayerItem({
     required String label,
     required String time,
+    required IconData iconData,
     required bool isHighlight,
     required bool isNext,
   }) {
@@ -165,32 +168,39 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           color: AppColors.bgBlue,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                fontFamily: 'JetBrainsMono',
-                fontWeight: FontWeight.bold,
-                fontSize: 32,
-                color: textColor,
-              ),
+            Icon(iconData, color: textColor, size: 36),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  time,
+                  style: TextStyle(
+                    fontFamily: 'JetBrainsMono',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    color: textColor,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
