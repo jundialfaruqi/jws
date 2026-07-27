@@ -157,52 +157,77 @@ class _AppJadwalSholatHorizontalState extends ConsumerState<AppJadwalSholatHoriz
     required bool isHighlight,
     required bool isNext,
   }) {
-    Color getTextColor() {
+    Color getBgColor() {
       if (isHighlight) return Colors.red;
       if (isNext) return Colors.yellow;
+      return AppColors.bgBlue; // default
+    }
+
+    Color getTextColor() {
+      if (isHighlight) return Colors.white;
+      if (isNext) return Colors.black; // Teks hitam agar kontras dengan latar kuning
       return Colors.white; // default
     }
 
+    final bgColor = getBgColor();
     final textColor = getTextColor();
 
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         decoration: BoxDecoration(
-          color: AppColors.bgBlue,
+          color: bgColor,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(iconData, color: textColor, size: 36),
-            const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: textColor,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 800),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final offsetAnimation = Tween<Offset>(
+              begin: const Offset(-0.3, 0.0),
+              end: Offset.zero,
+            ).animate(animation);
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              ),
+            );
+          },
+          child: Row(
+            key: ValueKey(label),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(iconData, color: textColor, size: 48),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: textColor,
+                    ),
                   ),
-                ),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    color: textColor,
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontFamily: 'JetBrainsMono',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      color: textColor,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

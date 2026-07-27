@@ -68,9 +68,14 @@ class Theme10Widget extends StatelessWidget {
 
             // Baris Horizontal Jadwal Sholat
             Container(
-              height: 120,
+              height: 90,
               color: AppColors.bgNavy.withValues(alpha: 0.9),
-              padding: const EdgeInsets.only(left: 500, right: 16, top: 8, bottom: 8),
+              padding: const EdgeInsets.only(
+                left: 500,
+                right: 6,
+                top: 4,
+                bottom: 4,
+              ),
               child: AppJadwalSholatHorizontal(
                 jadwalSholatList: data.jadwalSholat,
               ),
@@ -90,8 +95,6 @@ class Theme10Widget extends StatelessWidget {
             ),
           ],
         ),
-
-
 
         // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
         Positioned(
