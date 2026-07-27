@@ -8,6 +8,7 @@ class AppLiveClock extends ConsumerWidget {
   final String prefix;
   final bool showDate;
   final bool showSeconds;
+  final bool blinkSeparator;
 
   const AppLiveClock({
     super.key,
@@ -15,6 +16,7 @@ class AppLiveClock extends ConsumerWidget {
     this.prefix = '',
     this.showDate = true,
     this.showSeconds = true,
+    this.blinkSeparator = false,
   });
 
   String _formatNumber(int number) => number.toString().padLeft(2, '0');
@@ -28,9 +30,12 @@ class AppLiveClock extends ConsumerWidget {
         final now = ref.read(timeSyncServiceProvider).now();
         var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
         dateStr = dateStr.replaceAll('Minggu', 'Ahad');
+        
+        final separator = (blinkSeparator && now.second % 2 != 0) ? " " : ":";
+        
         final timeStr = showSeconds
-            ? "${_formatNumber(now.hour)}:${_formatNumber(now.minute)}:${_formatNumber(now.second)}"
-            : "${_formatNumber(now.hour)}:${_formatNumber(now.minute)}";
+            ? "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}$separator${_formatNumber(now.second)}"
+            : "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}";
         
         String baseText = showDate ? '$dateStr $timeStr' : timeStr;
         final displayText = prefix.isNotEmpty 

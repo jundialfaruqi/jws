@@ -52,6 +52,7 @@ class Theme12Widget extends StatelessWidget {
                   child: AppLiveClock(
                     showSeconds: false,
                     showDate: false,
+                    blinkSeparator: true,
                     textStyle: const TextStyle(
                       fontFamily: 'JetBrainsMono',
                       fontSize: 84,
@@ -60,8 +61,7 @@ class Theme12Widget extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Pembatas Tipis
-                Container(height: 2, color: Colors.white12),
+                // Pembatas Tipis Dihapus
                 // 3. App Jadwal Sholat
                 Expanded(
                   child: Container(
@@ -83,8 +83,7 @@ class Theme12Widget extends StatelessWidget {
             ),
           ),
 
-          // Pembatas Vertikal Utama
-          Container(width: 4, color: Colors.white12),
+          // Pembatas Vertikal Utama Dihapus
 
           // ===============================
           // 2, 4, 5, 6, 7, 8, 9: KOLOM KANAN (Expanded)
@@ -105,8 +104,7 @@ class Theme12Widget extends StatelessWidget {
                   isRightAligned: true,
                 ),
 
-                // Pembatas Horisontal
-                Container(height: 2, color: Colors.white12),
+                // Pembatas Horisontal Dihapus
 
                 // 4. App Tanggal (Rata Kanan)
                 Container(
@@ -118,8 +116,7 @@ class Theme12Widget extends StatelessWidget {
                   ),
                 ),
 
-                // Pembatas Horisontal
-                Container(height: 2, color: Colors.white12),
+                // Pembatas Horisontal Dihapus
 
                 // Baris Tengah (Slide & Keuangan)
                 Expanded(
@@ -128,7 +125,7 @@ class Theme12Widget extends StatelessWidget {
                     children: [
                       // KOLOM TENGAH KIRI (Slide & Next Prayer)
                       Expanded(
-                        flex: 5,
+                        flex: 7,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -140,12 +137,12 @@ class Theme12Widget extends StatelessWidget {
                                 leftMargin: 0,
                               ),
                             ),
-                            // Pembatas Horisontal
-                            Container(height: 4, color: Colors.white12),
+                            // Pembatas Horisontal Dihapus
                             // 7. App Next Prayer (Countdown)
                             Container(
                               color: AppColors.bgNavy,
                               alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
                               child: AppNextPrayerBar(
                                 jadwalSholatList: data.jadwalSholat,
                                 countdownOnly: true,
@@ -155,8 +152,7 @@ class Theme12Widget extends StatelessWidget {
                         ),
                       ),
 
-                      // Pembatas Vertikal Tengah
-                      Container(width: 4, color: Colors.white12),
+                      // Pembatas Vertikal Tengah Dihapus
 
                       // KOLOM TENGAH KANAN (Keuangan & Agenda)
                       Expanded(
@@ -173,13 +169,15 @@ class Theme12Widget extends StatelessWidget {
                                 margin: EdgeInsets.zero,
                               ),
                             ),
-                            // Pembatas Horisontal
-                            Container(height: 4, color: Colors.white12),
+                            // Pembatas Horisontal Dihapus
                             // 8. App Agenda
                             Container(
-                              height: 300, // Tinggi fix proporsional untuk agenda
                               color: AppColors.bgDark,
-                              child: AppAgendaWidget(agendas: data.agenda),
+                              child: AppAgendaWidget(
+                                agendas: data.agenda,
+                                continuous: true,
+                                borderRadius: 0.0,
+                              ),
                             ),
                           ],
                         ),
@@ -188,8 +186,7 @@ class Theme12Widget extends StatelessWidget {
                   ),
                 ),
 
-                // Pembatas Horisontal Bawah
-                Container(height: 4, color: Colors.white12),
+                // Pembatas Horisontal Bawah Dihapus
 
                 // 9. App Marquee
                 AppMarquee(

@@ -9,8 +9,10 @@ import '../time/time_sync_service.dart';
 class AppAgendaWidget extends ConsumerStatefulWidget {
   final List<AgendaModel> agendas;
   final bool slideLeft;
+  final bool continuous;
+  final double borderRadius;
 
-  const AppAgendaWidget({super.key, required this.agendas, this.slideLeft = false});
+  const AppAgendaWidget({super.key, required this.agendas, this.slideLeft = false, this.continuous = false, this.borderRadius = 24.0});
 
   @override
   ConsumerState<AppAgendaWidget> createState() => _AppAgendaWidgetState();
@@ -93,11 +95,15 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
 
     final int activeCount = validAgendas.length;
-    final int cycleTime =
-        (activeCount * 10) + 5; // 10s tiap item + 5s istirahat
+    final int cycleTime = widget.continuous 
+        ? (activeCount * 10)
+        : (activeCount * 10) + 5; // 10s tiap item + 5s istirahat (jika tidak continuous)
     final int cyclePosition = currentEpoch % cycleTime;
 
-    if (cyclePosition >= activeCount * 10) {
+    if (widget.continuous) {
+      _isResting = false;
+      _currentIndex = cyclePosition ~/ 10;
+    } else if (cyclePosition >= activeCount * 10) {
       _isResting = true;
       // Tetap pertahankan index terakhir yang valid
       _currentIndex = activeCount - 1;
@@ -144,7 +150,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppColors.bgBlue,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.5),
