@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +18,8 @@ class AppKeuanganWidget extends StatefulWidget {
   State<AppKeuanganWidget> createState() => _AppKeuanganWidgetState();
 }
 
-class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTickerProviderStateMixin {
+class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
+    with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late Ticker _ticker;
   Duration _lastElapsed = Duration.zero;
@@ -31,7 +31,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
     super.initState();
     _targetSpeed = _calculateSpeed(widget.scrollSpeed);
     _currentSpeed = _targetSpeed;
-    
+
     _ticker = createTicker(_onTick);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _ticker.start();
@@ -54,17 +54,17 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
 
   void _onTick(Duration elapsed) {
     if (!mounted || !_scrollController.hasClients) return;
-    
+
     final delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
-    
+
     final dt = delta.inMilliseconds / 1000.0; // waktu dalam detik
     if (dt <= 0) return;
 
     // Transisi kecepatan secara bertahap (Ramp up / Ramp down)
     if ((_targetSpeed - _currentSpeed).abs() > 0.1) {
       // Menyesuaikan kecepatan sedikit demi sedikit setiap frame
-      _currentSpeed += (_targetSpeed - _currentSpeed) * 2.0 * dt; 
+      _currentSpeed += (_targetSpeed - _currentSpeed) * 2.0 * dt;
     } else {
       _currentSpeed = _targetSpeed;
     }
@@ -86,8 +86,11 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
       return const SizedBox.shrink();
     }
 
-    final currencyFormatter =
-        NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     final data = widget.laporanData!;
     final grandTotals = data.grandTotals;
@@ -102,7 +105,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
 
     return Container(
       width: 500,
-      margin: const EdgeInsets.only(top: 12, bottom: 12, left: 12, right: 12),
+      margin: const EdgeInsets.only(top: 0, bottom: 0, left: 12, right: 12),
       decoration: BoxDecoration(
         color: AppColors.bgNavy.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
@@ -168,16 +171,32 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             ),
           ),
           const SizedBox(height: 16),
-          _buildSummaryRow("Total Uang Masuk", fmt.format(totals.sumMasuk), Colors.greenAccent),
-          _buildSummaryRow("Total Uang Keluar", fmt.format(totals.sumKeluar), Colors.redAccent),
+          _buildSummaryRow(
+            "Total Uang Masuk",
+            fmt.format(totals.sumMasuk),
+            Colors.greenAccent,
+          ),
+          _buildSummaryRow(
+            "Total Uang Keluar",
+            fmt.format(totals.sumKeluar),
+            Colors.redAccent,
+          ),
           const Divider(color: Colors.white24, height: 24),
-          _buildSummaryRow("Total Akhir Saldo", fmt.format(totals.ending), AppColors.textYellow, isBold: true),
+          _buildSummaryRow(
+            "Total Akhir Saldo",
+            fmt.format(totals.ending),
+            AppColors.textYellow,
+            isBold: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCategorySection(LaporanKeuanganGroupModel group, NumberFormat fmt) {
+  Widget _buildCategorySection(
+    LaporanKeuanganGroupModel group,
+    NumberFormat fmt,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 32),
       child: Column(
@@ -201,7 +220,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // SUMMARY KATEGORI
           Container(
             padding: const EdgeInsets.all(16),
@@ -212,13 +231,34 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
             ),
             child: Column(
               children: [
-                _buildSummaryRow("Pemasukan", fmt.format(group.sumMasuk), Colors.greenAccent),
-                _buildSummaryRow("Pengeluaran", fmt.format(group.sumKeluar), Colors.redAccent),
+                _buildSummaryRow(
+                  "Pemasukan",
+                  fmt.format(group.sumMasuk),
+                  Colors.greenAccent,
+                ),
+                _buildSummaryRow(
+                  "Pengeluaran",
+                  fmt.format(group.sumKeluar),
+                  Colors.redAccent,
+                ),
                 const Divider(color: Colors.white24, height: 16),
-                _buildSummaryRow("Total", fmt.format(group.ending), Colors.white),
-                _buildSummaryRow("Saldo Sebelumnya", fmt.format(group.saldoSebelumnya), Colors.white54),
+                _buildSummaryRow(
+                  "Total",
+                  fmt.format(group.ending),
+                  Colors.white,
+                ),
+                _buildSummaryRow(
+                  "Saldo Sebelumnya",
+                  fmt.format(group.saldoSebelumnya),
+                  Colors.white54,
+                ),
                 const Divider(color: Colors.white24, height: 16),
-                _buildSummaryRow("Saldo Akhir", fmt.format(group.saldoAkhir), AppColors.textYellow, isBold: true),
+                _buildSummaryRow(
+                  "Saldo Akhir",
+                  fmt.format(group.saldoAkhir),
+                  AppColors.textYellow,
+                  isBold: true,
+                ),
               ],
             ),
           ),
@@ -231,7 +271,12 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
     );
   }
 
-  Widget _buildSummaryRow(String title, String amount, Color color, {bool isBold = false}) {
+  Widget _buildSummaryRow(
+    String title,
+    String amount,
+    Color color, {
+    bool isBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -258,7 +303,10 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
     );
   }
 
-  Widget _buildTransactionItem(LaporanKeuanganItemModel item, NumberFormat fmt) {
+  Widget _buildTransactionItem(
+    LaporanKeuanganItemModel item,
+    NumberFormat fmt,
+  ) {
     final isMasuk = item.jenis.toLowerCase() == 'masuk';
 
     return Container(
@@ -297,10 +345,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget> with SingleTicker
                 const SizedBox(height: 4),
                 Text(
                   item.tanggal,
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 20,
-                  ),
+                  style: TextStyle(color: Colors.white54, fontSize: 20),
                 ),
               ],
             ),
