@@ -11,6 +11,7 @@ class AppMasjidTitle extends StatelessWidget {
   final String? logoMasjid;
   final String? logoPemerintah;
   final bool isRightAligned;
+  final bool isLeftAligned;
   final bool showText;
 
   const AppMasjidTitle({
@@ -23,6 +24,7 @@ class AppMasjidTitle extends StatelessWidget {
     this.logoMasjid,
     this.logoPemerintah,
     this.isRightAligned = false,
+    this.isLeftAligned = false,
     this.showText = true,
   });
 
@@ -48,7 +50,7 @@ class AppMasjidTitle extends StatelessWidget {
 
     List<Widget> logoWidgets = [];
 
-    final double logoSize = 100.0; // Ukuran global untuk logo
+    final double logoSize = 100.0;
 
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(
@@ -103,73 +105,86 @@ class AppMasjidTitle extends StatelessWidget {
       );
     }
 
+    // Teks widget builder agar tidak berulang
+    Widget buildTextColumn(CrossAxisAlignment alignment, TextAlign textAlign) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: alignment,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 50,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+              fontFamily: 'Poppins',
+              letterSpacing: 1.5,
+              height: 1.0,
+            ),
+            textAlign: textAlign,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (address != null && address!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              address!,
+              style: TextStyle(
+                fontSize: 28,
+                color: addressColor ?? textColor.withValues(alpha: 0.8),
+                fontFamily: 'Poppins',
+              ),
+              textAlign: textAlign,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      );
+    }
+
+    List<Widget> rowChildren = [];
+
+    if (isLeftAligned) {
+      // LOGO -> TEKS (KIRI)
+      rowChildren = [
+        ...logoWidgets,
+        const SizedBox(width: 24),
+        Expanded(
+          child: buildTextColumn(CrossAxisAlignment.start, TextAlign.left),
+        ),
+      ];
+    } else if (isRightAligned) {
+      // TEKS -> LOGO (KANAN)
+      rowChildren = [
+        Expanded(
+          child: buildTextColumn(CrossAxisAlignment.end, TextAlign.right),
+        ),
+        const SizedBox(width: 24),
+        ...logoWidgets,
+      ];
+    } else {
+      // DEFAULT / CENTER (TEKS DI TENGAH, LOGO DI KANAN)
+      rowChildren = [
+        const Expanded(child: SizedBox()),
+        buildTextColumn(CrossAxisAlignment.center, TextAlign.center),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: logoWidgets,
+          ),
+        ),
+      ];
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 10),
+      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 24),
       color: backgroundColor,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: isRightAligned
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        children: [
-          if (!isRightAligned) const Expanded(child: SizedBox()),
-
-          if (isRightAligned)
-            const Expanded(child: SizedBox()), // Dorong dari kiri ke kanan
-          // Bagian Teks
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: isRightAligned
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 50, // Dikecilkan sedikit
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                  fontFamily: 'Poppins',
-                  letterSpacing: 1.5,
-                  height: 1.0, // Merapatkan tinggi baris
-                ),
-                textAlign: isRightAligned ? TextAlign.right : TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (address != null && address!.isNotEmpty) ...[
-                const SizedBox(height: 2), // Mengurangi jarak
-                Text(
-                  address!,
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: addressColor ?? textColor.withValues(alpha: 0.8),
-                    fontFamily: 'Poppins',
-                  ),
-                  textAlign: isRightAligned
-                      ? TextAlign.right
-                      : TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ],
-          ),
-
-          if (!isRightAligned)
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: logoWidgets,
-              ),
-            )
-          else ...[
-            const SizedBox(width: 16),
-            ...logoWidgets,
-          ],
-        ],
+        children: rowChildren,
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jws/core/widgets/app_marquee.dart';
 import 'package:jws/core/widgets/app_masjid_title.dart';
 import 'package:jws/core/widgets/app_jadwal_sholat_horizontal.dart';
-import 'package:jws/core/widgets/app_next_prayer_bar.dart';
+import 'package:jws/core/widgets/app_next_prayer_bar_theme_10.dart';
 import 'package:jws/core/widgets/app_image_slider.dart';
 import 'package:jws/core/widgets/app_analog_clock.dart';
 import 'package:jws/core/widgets/app_agenda_widget.dart';
@@ -44,11 +44,11 @@ class Theme10Widget extends StatelessWidget {
               backgroundColor: AppColors.bgBlue,
               textColor: AppColors.textInverse,
               addressColor: AppColors.textInverse,
-              isRightAligned: true,
+              isLeftAligned: true,
             ),
 
             // Info Bar Waktu Sholat & Tanggal
-            AppNextPrayerBar(
+            AppNextPrayerBarTheme10(
               leftMargin: 600, // Menghindari card melayang di kiri
               jadwalSholatList: data.jadwalSholat,
             ),
