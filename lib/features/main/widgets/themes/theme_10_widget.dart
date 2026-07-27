@@ -102,7 +102,12 @@ class Theme10Widget extends StatelessWidget {
           bottom: 0,
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.only(
+                left: 190,
+                top: 12,
+                bottom: 12,
+                right: 12, // Melebarkan sisi kanan pembungkus jam
+              ),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(400),
