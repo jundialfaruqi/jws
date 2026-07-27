@@ -6,6 +6,7 @@ import 'package:jws/core/widgets/app_next_prayer_bar.dart';
 import 'package:jws/core/widgets/app_image_slider.dart';
 import 'package:jws/core/widgets/app_analog_clock.dart';
 import 'package:jws/core/widgets/app_agenda_widget.dart';
+import 'package:jws/core/widgets/app_keuangan_widget.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../models/my_masjid_model.dart';
 import '../../models/marquee_model.dart';
@@ -58,8 +59,14 @@ class Theme10Widget extends StatelessWidget {
                 color: AppColors.bgNavy, // Dasar warna navy
                 child: Row(
                   children: [
-                    // Sisi Kiri: Ruang kosong 500px (Bisa diisi komponen lain ke depannya)
-                    const SizedBox(width: 500),
+                    // Sisi Kiri: Widget Laporan Keuangan (500px)
+                    SizedBox(
+                      width: 500,
+                      child: AppKeuanganWidget(
+                        laporanKeuangan: data.laporanKeuangan,
+                        scrollSpeed: data.durasi?.financeScrollSpeed ?? 0,
+                      ),
+                    ),
                     // Sisi Kanan: Gambar Slide
                     Expanded(
                       child: AppImageSlider(
@@ -110,7 +117,7 @@ class Theme10Widget extends StatelessWidget {
           child: Center(
             child: Container(
               padding: const EdgeInsets.only(
-                left: 190,
+                left: 20,
                 top: 12,
                 bottom: 12,
                 right: 12, // Melebarkan sisi kanan pembungkus jam
@@ -124,7 +131,7 @@ class Theme10Widget extends StatelessWidget {
                 ),
                 color: AppColors.bgNavy,
               ),
-              child: const AppAnalogClock(size: 300),
+              child: const AppAnalogClock(size: 240),
             ),
           ),
         ),
