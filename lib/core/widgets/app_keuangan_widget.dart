@@ -166,11 +166,11 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
 
   Widget _buildGrandTotalSection(GrandTotalsModel totals, NumberFormat fmt) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(0),
       decoration: BoxDecoration(
-        color: AppColors.bgPrimary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        // color: AppColors.bgPrimary.withValues(alpha: 0.1),
+        // borderRadius: BorderRadius.circular(12),
+        // border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,40 +308,35 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1), // Badge tipis
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    "Rp",
-                    style: TextStyle(
-                      color: color.withValues(alpha: 0.8),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1), // Badge full width
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  "Rp",
+                  style: TextStyle(
+                    color: color.withValues(alpha: 0.8),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    cleanAmount,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 44, // Diperkecil dari 50
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -1, // Merapatkan sedikit agar dinamis
-                    ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  cleanAmount,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 44, // Diperkecil dari 50
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -1, // Merapatkan sedikit agar dinamis
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
