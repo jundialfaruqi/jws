@@ -112,17 +112,28 @@ class AppNextPrayerBar extends ConsumerWidget {
         
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
+        bool isAfterMaghrib = false;
         if (todayJadwal != null && todayJadwal.maghrib.isNotEmpty) {
           try {
             final maghribTime = _parseTime(todayJadwal.maghrib, now);
-            if (now.isBefore(maghribTime)) {
-              dateToCalculate = now.subtract(const Duration(days: 1));
+            if (!now.isBefore(maghribTime)) {
+              dateToCalculate = now.add(const Duration(days: 1));
+              isAfterMaghrib = true;
             }
           } catch (_) {}
         }
+
+        String tanggalHijriah = "";
+        final activeJadwal = isAfterMaghrib ? tomorrowJadwal : todayJadwal;
         
-        final hijriDate = HijriCalendar.fromDate(dateToCalculate);
-        final tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+        if (activeJadwal != null && activeJadwal.tanggalHijriah != null && activeJadwal.tanggalHijriah!.isNotEmpty) {
+          tanggalHijriah = activeJadwal.tanggalHijriah!;
+        } else {
+          // Fallback ke library, dengan koreksi -1 hari karena Umm al-Qura sering +1 hari dibanding Indonesia
+          final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
+          final hijriDate = HijriCalendar.fromDate(correctedDate);
+          tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+        }
 
         final countdownWidget = Row(
           mainAxisSize: MainAxisSize.min,

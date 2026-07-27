@@ -8,11 +8,13 @@ import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+
+import '../models/petugas_model.dart';
+import '../models/jadwal_sholat_model.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_live_clock.dart';
-import '../models/petugas_model.dart';
 
 class JumatScreen extends ConsumerWidget {
   const JumatScreen({super.key});
@@ -113,11 +115,22 @@ class JumatScreen extends ConsumerWidget {
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
     DateTime dateToCalculate = now;
+    bool isAfterMaghrib = false;
+    JadwalSholatModel? todayJadwal;
+    JadwalSholatModel? tomorrowJadwal;
+    
     if (myMasjidData != null && myMasjidData.jadwalSholat.isNotEmpty) {
       try {
-        final todayJadwal = myMasjidData.jadwalSholat.firstWhere(
+        todayJadwal = myMasjidData.jadwalSholat.firstWhere(
           (j) => j.date == dateStr,
         );
+        
+        final tomorrow = now.add(const Duration(days: 1));
+        final tomorrowStr = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+        try {
+          tomorrowJadwal = myMasjidData.jadwalSholat.firstWhere((j) => j.date == tomorrowStr);
+        } catch (_) {}
+
         if (todayJadwal.maghrib.isNotEmpty) {
           final parts = todayJadwal.maghrib.split(':');
           if (parts.length >= 2) {
@@ -128,19 +141,29 @@ class JumatScreen extends ConsumerWidget {
               int.tryParse(parts[0]) ?? 0,
               int.tryParse(parts[1]) ?? 0,
             );
-            if (now.isBefore(maghribTime)) {
-              dateToCalculate = now.subtract(const Duration(days: 1));
+            if (!now.isBefore(maghribTime)) {
+              dateToCalculate = now.add(const Duration(days: 1));
+              isAfterMaghrib = true;
             }
           }
         }
       } catch (_) {}
     }
 
-    final hijriDate = HijriCalendar.fromDate(dateToCalculate);
     String tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
     tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
-    final tanggalHijriah =
-        "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+
+    String tanggalHijriah = "";
+    final activeJadwal = isAfterMaghrib ? tomorrowJadwal : todayJadwal;
+    
+    if (activeJadwal != null && activeJadwal.tanggalHijriah != null && activeJadwal.tanggalHijriah!.isNotEmpty) {
+      tanggalHijriah = activeJadwal.tanggalHijriah!;
+    } else {
+      // Fallback ke library, dengan koreksi -1 hari
+      final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
+      final hijriDate = HijriCalendar.fromDate(correctedDate);
+      tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+    }
 
     PetugasModel? petugasHariIni;
     if (myMasjidData != null && myMasjidData.petugasJumat.isNotEmpty) {
