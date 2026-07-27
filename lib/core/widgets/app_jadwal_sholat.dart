@@ -10,6 +10,11 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
   final Color textColor;
   final Color iconColor;
   final List<JadwalSholatModel> jadwalSholatList;
+  final double? width;
+  final EdgeInsetsGeometry? padding;
+  final double? iconSize;
+  final double? titleFontSize;
+  final double? timeFontSize;
 
   const AppJadwalSholat({
     super.key,
@@ -17,6 +22,11 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
     required this.textColor,
     required this.iconColor,
     this.jadwalSholatList = const [],
+    this.width,
+    this.padding,
+    this.iconSize,
+    this.titleFontSize,
+    this.timeFontSize,
   });
 
   @override
@@ -179,9 +189,9 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     ];
 
     return Container(
-      width: 700, // Diperlebar agar lengkungan dan card terlihat jelas
+      width: widget.width ?? 700, // Default 700, bisa dioverride
       color: widget.backgroundColor,
-      padding: const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
+      padding: widget.padding ?? const EdgeInsets.only(left: 32, right: 250, top: 16, bottom: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment
             .center, // Ubah dari spaceEvenly ke center agar mengumpul
@@ -239,7 +249,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Icon Paling Kiri
-                    Icon(item['icon'] as IconData, color: itemColor, size: 48),
+                    Icon(item['icon'] as IconData, color: itemColor, size: widget.iconSize ?? 48),
                     const SizedBox(width: 32),
                     // Column Nama dan Jam di Kanannya
                     Expanded(
@@ -250,7 +260,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                           Text(
                             item['nama'] as String,
                             style: TextStyle(
-                              fontSize: 32,
+                              fontSize: widget.titleFontSize ?? 32,
                               fontWeight: FontWeight.bold,
                               color: itemColor,
                               fontFamily: 'Poppins',
@@ -263,7 +273,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                           Text(
                             item['jam'] as String,
                             style: TextStyle(
-                              fontSize: 72, // Jam diperbesar
+                              fontSize: widget.timeFontSize ?? 72, // Jam diperbesar
                               fontWeight: FontWeight.bold,
                               color: itemColor,
                               fontFamily: 'Poppins',
