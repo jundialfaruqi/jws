@@ -170,7 +170,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         // color: AppColors.bgPrimary.withValues(alpha: 0.1),
-        // borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(0),
         // border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
@@ -283,7 +283,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32), // Jarak lebih luas antara rincian item dengan card summary
 
             // TRANSAKSI
             ...group.items.map((item) => _buildTransactionItem(item, fmt)),
@@ -320,7 +320,8 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1), // Badge full width
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -360,8 +361,8 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     final isMasuk = item.jenis.toLowerCase() == 'masuk';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16), // Jarak antar item diperlebar
+      padding: const EdgeInsets.all(16), // Jarak ke dalam (padding) item diperlebar
       decoration: BoxDecoration(
         color: isMasuk
             ? Colors.greenAccent.withValues(alpha: 0.1)
