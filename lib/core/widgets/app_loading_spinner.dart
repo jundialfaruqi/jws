@@ -4,11 +4,13 @@ import '../constants/app_colors.dart';
 class AppLoadingSpinner extends StatelessWidget {
   final double size;
   final String? message;
+  final double fontSize;
 
   const AppLoadingSpinner({
     super.key,
-    this.size = 40.0,
+    this.size = 80.0,
     this.message,
+    this.fontSize = 24.0,
   });
 
   @override
@@ -23,7 +25,7 @@ class AppLoadingSpinner extends StatelessWidget {
               width: size,
               height: size,
               child: const CircularProgressIndicator(
-                strokeWidth: 4,
+                strokeWidth: 6,
                 strokeCap: StrokeCap.round, // Ujung garis loading melengkung elegan
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                 backgroundColor: AppColors.ghost,
@@ -34,9 +36,9 @@ class AppLoadingSpinner extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 14,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w500,
               ),
             ),

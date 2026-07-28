@@ -7,6 +7,7 @@ import '../../../core/providers/main_slide_index_provider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
+import '../../../core/widgets/tv/tv_button.dart';
 import '../screens/jumbotron_masjid_screen.dart';
 import '../screens/jumbotron_pemko_screen.dart';
 import 'main_content_widget.dart';
@@ -55,6 +56,17 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         child: Center(child: AppLoadingSpinner(message: 'Memuat data...')),
       ),
       error: (e, s) {
+        // Tampilkan loading screen jika pengguna menekan "Coba Lagi" (state sedang refreshing)
+        if (myMasjidAsync.isLoading) {
+          return const Expanded(
+            child: Center(
+              child: AppLoadingSpinner(
+                message: 'Mencoba menghubungkan kembali...',
+              ),
+            ),
+          );
+        }
+
         // Minta fokus ke tombol Coba Lagi HANYA 1 kali saat error terjadi
         if (!_hasRequestedFocusForRetry) {
           _hasRequestedFocusForRetry = true;
@@ -71,25 +83,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
+                  style: TextStyle(fontSize: 30),
                   'Gagal memuat data, periksa koneksi atau coba beberapa saat lagi',
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton.icon(
+                TvButton(
                   focusNode: _retryFocusNode,
                   onPressed: () {
                     // Reset flag agar jika error lagi bisa minta fokus lagi
                     _hasRequestedFocusForRetry = false;
                     ref.invalidate(myMasjidProvider(profil.id));
                   },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Coba lagi'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    textStyle: const TextStyle(fontSize: 24),
-                  ),
+                  icon: Icons.refresh,
+                  label: 'Coba lagi',
+                  fontSize: 24,
                 ),
               ],
             ),
