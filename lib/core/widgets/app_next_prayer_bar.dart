@@ -15,8 +15,8 @@ class AppNextPrayerBar extends ConsumerWidget {
   final double fontSize;
 
   const AppNextPrayerBar({
-    super.key, 
-    this.leftMargin = 0.0, 
+    super.key,
+    this.leftMargin = 0.0,
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
     this.dateOnly = false,
@@ -49,8 +49,9 @@ class AppNextPrayerBar extends ConsumerWidget {
         JadwalSholatModel? tomorrowJadwal;
 
         if (jadwalSholatList.isNotEmpty) {
-          final dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-          
+          final dateStr =
+              "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
           try {
             todayJadwal = jadwalSholatList.firstWhere((j) => j.date == dateStr);
           } catch (_) {
@@ -58,9 +59,12 @@ class AppNextPrayerBar extends ConsumerWidget {
           }
 
           final tomorrow = now.add(const Duration(days: 1));
-          final tomorrowStr = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+          final tomorrowStr =
+              "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
           try {
-            tomorrowJadwal = jadwalSholatList.firstWhere((j) => j.date == tomorrowStr);
+            tomorrowJadwal = jadwalSholatList.firstWhere(
+              (j) => j.date == tomorrowStr,
+            );
           } catch (_) {
             tomorrowJadwal = todayJadwal;
           }
@@ -70,7 +74,10 @@ class AppNextPrayerBar extends ConsumerWidget {
             {'nama': 'SUBUH', 'time': _parseTime(todayJadwal.subuh, now)},
             {'nama': 'SYURUQ', 'time': _parseTime(todayJadwal.terbit, now)},
             {'nama': 'DHUHA', 'time': _parseTime(todayJadwal.dhuha, now)},
-            {'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR', 'time': _parseTime(todayJadwal.dzuhur, now)},
+            {
+              'nama': now.weekday == DateTime.friday ? "JUM'AT" : 'DZUHUR',
+              'time': _parseTime(todayJadwal.dzuhur, now),
+            },
             {'nama': 'ASHAR', 'time': _parseTime(todayJadwal.ashar, now)},
             {'nama': 'MAGHRIB', 'time': _parseTime(todayJadwal.maghrib, now)},
             {'nama': 'ISYA', 'time': _parseTime(todayJadwal.isya, now)},
@@ -90,7 +97,10 @@ class AppNextPrayerBar extends ConsumerWidget {
           if (!found) {
             nextPrayer = 'IMSAK';
             // Pakai jam Imsak besok
-            final tomorrowImsakTime = _parseTime(tomorrowJadwal.imsak, tomorrow);
+            final tomorrowImsakTime = _parseTime(
+              tomorrowJadwal.imsak,
+              tomorrow,
+            );
             countdown = tomorrowImsakTime.difference(now);
           }
         }
@@ -103,13 +113,16 @@ class AppNextPrayerBar extends ConsumerWidget {
 
         final isWarning = countdown.inSeconds > 0 && countdown.inSeconds <= 600;
         final blinkOn = now.second % 2 == 0;
-        final cardColor = isWarning && blinkOn ? Colors.redAccent : Colors.white.withValues(alpha: 0.1);
-        final borderColor = isWarning && blinkOn ? Colors.red : Colors.white.withValues(alpha: 0.2);
-        final textColor = isWarning && blinkOn ? Colors.white : AppColors.textYellow;
+        final cardColor = isWarning && blinkOn ? AppColors.bgBlue : Colors.red;
+        final borderColor = Colors.transparent;
+        final textColor = isWarning && blinkOn
+            ? AppColors.textYellow
+            : Colors.white;
 
         // Tanggal masehi dari jadwal
-        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026').replaceAll('Minggu', 'Ahad');
-        
+        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026')
+            .replaceAll('Minggu', 'Ahad');
+
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
         bool isAfterMaghrib = false;
@@ -125,14 +138,19 @@ class AppNextPrayerBar extends ConsumerWidget {
 
         String tanggalHijriah = "";
         final activeJadwal = isAfterMaghrib ? tomorrowJadwal : todayJadwal;
-        
-        if (activeJadwal != null && activeJadwal.tanggalHijriah != null && activeJadwal.tanggalHijriah!.isNotEmpty) {
+
+        if (activeJadwal != null &&
+            activeJadwal.tanggalHijriah != null &&
+            activeJadwal.tanggalHijriah!.isNotEmpty) {
           tanggalHijriah = activeJadwal.tanggalHijriah!;
         } else {
           // Fallback ke library, dengan koreksi -1 hari karena Umm al-Qura sering +1 hari dibanding Indonesia
-          final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
+          final correctedDate = dateToCalculate.subtract(
+            const Duration(days: 1),
+          );
           final hijriDate = HijriCalendar.fromDate(correctedDate);
-          tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+          tanggalHijriah =
+              "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
         }
 
         final countdownWidget = Row(
@@ -156,16 +174,11 @@ class AppNextPrayerBar extends ConsumerWidget {
             ),
             const SizedBox(width: 24),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: borderColor,
-                ),
+                border: Border.all(color: borderColor),
               ),
               child: Text(
                 countdownStr,
@@ -205,11 +218,7 @@ class AppNextPrayerBar extends ConsumerWidget {
             const SizedBox(width: 24),
             Container(width: 2, height: 28, color: Colors.white54),
             const SizedBox(width: 24),
-            const Icon(
-              TablerIcons.moon_stars,
-              color: Colors.white,
-              size: 32,
-            ),
+            const Icon(TablerIcons.moon_stars, color: Colors.white, size: 32),
             const SizedBox(width: 12),
             Text(
               tanggalHijriah,
@@ -232,11 +241,10 @@ class AppNextPrayerBar extends ConsumerWidget {
             bottom: 16,
           ),
           child: Row(
-            mainAxisAlignment: dateOnly ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,
-            children: [
-              if (!dateOnly) countdownWidget,
-              dateWidget,
-            ],
+            mainAxisAlignment: dateOnly
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.spaceBetween,
+            children: [if (!dateOnly) countdownWidget, dateWidget],
           ),
         );
       },

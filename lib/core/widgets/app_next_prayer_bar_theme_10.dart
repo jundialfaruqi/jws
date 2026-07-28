@@ -113,15 +113,11 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
 
         final isWarning = countdown.inSeconds > 0 && countdown.inSeconds <= 600;
         final blinkOn = now.second % 2 == 0;
-        final cardColor = isWarning && blinkOn
-            ? Colors.redAccent
-            : Colors.white.withValues(alpha: 0.1);
-        final borderColor = isWarning && blinkOn
-            ? Colors.red
-            : Colors.white.withValues(alpha: 0.2);
+        final cardColor = isWarning && blinkOn ? AppColors.bgBlue : Colors.red;
+        final borderColor = Colors.transparent;
         final textColor = isWarning && blinkOn
-            ? Colors.white
-            : AppColors.textYellow;
+            ? AppColors.textYellow
+            : Colors.white;
 
         // Tanggal masehi dari jadwal
         final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026')
@@ -142,14 +138,19 @@ class AppNextPrayerBarTheme10 extends ConsumerWidget {
 
         String tanggalHijriah = "";
         final activeJadwal = isAfterMaghrib ? tomorrowJadwal : todayJadwal;
-        
-        if (activeJadwal != null && activeJadwal.tanggalHijriah != null && activeJadwal.tanggalHijriah!.isNotEmpty) {
+
+        if (activeJadwal != null &&
+            activeJadwal.tanggalHijriah != null &&
+            activeJadwal.tanggalHijriah!.isNotEmpty) {
           tanggalHijriah = activeJadwal.tanggalHijriah!;
         } else {
           // Fallback ke library, dengan koreksi -1 hari karena Umm al-Qura sering +1 hari dibanding Indonesia
-          final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
+          final correctedDate = dateToCalculate.subtract(
+            const Duration(days: 1),
+          );
           final hijriDate = HijriCalendar.fromDate(correctedDate);
-          tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+          tanggalHijriah =
+              "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
         }
 
         final countdownWidget = Container(
