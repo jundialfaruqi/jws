@@ -104,7 +104,14 @@ class AdzanScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgDark, // Menggunakan background gelap/hitam
       body: Stack(
         children: [
-          // Konten Utama (Dummy)
+          // Background
+          Positioned.fill(
+            child: Image.asset(
+              'assets/adzan/bg-adzan-screen.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Konten Utama
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

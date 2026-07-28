@@ -95,13 +95,22 @@ class AlertScreen extends ConsumerWidget {
         : 90; // 1 menit 30 detik
 
     double progress = transitionState.totalSeconds > 0
-        ? 1.0 - (transitionState.remainingSeconds / transitionState.totalSeconds)
+        ? 1.0 -
+              (transitionState.remainingSeconds / transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
       backgroundColor: AppColors.bgDark,
       body: Stack(
         children: [
+          // Background
+          Positioned.fill(
+            child: Image.asset(
+              'assets/adzan/bg-adzan-screen.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Konten Utama
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

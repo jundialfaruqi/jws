@@ -149,8 +149,12 @@ class TvDrawerMenuState extends State<TvDrawerMenu> with SingleTickerProviderSta
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 64),
-                  const Center(
-                    child: Icon(Icons.mosque, color: Colors.white, size: 80),
+                  Center(
+                    child: Image.asset(
+                      'assets/logo/logo-pemko-kominfo.webp',
+                      width: 250,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Center(
