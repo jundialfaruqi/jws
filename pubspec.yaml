@@ -24,6 +24,13 @@ dependencies:
   path_provider: ^2.1.5
   sticky_headers: ^0.3.0+2
   webview_flutter: ^4.13.1
+  # Dependensi khusus Tizen OS (Smart TV Samsung)
+  audioplayers_tizen: any
+  connectivity_plus_tizen: any
+  flutter_secure_storage_tizen: any
+  path_provider_tizen: any
+  webview_flutter_tizen: any
+  sqflite_tizen: any
 
 dev_dependencies:
   flutter_test:
