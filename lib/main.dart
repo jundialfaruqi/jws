@@ -9,6 +9,7 @@ import 'core/services/secure_storage_service.dart';
 import 'core/providers/selected_profil_provider.dart';
 import 'core/providers/view_mode_provider.dart';
 import 'core/services/prayer_transition_service.dart';
+import 'core/services/murotal_audio_service.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -59,6 +60,7 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Injeksi transition service agar mulai berdetak
     ref.watch(prayerTransitionProvider);
+    ref.watch(murotalAudioServiceProvider);
     
     final router = ref.watch(routerProvider);
     return MaterialApp.router(

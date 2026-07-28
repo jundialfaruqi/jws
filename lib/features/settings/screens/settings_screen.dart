@@ -8,12 +8,15 @@ import '../../../core/widgets/app_view_selection_dialog.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/view_mode_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/providers/audio_settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final audioSettings = ref.watch(audioSettingsProvider);
+
     return AppScaffold(
       appBar: AppTopBar(
         automaticallyImplyLeading: false,
@@ -25,6 +28,34 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(32.0),
         children: [
+          _SettingsItemWidget(
+            icon: Icons.volume_off,
+            title: 'Bisukan Suara Adzan',
+            subtitle: 'Jika diaktifkan, suara Adzan tidak akan diputar saat masuk waktu sholat.',
+            trailing: Switch(
+              value: audioSettings.isAdzanMuted,
+              onChanged: (val) {
+                ref.read(audioSettingsProvider.notifier).toggleAdzanMuted();
+              },
+            ),
+            onTap: () {
+              ref.read(audioSettingsProvider.notifier).toggleAdzanMuted();
+            },
+          ),
+          _SettingsItemWidget(
+            icon: Icons.music_off,
+            title: 'Bisukan Suara Murotal',
+            subtitle: 'Jika diaktifkan, suara Murotal tidak akan diputar sebagai latar belakang.',
+            trailing: Switch(
+              value: audioSettings.isMurotalMuted,
+              onChanged: (val) {
+                ref.read(audioSettingsProvider.notifier).toggleMurotalMuted();
+              },
+            ),
+            onTap: () {
+              ref.read(audioSettingsProvider.notifier).toggleMurotalMuted();
+            },
+          ),
           _SettingsItemWidget(
             icon: Icons.launch,
             title: 'Izin Layar Mengambang (Auto-Start)',
@@ -139,12 +170,14 @@ class _SettingsItemWidget extends StatefulWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   const _SettingsItemWidget({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.trailing,
   });
 
   @override
@@ -212,11 +245,14 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 40,
-                  color: _isFocused ? AppColors.primary : Colors.grey.shade400,
-                ),
+                if (widget.trailing != null)
+                  widget.trailing!
+                else
+                  Icon(
+                    Icons.chevron_right,
+                    size: 40,
+                    color: _isFocused ? AppColors.primary : Colors.grey.shade400,
+                  ),
               ],
             ),
           ),

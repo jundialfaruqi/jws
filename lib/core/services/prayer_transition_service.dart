@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jws/core/constants/api_constant.dart';
 import '../routes/app_router.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
 import '../time/time_sync_service.dart';
+import '../providers/audio_settings_provider.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
 import '../../features/main/models/durasi_model.dart';
 
@@ -56,6 +58,7 @@ final prayerTransitionProvider = NotifierProvider<PrayerTransitionNotifier, Pray
 class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
   Timer? _timer;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _adzanPlayer = AudioPlayer();
   bool _hasPlayedIqomahBeep = false;
 
   @override
@@ -63,9 +66,17 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     // Start timer on build
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
     
+    // Listen to beep complete to start Adzan
+    _audioPlayer.onPlayerComplete.listen((_) {
+      if (state.status == PrayerState.adzan) {
+        _playAdzanAudio(state.prayerName);
+      }
+    });
+
     ref.onDispose(() {
       _timer?.cancel();
       _audioPlayer.dispose();
+      _adzanPlayer.dispose();
     });
     
     return PrayerTransitionState();
@@ -76,6 +87,32 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
       await _audioPlayer.play(AssetSource('sounds/beep.mp3'));
     } catch (e) {
       debugPrint('Error playing sound: $e');
+    }
+  }
+
+  void _playAdzanAudio(String prayerName) async {
+    final audioSettings = ref.read(audioSettingsProvider);
+    if (audioSettings.isAdzanMuted) return;
+
+    final profil = ref.read(selectedProfilProvider);
+    if (profil == null) return;
+    
+    final data = ref.read(myMasjidProvider(profil.id)).value;
+    if (data == null || data.audioAdzan == null || !data.audioAdzan!.status) return;
+
+    final adzanData = data.audioAdzan!;
+    String? path = prayerName == 'SHUBUH' ? adzanData.adzanShubuh : adzanData.audioAdzan;
+
+    if (path == null || path.isEmpty) return;
+
+    final baseUrl = ApiConstant.baseUrl;
+    final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    final fullUrl = path.startsWith('http') ? path : '$cleanBase$path';
+
+    try {
+      await _adzanPlayer.play(UrlSource(fullUrl));
+    } catch (e) {
+      debugPrint("Gagal memutar adzan: $e");
     }
   }
 
@@ -95,6 +132,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
         state = state.copyWith(remainingSeconds: newRemaining);
       } else {
         // Waktu habis, pindah ke state berikutnya
+        _adzanPlayer.stop(); // Pastikan adzan berhenti saat berpindah fase
         _nextState();
       }
     } else {

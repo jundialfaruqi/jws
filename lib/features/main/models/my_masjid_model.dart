@@ -6,6 +6,8 @@ import 'agenda_model.dart';
 import 'petugas_model.dart';
 import 'durasi_model.dart';
 import 'laporan_keuangan_model.dart';
+import 'audio_adzan_model.dart';
+import 'audio_murotal_model.dart';
 
 class MyMasjidModel {
   final String currentTime;
@@ -25,6 +27,8 @@ class MyMasjidModel {
   final SlideModel? jumbotronMasjid;
   final DurasiModel? durasi;
   final LaporanKeuanganDataModel? laporanKeuangan;
+  final AudioAdzanModel? audioAdzan;
+  final AudioMurotalModel? audioMurotal;
 
   MyMasjidModel({
     required this.currentTime,
@@ -44,6 +48,8 @@ class MyMasjidModel {
     this.jumbotronMasjid,
     this.durasi,
     this.laporanKeuangan,
+    this.audioAdzan,
+    this.audioMurotal,
   });
 
   factory MyMasjidModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +71,8 @@ class MyMasjidModel {
       jumbotronMasjid: json['jumbotron_masjid'] != null && json['jumbotron_masjid']['data'] != null ? SlideModel.fromJson(json['jumbotron_masjid']['data']) : null,
       durasi: json['durasi'] != null && json['durasi']['data'] != null ? DurasiModel.fromJson(json['durasi']['data']) : DurasiModel(),
       laporanKeuangan: json['laporan_keuangan'] != null && json['laporan_keuangan']['data'] != null ? LaporanKeuanganDataModel.fromJson(json['laporan_keuangan']['data']) : null,
+      audioAdzan: json['audio_adzan'] != null && json['audio_adzan']['data'] != null ? AudioAdzanModel.fromJson(json['audio_adzan']['data']) : null,
+      audioMurotal: json['audio_murotal'] != null && json['audio_murotal']['data'] != null ? AudioMurotalModel.fromJson(json['audio_murotal']['data']) : null,
     );
   }
 }
