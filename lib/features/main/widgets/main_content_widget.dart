@@ -26,9 +26,9 @@ class MainContentWidget extends ConsumerWidget {
     }
 
     // Inisiasi koneksi WebSocket
-    ref.read(webSocketServiceProvider(profil.slug)).connect();
+    ref.read(webSocketServiceProvider(profil.id)).connect();
 
-    final myMasjidAsync = ref.watch(myMasjidProvider(profil.slug));
+    final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
 
     return myMasjidAsync.when(
         loading: () => const Center(
@@ -46,7 +46,7 @@ class MainContentWidget extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.refresh(myMasjidProvider(profil.slug)),
+                onPressed: () => ref.refresh(myMasjidProvider(profil.id)),
                 child: const Text('Coba Lagi'),
               ),
             ],

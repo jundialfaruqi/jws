@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
 
-final webSocketServiceProvider = Provider.family<WebSocketService, String>((ref, slug) {
-  final service = WebSocketService(ref: ref, slug: slug);
+final webSocketServiceProvider = Provider.family<WebSocketService, int>((ref, id) {
+  final service = WebSocketService(ref: ref, id: id);
   ref.onDispose(() {
     service.disconnect();
   });
@@ -15,12 +15,12 @@ final webSocketServiceProvider = Provider.family<WebSocketService, String>((ref,
 
 class WebSocketService {
   final Ref ref;
-  final String slug;
+  final int id;
   PusherChannelsClient? _pusherClient;
   StreamSubscription? _connectionSub;
   bool _isConnected = false;
 
-  WebSocketService({required this.ref, required this.slug});
+  WebSocketService({required this.ref, required this.id});
 
   Future<void> connect() async {
     if (_isConnected) return;
@@ -50,15 +50,15 @@ class WebSocketService {
 
       _connectionSub = _pusherClient!.onConnectionEstablished.listen((_) {
         _isConnected = true;
-        debugPrint("WebSocket Subscribed to masjid-$slug at $wsScheme://$host:$port");
+        debugPrint("WebSocket Subscribed to masjid-$id at $wsScheme://$host:$port");
         
-        final channel = _pusherClient!.publicChannel('masjid-$slug');
+        final channel = _pusherClient!.publicChannel('masjid-$id');
         channel.subscribe();
 
         channel.bind('App\\Events\\ContentUpdatedEvent').listen((event) {
           debugPrint("WebSocket Event Received: ContentUpdatedEvent");
           debugPrint("Triggering Data Refresh...");
-          ref.invalidate(myMasjidProvider(slug));
+          ref.invalidate(myMasjidProvider(id));
         });
 
         // Channel Global (Jumbotron Pemko, Marquee Global, dll)
@@ -68,7 +68,7 @@ class WebSocketService {
         globalChannel.bind('App\\Events\\GlobalUpdatedEvent').listen((event) {
           debugPrint("WebSocket Event Received: GlobalUpdatedEvent");
           debugPrint("Triggering Data Refresh...");
-          ref.invalidate(myMasjidProvider(slug));
+          ref.invalidate(myMasjidProvider(id));
         });
       });
 

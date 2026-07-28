@@ -13,10 +13,10 @@ class MyMasjidService {
 
   MyMasjidService(this._apiClient);
 
-  Future<MyMasjidModel> getMyMasjid(String slug) async {
+  Future<MyMasjidModel> getMyMasjid(int id) async {
     final response = await _apiClient.dio.get(
       ApiConstant.myMasjid,
-      queryParameters: {'slug': slug},
+      queryParameters: {'id': id},
     );
 
     final responseData = response.data;

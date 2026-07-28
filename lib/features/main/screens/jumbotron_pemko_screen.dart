@@ -101,7 +101,7 @@ class JumbotronPemkoScreen extends ConsumerWidget {
                 fontSize: 48,
                 jadwalSholatList: profil != null
                     ? ref
-                              .watch(myMasjidProvider(profil.slug))
+                              .watch(myMasjidProvider(profil.id))
                               .value
                               ?.jadwalSholat ??
                           []

@@ -42,7 +42,7 @@ class JumatScreen extends ConsumerWidget {
     final bool hasLogo2 = logo2.isNotEmpty;
 
     final myMasjidData = profil != null
-        ? ref.watch(myMasjidProvider(profil.slug)).value
+        ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
     List<String> slideJumats = [];
     if (myMasjidData != null && myMasjidData.slideJumat != null) {

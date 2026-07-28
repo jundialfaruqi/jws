@@ -107,7 +107,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     final now = ref.read(timeSyncServiceProvider).now();
     final profil = ref.read(selectedProfilProvider);
     if (profil == null) return;
-    final data = ref.read(myMasjidProvider(profil.slug)).value;
+    final data = ref.read(myMasjidProvider(profil.id)).value;
     if (data == null) return;
 
     final todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
@@ -214,7 +214,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
   void _nextState() {
     final name = state.prayerName;
     final profil = ref.read(selectedProfilProvider);
-    final durasi = (profil != null) ? (ref.read(myMasjidProvider(profil.slug)).value?.durasi ?? DurasiModel()) : DurasiModel();
+    final durasi = (profil != null) ? (ref.read(myMasjidProvider(profil.id)).value?.durasi ?? DurasiModel()) : DurasiModel();
     final now = ref.read(timeSyncServiceProvider).now();
     final isFriday = now.weekday == DateTime.friday;
 

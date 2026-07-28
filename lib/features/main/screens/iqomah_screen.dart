@@ -43,7 +43,7 @@ class IqomahScreen extends ConsumerWidget {
     final bool hasLogo2 = logo2.isNotEmpty;
 
     final myMasjidData = profil != null
-        ? ref.watch(myMasjidProvider(profil.slug)).value
+        ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
     List<String> slideIqomahs = [];
     if (myMasjidData != null && myMasjidData.slideIqomah != null) {

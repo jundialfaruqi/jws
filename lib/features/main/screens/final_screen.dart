@@ -11,7 +11,7 @@ class FinalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
-    final myMasjidData = profil != null ? ref.watch(myMasjidProvider(profil.slug)).value : null;
+    final myMasjidData = profil != null ? ref.watch(myMasjidProvider(profil.id)).value : null;
     
     List<String> slideFinals = [];
     if (myMasjidData != null && myMasjidData.slideFinal != null) {

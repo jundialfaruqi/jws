@@ -43,7 +43,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       return const Expanded(child: Center(child: Text('Profil tidak ditemukan')));
     }
 
-    final myMasjidAsync = ref.watch(myMasjidProvider(profil.slug));
+    final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
 
     return myMasjidAsync.when(
       loading: () => const Expanded(

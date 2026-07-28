@@ -3,9 +3,9 @@ import '../models/my_masjid_model.dart';
 import '../services/my_masjid_service.dart';
 import '../../../core/time/time_sync_service.dart';
 
-final myMasjidProvider = FutureProvider.family<MyMasjidModel, String>((ref, slug) async {
+final myMasjidProvider = FutureProvider.family<MyMasjidModel, int>((ref, id) async {
   final service = ref.read(myMasjidServiceProvider);
-  final data = await service.getMyMasjid(slug);
+  final data = await service.getMyMasjid(id);
   
   // Sinkronisasi waktu menggunakan timestamp dari server
   ref.read(timeSyncServiceProvider).sync(data.timestamp);
