@@ -118,17 +118,20 @@ class JumatScreen extends ConsumerWidget {
     bool isAfterMaghrib = false;
     JadwalSholatModel? todayJadwal;
     JadwalSholatModel? tomorrowJadwal;
-    
+
     if (myMasjidData != null && myMasjidData.jadwalSholat.isNotEmpty) {
       try {
         todayJadwal = myMasjidData.jadwalSholat.firstWhere(
           (j) => j.date == dateStr,
         );
-        
+
         final tomorrow = now.add(const Duration(days: 1));
-        final tomorrowStr = "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
+        final tomorrowStr =
+            "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
         try {
-          tomorrowJadwal = myMasjidData.jadwalSholat.firstWhere((j) => j.date == tomorrowStr);
+          tomorrowJadwal = myMasjidData.jadwalSholat.firstWhere(
+            (j) => j.date == tomorrowStr,
+          );
         } catch (_) {}
 
         if (todayJadwal.maghrib.isNotEmpty) {
@@ -155,14 +158,17 @@ class JumatScreen extends ConsumerWidget {
 
     String tanggalHijriah = "";
     final activeJadwal = isAfterMaghrib ? tomorrowJadwal : todayJadwal;
-    
-    if (activeJadwal != null && activeJadwal.tanggalHijriah != null && activeJadwal.tanggalHijriah!.isNotEmpty) {
+
+    if (activeJadwal != null &&
+        activeJadwal.tanggalHijriah != null &&
+        activeJadwal.tanggalHijriah!.isNotEmpty) {
       tanggalHijriah = activeJadwal.tanggalHijriah!;
     } else {
       // Fallback ke library, dengan koreksi -1 hari
       final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
       final hijriDate = HijriCalendar.fromDate(correctedDate);
-      tanggalHijriah = "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
+      tanggalHijriah =
+          "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
     }
 
     PetugasModel? petugasHariIni;
@@ -177,7 +183,7 @@ class JumatScreen extends ConsumerWidget {
     }
 
     return TvScaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: AppColors.bgBlack,
       body: Stack(
         children: [
           Padding(

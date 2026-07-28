@@ -124,7 +124,7 @@ class IqomahScreen extends ConsumerWidget {
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
-      backgroundColor: AppColors.bgDark,
+      backgroundColor: AppColors.bgBlack,
       body: Stack(
         children: [
           Padding(
