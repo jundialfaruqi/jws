@@ -109,7 +109,8 @@ class MurotalAudioService {
           
           final diff = prayerTime.difference(now).inSeconds;
           // Jika waktu sekarang berada dalam range 0 hingga 60 detik sebelum waktu sholat
-          if (diff > 0 && diff <= 60) {
+          // (Termasuk tepat pada detik 0 agar tidak terjadi kebocoran suara karena race condition)
+          if (diff >= 0 && diff <= 60) {
             return false;
           }
         }
