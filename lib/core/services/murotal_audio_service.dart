@@ -123,64 +123,74 @@ class MurotalAudioService {
     return true; // Semua syarat terpenuhi, Murotal boleh berputar
   }
 
+  bool _isStarting = false;
+
   void _startOrResume() async {
-    final profil = _ref.read(selectedProfilProvider);
-    if (profil == null) return;
-    final data = _ref.read(myMasjidProvider(profil.id)).value;
-    if (data == null || data.audioMurotal == null) return;
-
-    final murotal = data.audioMurotal!;
-    
-    // Coba ambil url dari slot sekarang, kalau null pindah ke next
-    String? path = _getPathForSlot(_currentSlot, murotal);
-    if (path == null) {
-      _moveToNextSlot(murotal);
-      path = _getPathForSlot(_currentSlot, murotal);
-      if (path == null) return; // Mencegah infinite loop kalau semua null (sudah dihandle di atas)
-    }
-
-    // 1. Cek File Lokal
-    final downloader = _ref.read(audioDownloaderProvider.notifier);
-    String? localPath = await downloader.getLocalAudioPath(path);
-
-    if (localPath == null) {
-      // 2. Jika belum ada, tunggu sampai proses download selesai
-      debugPrint("⏳ [Murotal] File belum tersedia, menunggu download selesai...");
-      await downloader.waitForDownload();
-      
-      // 3. Cek ulang setelah download selesai
-      localPath = await downloader.getLocalAudioPath(path);
-      if (localPath == null) {
-         debugPrint("❌ [Murotal] Gagal memutar, file masih tidak ditemukan setelah download.");
-         return; 
-      }
-    }
-
-    // 4. Mainkan dari Lokal (100% Offline)
-    final source = DeviceFileSource(localPath);
-    final trackId = 'local_$localPath';
-    debugPrint("🎵 [Murotal] Memutar dari memori lokal: $localPath");
+    if (_isStarting) return; // Cegah pemanggilan berulang jika sebelumnya masih loading/hang
+    _isStarting = true;
 
     try {
+      final profil = _ref.read(selectedProfilProvider);
+      if (profil == null) return;
+      final data = _ref.read(myMasjidProvider(profil.id)).value;
+      if (data == null || data.audioMurotal == null) return;
+
+      final murotal = data.audioMurotal!;
+      
+      // Coba ambil url dari slot sekarang, kalau null pindah ke next
+      String? path = _getPathForSlot(_currentSlot, murotal);
+      if (path == null) {
+        _moveToNextSlot(murotal);
+        path = _getPathForSlot(_currentSlot, murotal);
+        if (path == null) return; // Mencegah infinite loop kalau semua null
+      }
+
+      // 1. Cek File Lokal
+      final downloader = _ref.read(audioDownloaderProvider.notifier);
+      String? localPath = await downloader.getLocalAudioPath(path);
+
+      if (localPath == null) {
+        // 2. Jika belum ada, tunggu sampai proses download selesai
+        debugPrint("⏳ [Murotal] File belum tersedia, menunggu download selesai...");
+        await downloader.waitForDownload();
+        
+        // 3. Cek ulang setelah download selesai
+        localPath = await downloader.getLocalAudioPath(path);
+        if (localPath == null) {
+           debugPrint("❌ [Murotal] Gagal memutar, file masih tidak ditemukan setelah download.");
+           return; 
+        }
+      }
+
+      // 4. Mainkan dari Lokal (100% Offline)
+      final source = DeviceFileSource(localPath);
+      final trackId = 'local_$localPath';
+      debugPrint("🎵 [Murotal] Memutar dari memori lokal: $localPath");
+
       if (_currentUrl == trackId) {
         // Resume if it's the same track
-        await _audioPlayer.resume();
+        await _audioPlayer.resume().timeout(const Duration(seconds: 5));
       } else {
         // Play new track
         _currentUrl = trackId;
-        await _audioPlayer.play(source);
+        await _audioPlayer.play(source).timeout(const Duration(seconds: 5));
       }
+      
       _lastPlayTime = DateTime.now();
       _isPlaying = true;
     } catch (e) {
       debugPrint("Gagal memutar murotal: $e");
+      // Reset _currentUrl agar next tick mau mencoba play ulang dari awal
+      _currentUrl = null;
+    } finally {
+      _isStarting = false;
     }
   }
 
   void _pause() async {
     if (!_isPlaying) return;
     try {
-      await _audioPlayer.pause();
+      await _audioPlayer.pause().timeout(const Duration(seconds: 3));
       _isPlaying = false;
     } catch (e) {
       debugPrint("Gagal pause murotal: $e");
