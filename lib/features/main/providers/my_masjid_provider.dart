@@ -4,15 +4,26 @@ import '../services/my_masjid_service.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/services/audio_downloader_service.dart';
 
+import 'dart:async';
+
 final myMasjidProvider = FutureProvider.family<MyMasjidModel, int>((ref, id) async {
   final service = ref.read(myMasjidServiceProvider);
-  final data = await service.getMyMasjid(id);
+  final result = await service.getMyMasjid(id);
   
-  // Sinkronisasi waktu menggunakan timestamp dari server
-  ref.read(timeSyncServiceProvider).sync(data.timestamp);
+  if (!result.isFromCache) {
+    // Sinkronisasi waktu menggunakan timestamp dari server (HANYA JIKA DARI SERVER)
+    ref.read(timeSyncServiceProvider).sync(result.data.timestamp);
+  } else {
+    // JIKA DARI CACHE: Jangan sinkronisasi waktu agar tidak terjadi Time Travel.
+    // Lakukan Auto-Retry rahasia (Stale-While-Revalidate) setiap 5 menit.
+    final timer = Timer(const Duration(minutes: 5), () {
+      ref.invalidateSelf();
+    });
+    ref.onDispose(timer.cancel);
+  }
   
   // Sinkronisasi audio secara background
-  ref.read(audioDownloaderProvider.notifier).syncAudios(data);
+  ref.read(audioDownloaderProvider.notifier).syncAudios(result.data);
   
-  return data;
+  return result.data;
 });
