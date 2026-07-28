@@ -30,6 +30,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
   Duration _lastElapsed = Duration.zero;
   double _currentSpeed = 30.0;
   double _targetSpeed = 30.0;
+  double _accumulatedDx = 0.0;
 
   @override
   void initState() {
@@ -75,7 +76,16 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     }
 
     final double dx = _currentSpeed * dt;
-    _scrollController.jumpTo(_scrollController.offset + dx);
+    _accumulatedDx += dx;
+
+    // Solusi "Gempa" StickyHeader:
+    // Hanya lakukan scroll ketika terkumpul pergerakan minimal 1 pixel bulat.
+    // Ini mencegah sub-pixel rendering (misal 100.5 px) yang membuat StickyHeader bingung dan bergetar.
+    if (_accumulatedDx >= 1.0) {
+      final double steps = _accumulatedDx.floorToDouble();
+      _scrollController.jumpTo((_scrollController.offset + steps).roundToDouble());
+      _accumulatedDx -= steps;
+    }
   }
 
   @override
