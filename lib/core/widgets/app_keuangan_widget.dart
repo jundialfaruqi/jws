@@ -283,8 +283,9 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
                 ],
               ),
             ),
-            const SizedBox(height: 32), // Jarak lebih luas antara rincian item dengan card summary
-
+            const SizedBox(
+              height: 32,
+            ), // Jarak lebih luas antara rincian item dengan card summary
             // TRANSAKSI
             ...group.items.map((item) => _buildTransactionItem(item, fmt)),
           ],
@@ -320,7 +321,7 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -362,7 +363,9 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16), // Jarak antar item diperlebar
-      padding: const EdgeInsets.all(16), // Jarak ke dalam (padding) item diperlebar
+      padding: const EdgeInsets.all(
+        16,
+      ), // Jarak ke dalam (padding) item diperlebar
       decoration: BoxDecoration(
         color: isMasuk
             ? Colors.greenAccent.withValues(alpha: 0.1)
