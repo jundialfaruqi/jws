@@ -10,7 +10,6 @@ import '../providers/my_masjid_provider.dart';
 import '../screens/jumbotron_masjid_screen.dart';
 import '../screens/jumbotron_pemko_screen.dart';
 import 'main_content_widget.dart';
-import '../../../core/widgets/tv/tv_button.dart';
 
 class IdleScreenManager extends ConsumerStatefulWidget {
   const IdleScreenManager({super.key});
@@ -21,6 +20,8 @@ class IdleScreenManager extends ConsumerStatefulWidget {
 
 class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   Timer? _timer;
+  final FocusNode _retryFocusNode = FocusNode();
+  bool _hasRequestedFocusForRetry = false;
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   @override
   void dispose() {
     _timer?.cancel();
+    _retryFocusNode.dispose();
     super.dispose();
   }
 
@@ -41,7 +43,9 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   Widget build(BuildContext context) {
     final profil = ref.watch(selectedProfilProvider);
     if (profil == null) {
-      return const Expanded(child: Center(child: Text('Profil tidak ditemukan')));
+      return const Expanded(
+        child: Center(child: Text('Profil tidak ditemukan')),
+      );
     }
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
@@ -50,25 +54,48 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       loading: () => const Expanded(
         child: Center(child: AppLoadingSpinner(message: 'Memuat data...')),
       ),
-      error: (e, s) => Expanded(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Gagal memuat data, periksa koneksi atau coba beberapa saat lagi'),
-              const SizedBox(height: 16),
-              TvButton(
-                label: 'Coba lagi',
-                icon: Icons.refresh,
-                autofocus: true,
-                onPressed: () {
-                  ref.invalidate(myMasjidProvider(profil.id));
-                },
-              ),
-            ],
+      error: (e, s) {
+        // Minta fokus ke tombol Coba Lagi HANYA 1 kali saat error terjadi
+        if (!_hasRequestedFocusForRetry) {
+          _hasRequestedFocusForRetry = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_retryFocusNode.canRequestFocus) {
+              _retryFocusNode.requestFocus();
+            }
+          });
+        }
+
+        return Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Gagal memuat data, periksa koneksi atau coba beberapa saat lagi',
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  focusNode: _retryFocusNode,
+                  onPressed: () {
+                    // Reset flag agar jika error lagi bisa minta fokus lagi
+                    _hasRequestedFocusForRetry = false;
+                    ref.invalidate(myMasjidProvider(profil.id));
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Coba lagi'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(fontSize: 24),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
       data: (data) {
         final mainSlides = data.slides?.validSlides ?? [];
         final pemkoSlides = data.jumbotronPemko?.isActive == true
@@ -115,8 +142,10 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
           blocks.removeLast();
         }
 
-        int totalDuration =
-            blocks.fold(0, (sum, b) => sum + (b['duration'] as int));
+        int totalDuration = blocks.fold(
+          0,
+          (sum, b) => sum + (b['duration'] as int),
+        );
 
         if (totalDuration == 0) totalDuration = 1;
 
@@ -129,7 +158,8 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         Map<String, dynamic>? activeBlock;
         for (final b in blocks) {
           int duration = b['duration'] as int;
-          if (currentPos >= accumulated && currentPos < accumulated + duration) {
+          if (currentPos >= accumulated &&
+              currentPos < accumulated + duration) {
             activeBlock = b;
             activeBlockStart = accumulated;
             break;
@@ -151,7 +181,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         } else {
           int relativeTime = currentPos - activeBlockStart;
           int mainSlideIndex = relativeTime ~/ 10;
-          
+
           currentWidget = ProviderScope(
             key: const ValueKey('main'),
             overrides: [

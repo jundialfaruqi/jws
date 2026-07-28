@@ -66,6 +66,7 @@ class MurotalAudioService {
   bool _checkShouldPlay() {
     // 1. Cek Setting Mute
     final audioSettings = _ref.read(audioSettingsProvider);
+    if (audioSettings.isLoading) return false;
     if (audioSettings.isMurotalMuted) return false;
 
     // 2. Cek Transisi (Hanya main di Idle)

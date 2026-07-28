@@ -92,6 +92,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
   void _playAdzanAudio(String prayerName) async {
     final audioSettings = ref.read(audioSettingsProvider);
+    if (audioSettings.isLoading) return;
     if (audioSettings.isAdzanMuted) return;
 
     final profil = ref.read(selectedProfilProvider);

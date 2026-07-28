@@ -16,8 +16,9 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  final GlobalKey<TvDrawerMenuState> _drawerKey = GlobalKey<TvDrawerMenuState>();
-  final FocusNode _mainScreenFocusNode = FocusNode();
+  final GlobalKey<TvDrawerMenuState> _drawerKey =
+      GlobalKey<TvDrawerMenuState>();
+  final FocusScopeNode _mainScreenFocusNode = FocusScopeNode();
 
   @override
   void dispose() {
@@ -27,13 +28,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return AppConfirmExit(
-      child: Focus(
-        focusNode: _mainScreenFocusNode,
+      child: FocusScope(
+        node: _mainScreenFocusNode,
         autofocus: true,
         onKeyEvent: (node, event) {
-          if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.arrowRight) {
             _drawerKey.currentState?.showDrawer();
             return KeyEventResult.handled;
           }

@@ -4,19 +4,23 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AudioSettingsState {
   final bool isAdzanMuted;
   final bool isMurotalMuted;
+  final bool isLoading;
 
   AudioSettingsState({
     this.isAdzanMuted = false,
     this.isMurotalMuted = false,
+    this.isLoading = true,
   });
 
   AudioSettingsState copyWith({
     bool? isAdzanMuted,
     bool? isMurotalMuted,
+    bool? isLoading,
   }) {
     return AudioSettingsState(
       isAdzanMuted: isAdzanMuted ?? this.isAdzanMuted,
       isMurotalMuted: isMurotalMuted ?? this.isMurotalMuted,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }
@@ -39,6 +43,7 @@ class AudioSettingsNotifier extends Notifier<AudioSettingsState> {
     state = state.copyWith(
       isAdzanMuted: adzanMutedStr == 'true',
       isMurotalMuted: murotalMutedStr == 'true',
+      isLoading: false,
     );
   }
 

@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/connectivity_provider.dart';
@@ -30,30 +29,30 @@ class AppOfflineBanner extends ConsumerWidget {
       width: double.infinity,
       color: Colors.red.shade100, // Warna latar error yang lembut
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: TextStyle(
-            color: Colors.red.shade900,
-            fontSize: 14,
-          ),
-          children: [
-            const TextSpan(text: 'Tidak ada internet. Tunggu koneksi terhubung, atau '),
-            TextSpan(
-              text: 'muat ulang halaman',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  if (onRetry != null) {
-                    onRetry!();
-                  }
-                },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Tidak ada internet. Tunggu koneksi terhubung, atau',
+            style: TextStyle(
+              color: Colors.red.shade900,
+              fontSize: 16,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () {
+              if (onRetry != null) {
+                onRetry!();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Coba Lagi'),
+          ),
+        ],
       ),
     );
   }
