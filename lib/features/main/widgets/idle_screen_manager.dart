@@ -10,6 +10,7 @@ import '../providers/my_masjid_provider.dart';
 import '../screens/jumbotron_masjid_screen.dart';
 import '../screens/jumbotron_pemko_screen.dart';
 import 'main_content_widget.dart';
+import '../../../core/widgets/tv/tv_button.dart';
 
 class IdleScreenManager extends ConsumerStatefulWidget {
   const IdleScreenManager({super.key});
@@ -49,8 +50,24 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       loading: () => const Expanded(
         child: Center(child: AppLoadingSpinner(message: 'Memuat data...')),
       ),
-      error: (e, s) => const Expanded(
-        child: Center(child: Text('Gagal memuat siklus Jumbotron')),
+      error: (e, s) => Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Gagal memuat data, periksa koneksi atau coba beberapa saat lagi'),
+              const SizedBox(height: 16),
+              TvButton(
+                label: 'Coba lagi',
+                icon: Icons.refresh,
+                autofocus: true,
+                onPressed: () {
+                  ref.invalidate(myMasjidProvider(profil.id));
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       data: (data) {
         final mainSlides = data.slides?.validSlides ?? [];
