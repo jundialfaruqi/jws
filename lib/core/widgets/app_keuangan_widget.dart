@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../features/main/models/laporan_keuangan_model.dart';
 import '../constants/app_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../time/time_sync_service.dart';
 
-class AppKeuanganWidget extends StatefulWidget {
+class AppKeuanganWidget extends ConsumerStatefulWidget {
   final LaporanKeuanganDataModel? laporanData;
   final int scrollSpeed;
   final EdgeInsetsGeometry? margin;
@@ -20,23 +22,19 @@ class AppKeuanganWidget extends StatefulWidget {
   });
 
   @override
-  State<AppKeuanganWidget> createState() => _AppKeuanganWidgetState();
+  ConsumerState<AppKeuanganWidget> createState() => _AppKeuanganWidgetState();
 }
 
-class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
+class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late Ticker _ticker;
-  Duration _lastElapsed = Duration.zero;
-  double _currentSpeed = 30.0;
-  double _targetSpeed = 30.0;
-  double _accumulatedDx = 0.0;
+  double _contentHeight = 0.0;
+  bool _isHeightCalculated = false;
 
   @override
   void initState() {
     super.initState();
-    _targetSpeed = _calculateSpeed(widget.scrollSpeed);
-    _currentSpeed = _targetSpeed;
 
     _ticker = createTicker(_onTick);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,48 +42,37 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     });
   }
 
-  double _calculateSpeed(int speedValue) {
-    final double baseSpeed = 30.0;
-    final double multiplier = (speedValue > 0) ? speedValue.toDouble() : 1.0;
-    return baseSpeed * multiplier;
-  }
-
-  @override
-  void didUpdateWidget(AppKeuanganWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scrollSpeed != widget.scrollSpeed) {
-      _targetSpeed = _calculateSpeed(widget.scrollSpeed);
-    }
-  }
-
   void _onTick(Duration elapsed) {
     if (!mounted || !_scrollController.hasClients) return;
 
-    final delta = elapsed - _lastElapsed;
-    _lastElapsed = elapsed;
-
-    final dt = delta.inMilliseconds / 1000.0; // waktu dalam detik
-    if (dt <= 0) return;
-
-    // Transisi kecepatan secara bertahap (Ramp up / Ramp down)
-    if ((_targetSpeed - _currentSpeed).abs() > 0.1) {
-      // Menyesuaikan kecepatan sedikit demi sedikit setiap frame
-      _currentSpeed += (_targetSpeed - _currentSpeed) * 2.0 * dt;
-    } else {
-      _currentSpeed = _targetSpeed;
+    // Hitung tinggi 1 set konten jika belum
+    if (!_isHeightCalculated) {
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      if (maxExtent > 0) {
+        // Karena kita merender 2 set konten identik (plus header),
+        // kita akan menghitung tinggi per set nanti setelah frame dirender penuh.
+        // Untuk sekarang, kita asumsikan jika bisa scroll, kita cari tingginya.
+      }
     }
 
-    final double dx = _currentSpeed * dt;
-    _accumulatedDx += dx;
+    if (_contentHeight == 0.0) return;
 
-    // Solusi "Gempa" StickyHeader:
-    // Hanya lakukan scroll ketika terkumpul pergerakan minimal 1 pixel bulat.
-    // Ini mencegah sub-pixel rendering (misal 100.5 px) yang membuat StickyHeader bingung dan bergetar.
-    if (_accumulatedDx >= 1.0) {
-      final double steps = _accumulatedDx.floorToDouble();
-      _scrollController.jumpTo((_scrollController.offset + steps).roundToDouble());
-      _accumulatedDx -= steps;
-    }
+    // Logika Sinkronisasi Jam Dunia (Keajaiban Sinkronisasi)
+    final int nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    
+    // Kecepatan dalam pixel per detik (base speed 30.0 * multiplier)
+    final double baseSpeed = 30.0;
+    final double multiplier = widget.scrollSpeed > 0 ? widget.scrollSpeed.toDouble() : 1.0;
+    final double speed = baseSpeed * multiplier;
+    
+    // Jarak absolut yang seharusnya ditempuh berdasarkan waktu
+    final double distance = (nowMs / 1000.0) * speed;
+    
+    // Hitung sisa jarak agar animasi berulang (looping) secara mulus di dalam 1 set konten
+    final double position = distance % _contentHeight;
+
+    // Update posisi scroll secara melompat (jumpTo) dengan pembulatan agar StickyHeader tidak gempa
+    _scrollController.jumpTo(position.floorToDouble());
   }
 
   @override
@@ -94,6 +81,8 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
     _scrollController.dispose();
     super.dispose();
   }
+
+  final GlobalKey _contentKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +132,6 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.bgDark.withValues(alpha: 0.8),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(0),
-                topRight: Radius.circular(0),
-              ),
             ),
             child: Text(
               "PERIODE ${data.periodeString.toUpperCase()}",
@@ -159,14 +144,48 @@ class _AppKeuanganWidgetState extends State<AppKeuanganWidget>
             ),
           ),
 
-          // SCROLLING CONTENT INFINITE
+          // SCROLLING CONTENT
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(0),
-              itemBuilder: (context, index) {
-                final itemIndex = index % scrollItems.length;
-                return scrollItems[itemIndex];
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Ukur tinggi konten segera setelah dirender
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  final renderBox = _contentKey.currentContext?.findRenderObject() as RenderBox?;
+                  if (renderBox != null && _contentHeight != renderBox.size.height) {
+                    setState(() {
+                      _contentHeight = renderBox.size.height;
+                      _isHeightCalculated = true;
+                    });
+                  }
+                });
+
+                return SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const NeverScrollableScrollPhysics(), // Scroll hanya via Ticker
+                  child: Column(
+                    children: [
+                      // Set Konten Asli (Diukur Tingginya)
+                      Container(
+                        key: _contentKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: scrollItems,
+                        ),
+                      ),
+                      // Set Konten Bayangan 1 (Untuk Seamless Looping)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: scrollItems,
+                      ),
+                      // Set Konten Bayangan 2 (Jaga-jaga jika tinggi layar sangat besar)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: scrollItems,
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
