@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_offline_banner.dart';
+import 'audio_download_overlay.dart';
 
 class AppScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
@@ -18,13 +19,18 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: appBar,
-      body: Column(
+      body: Stack(
         children: [
-          // Banner otomatis muncul di atas seluruh body halaman (tanpa menimpa AppBar)
-          AppOfflineBanner(
-            onRetry: () {},
+          Column(
+            children: [
+              // Banner otomatis muncul di atas seluruh body halaman (tanpa menimpa AppBar)
+              AppOfflineBanner(
+                onRetry: () {},
+              ),
+              Expanded(child: body),
+            ],
           ),
-          Expanded(child: body),
+          const AudioDownloadOverlay(),
         ],
       ),
     );

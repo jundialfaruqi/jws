@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:go_router/go_router.dart';
-import 'package:jws/core/constants/api_constant.dart';
 import '../routes/app_router.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
 import '../time/time_sync_service.dart';
 import '../providers/audio_settings_provider.dart';
+import 'audio_downloader_service.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
 import '../../features/main/models/durasi_model.dart';
 
@@ -105,12 +105,31 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
     if (path == null || path.isEmpty) return;
 
-    final baseUrl = ApiConstant.baseUrl;
-    final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
-    final fullUrl = path.startsWith('http') ? path : '$cleanBase$path';
+    final downloader = ref.read(audioDownloaderProvider.notifier);
+    String? localPath = await downloader.getLocalAudioPath(path);
+
+    if (localPath == null) {
+      debugPrint("⏳ [Adzan] File belum tersedia, menunggu download selesai...");
+      await downloader.waitForDownload();
+
+      // Cek apakah state masih adzan setelah selesai download
+      if (state.status != PrayerState.adzan) {
+        debugPrint("🛑 [Adzan] Batal memutar, waktu adzan sudah habis selama proses download.");
+        return;
+      }
+
+      localPath = await downloader.getLocalAudioPath(path);
+      if (localPath == null) {
+        debugPrint("❌ [Adzan] Gagal memutar, file masih tidak ditemukan setelah download.");
+        return;
+      }
+    }
+
+    final source = DeviceFileSource(localPath);
+    debugPrint("📢 [Adzan] Memutar Adzan dari memori lokal: $localPath");
 
     try {
-      await _adzanPlayer.play(UrlSource(fullUrl));
+      await _adzanPlayer.play(source);
     } catch (e) {
       debugPrint("Gagal memutar adzan: $e");
     }

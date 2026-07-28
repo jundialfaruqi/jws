@@ -2,13 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:jws/core/constants/api_constant.dart';
 
 import 'prayer_transition_service.dart';
 import '../providers/audio_settings_provider.dart';
 import '../providers/selected_profil_provider.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
 import '../time/time_sync_service.dart';
+import 'audio_downloader_service.dart';
 
 final murotalAudioServiceProvider = Provider<MurotalAudioService>((ref) {
   final service = MurotalAudioService(ref);
@@ -25,11 +25,25 @@ class MurotalAudioService {
   bool _isPlaying = false;
   String? _currentUrl;
 
+  DateTime? _lastPlayTime;
+
   MurotalAudioService(this._ref) {
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
     
-    _audioPlayer.onPlayerComplete.listen((_) {
+    _audioPlayer.onPlayerComplete.listen((_) async {
       _isPlaying = false;
+      
+      // Jeda Keselamatan (Circuit Breaker):
+      // Jika lagu baru diputar lalu mati dalam waktu < 2 detik, artinya file rusak.
+      // Kita beri jeda 10 detik agar tidak terjadi perulangan instan ratusan kali per detik.
+      if (_lastPlayTime != null) {
+        final diff = DateTime.now().difference(_lastPlayTime!).inSeconds;
+        if (diff < 2) {
+          debugPrint("⚠️ [Murotal] File kemungkinan rusak, menunda 10 detik...");
+          await Future.delayed(const Duration(seconds: 10));
+        }
+      }
+
       _moveToNextSlotAndPlay();
     });
   }
@@ -123,19 +137,38 @@ class MurotalAudioService {
       if (path == null) return; // Mencegah infinite loop kalau semua null (sudah dihandle di atas)
     }
 
-    final baseUrl = ApiConstant.baseUrl;
-    final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
-    final fullUrl = path.startsWith('http') ? path : '$cleanBase$path';
+    // 1. Cek File Lokal
+    final downloader = _ref.read(audioDownloaderProvider.notifier);
+    String? localPath = await downloader.getLocalAudioPath(path);
+
+    if (localPath == null) {
+      // 2. Jika belum ada, tunggu sampai proses download selesai
+      debugPrint("⏳ [Murotal] File belum tersedia, menunggu download selesai...");
+      await downloader.waitForDownload();
+      
+      // 3. Cek ulang setelah download selesai
+      localPath = await downloader.getLocalAudioPath(path);
+      if (localPath == null) {
+         debugPrint("❌ [Murotal] Gagal memutar, file masih tidak ditemukan setelah download.");
+         return; 
+      }
+    }
+
+    // 4. Mainkan dari Lokal (100% Offline)
+    final source = DeviceFileSource(localPath);
+    final trackId = 'local_$localPath';
+    debugPrint("🎵 [Murotal] Memutar dari memori lokal: $localPath");
 
     try {
-      if (_currentUrl == fullUrl) {
-        // Resume if it's the same URL
+      if (_currentUrl == trackId) {
+        // Resume if it's the same track
         await _audioPlayer.resume();
       } else {
-        // Play new URL
-        _currentUrl = fullUrl;
-        await _audioPlayer.play(UrlSource(fullUrl));
+        // Play new track
+        _currentUrl = trackId;
+        await _audioPlayer.play(source);
       }
+      _lastPlayTime = DateTime.now();
       _isPlaying = true;
     } catch (e) {
       debugPrint("Gagal memutar murotal: $e");
