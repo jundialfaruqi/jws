@@ -300,21 +300,33 @@ class JumatScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Gunakan Transform.translate untuk penyesuaian tengah secara visual (Optical Alignment).
-                              // Ubah nilai -8 (Y) jika ikon terasa masih terlalu tinggi atau rendah.
-                              Transform.translate(
-                                offset: const Offset(0, -8),
-                                child: const Icon(TablerIcons.clock, color: Colors.white70, size: 120),
-                              ),
-                              const SizedBox(width: 32),
                               Text(
-                                '$hour:$minute',
+                                hour,
                                 style: const TextStyle(
                                   fontSize: 120,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
-                                  letterSpacing: 4,
+                                  height: 1.0,
+                                ),
+                              ),
+                              Container(
+                                height: 80,
+                                width: 4,
+                                margin: const EdgeInsets.symmetric(horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              Text(
+                                minute,
+                                style: const TextStyle(
+                                  fontSize: 120,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  height: 1.0,
                                 ),
                               ),
                               const SizedBox(width: 16),

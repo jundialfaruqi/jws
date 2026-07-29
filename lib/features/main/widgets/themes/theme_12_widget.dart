@@ -75,13 +75,30 @@ class Theme12Widget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '$hour:$minute',
+                            hour,
                             style: const TextStyle(
                               fontSize: 84,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textYellow,
                               fontFamily: 'Poppins',
-                              letterSpacing: 2,
+                            ),
+                          ),
+                          Container(
+                            height: 56,
+                            width: 3,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          Text(
+                            minute,
+                            style: const TextStyle(
+                              fontSize: 84,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textYellow,
+                              fontFamily: 'Poppins',
                             ),
                           ),
                           const SizedBox(width: 12),
