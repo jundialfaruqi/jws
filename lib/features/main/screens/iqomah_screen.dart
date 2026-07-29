@@ -179,6 +179,15 @@ class IqomahScreen extends ConsumerWidget {
                               final currentSeconds = transitionState.totalSeconds == 0
                                   ? (value * 300).ceil()
                                   : displayRemaining;
+                              
+                              final floatSeconds = transitionState.totalSeconds == 0
+                                  ? value * 300
+                                  : value * transitionState.totalSeconds;
+
+                              final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
+                              final barColor = isBlinking
+                                  ? ((floatSeconds * 2).floor() % 2 == 0 ? Colors.redAccent : AppColors.textYellow)
+                                  : AppColors.textYellow;
 
                               return Column(
                                 children: [
@@ -186,16 +195,16 @@ class IqomahScreen extends ConsumerWidget {
                                     value: value,
                                     minHeight: 60,
                                     backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                    color: AppColors.textYellow,
+                                    color: barColor,
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   const SizedBox(height: 24),
                                   Text(
                                     _formatCountdown(currentSeconds),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 200,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.textYellow,
+                                      color: barColor,
                                       fontFamily: 'JetBrainsMono',
                                       height: 1.0,
                                     ),

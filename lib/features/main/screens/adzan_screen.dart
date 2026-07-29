@@ -162,6 +162,15 @@ class AdzanScreen extends ConsumerWidget {
                           final currentSeconds = transitionState.totalSeconds == 0
                               ? (value * 90).ceil()
                               : displayRemaining;
+                          
+                          final floatSeconds = transitionState.totalSeconds == 0
+                              ? value * 90
+                              : value * transitionState.totalSeconds;
+
+                          final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
+                          final barColor = isBlinking
+                              ? ((floatSeconds * 2).floor() % 2 == 0 ? Colors.redAccent : AppColors.textYellow)
+                              : AppColors.textYellow;
 
                           return Column(
                             children: [
@@ -169,16 +178,16 @@ class AdzanScreen extends ConsumerWidget {
                                 value: value,
                                 minHeight: 60,
                                 backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                color: AppColors.textYellow,
+                                color: barColor,
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               const SizedBox(height: 35),
                               Text(
                                 _formatCountdown(currentSeconds),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 260,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: isBlinking ? barColor : Colors.white,
                                   fontFamily: 'JetBrainsMono',
                                   height: 1.0,
                                 ),
