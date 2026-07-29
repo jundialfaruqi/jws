@@ -58,16 +58,21 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
     if (_contentHeight == 0.0) return;
 
     // Logika Sinkronisasi Jam Dunia (Keajaiban Sinkronisasi)
-    final int nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
-    
+    final int nowMs = ref
+        .read(timeSyncServiceProvider)
+        .now()
+        .millisecondsSinceEpoch;
+
     // Kecepatan dalam pixel per detik (base speed 30.0 * multiplier)
     final double baseSpeed = 30.0;
-    final double multiplier = widget.scrollSpeed > 0 ? widget.scrollSpeed.toDouble() : 1.0;
+    final double multiplier = widget.scrollSpeed > 0
+        ? widget.scrollSpeed.toDouble()
+        : 1.0;
     final double speed = baseSpeed * multiplier;
-    
+
     // Jarak absolut yang seharusnya ditempuh berdasarkan waktu
     final double distance = (nowMs / 1000.0) * speed;
-    
+
     // Hitung sisa jarak agar animasi berulang (looping) secara mulus di dalam 1 set konten
     final double position = distance % _contentHeight;
 
@@ -151,8 +156,11 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
                 // Ukur tinggi konten segera setelah dirender
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
-                  final renderBox = _contentKey.currentContext?.findRenderObject() as RenderBox?;
-                  if (renderBox != null && _contentHeight != renderBox.size.height) {
+                  final renderBox =
+                      _contentKey.currentContext?.findRenderObject()
+                          as RenderBox?;
+                  if (renderBox != null &&
+                      _contentHeight != renderBox.size.height) {
                     setState(() {
                       _contentHeight = renderBox.size.height;
                       _isHeightCalculated = true;
@@ -162,7 +170,8 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
 
                 return SingleChildScrollView(
                   controller: _scrollController,
-                  physics: const NeverScrollableScrollPhysics(), // Scroll hanya via Ticker
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Scroll hanya via Ticker
                   child: Column(
                     children: [
                       // Set Konten Asli (Diukur Tingginya)
