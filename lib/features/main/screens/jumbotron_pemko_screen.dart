@@ -99,6 +99,7 @@ class JumbotronPemkoScreen extends ConsumerWidget {
               child: AppNextPrayerBar(
                 countdownOnly: true,
                 fontSize: 48,
+                iconSize: 48,
                 jadwalSholatList: profil != null
                     ? ref
                               .watch(myMasjidProvider(profil.id))
