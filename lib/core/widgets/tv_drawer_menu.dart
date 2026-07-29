@@ -172,7 +172,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                     const SizedBox(height: 30),
                     const Center(
                       child: Text(
-                        'Menu Utama',
+                        'JWS Diskominfo',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 36,
