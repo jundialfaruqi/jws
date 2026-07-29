@@ -61,15 +61,61 @@ class Theme12Widget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   alignment: Alignment.center,
                   child: AppLiveClock(
-                    showSeconds: false,
-                    showDate: false,
-                    blinkSeparator: true,
-                    textStyle: const TextStyle(
-                      fontFamily: 'JetBrainsMono',
-                      fontSize: 84,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textYellow,
-                    ),
+                    builder: (context, now) {
+                      final hour = now.hour.toString().padLeft(2, '0');
+                      final minute = now.minute.toString().padLeft(2, '0');
+                      final second = now.second.toString().padLeft(2, '0');
+                      
+                      String timeZone = 'WIB';
+                      if (now.timeZoneOffset.inHours == 8) timeZone = 'WITA';
+                      if (now.timeZoneOffset.inHours == 9) timeZone = 'WIT';
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$hour:$minute',
+                            style: const TextStyle(
+                              fontSize: 84,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textYellow,
+                              fontFamily: 'Poppins',
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                second,
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textYellow,
+                                  fontFamily: 'Poppins',
+                                  height: 1.0,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                timeZone,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white70,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 1,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 // Pembatas Tipis Dihapus
