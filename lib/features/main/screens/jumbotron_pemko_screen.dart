@@ -41,6 +41,8 @@ class JumbotronPemkoScreen extends ConsumerWidget {
           Positioned.fill(
             child: CachedNetworkImage(
               imageUrl: _getFullUrl(imageUrl),
+              width: double.infinity,
+              height: double.infinity,
               fit: BoxFit.fill,
               errorWidget: (context, url, error) => const Center(
                 child: Icon(
