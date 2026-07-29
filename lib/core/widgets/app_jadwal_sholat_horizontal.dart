@@ -209,7 +209,7 @@ class _AppJadwalSholatHorizontalState
         return Colors.white;
       }
       if (isNext) {
-        return Colors.black; // Teks hitam agar kontras dengan latar kuning
+        return AppColors.bgNavy; // Teks hitam agar kontras dengan latar kuning
       }
       return Colors.white; // default
     }
