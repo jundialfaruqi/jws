@@ -60,11 +60,12 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final AudioPlayer _adzanPlayer = AudioPlayer();
   bool _hasPlayedIqomahBeep = false;
+  DateTime? _targetEndTime;
 
   @override
   PrayerTransitionState build() {
-    // Start timer on build
-    _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+    // Start timer on build dengan presisi milidetik (100ms) agar semua TV presisi!
+    _timer = Timer.periodic(const Duration(milliseconds: 100), _tick);
     
     // Listen to beep complete to start Adzan
     _audioPlayer.onPlayerComplete.listen((_) {
@@ -139,20 +140,28 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
   void _tick(Timer timer) {
     if (state.status != PrayerState.idle) {
       // Sedang dalam transisi (Adzan/Iqomah/dll)
-      if (state.remainingSeconds > 0) {
-        // Countdown
-        final newRemaining = state.remainingSeconds - 1;
-        
-        // Cek beep 5 detik terakhir di iqomah
-        if (state.status == PrayerState.iqomah && newRemaining == 5 && !_hasPlayedIqomahBeep) {
-          _hasPlayedIqomahBeep = true;
-          _playSound();
-        }
+      if (_targetEndTime != null) {
+        final now = ref.read(timeSyncServiceProvider).now();
+        final newRemaining = _targetEndTime!.difference(now).inSeconds;
 
-        state = state.copyWith(remainingSeconds: newRemaining);
+        if (newRemaining > 0) {
+          // Update state hanya jika detik (integer) benar-benar berubah (mencegah spam rebuild UI 10x per detik)
+          if (newRemaining != state.remainingSeconds) {
+            // Cek beep 5 detik terakhir di iqomah
+            if (state.status == PrayerState.iqomah && newRemaining <= 5 && newRemaining > 0 && !_hasPlayedIqomahBeep) {
+              _hasPlayedIqomahBeep = true;
+              _playSound();
+            }
+            state = state.copyWith(remainingSeconds: newRemaining);
+          }
+        } else {
+          // Waktu habis, pindah ke state berikutnya
+          _targetEndTime = null;
+          _adzanPlayer.stop(); // Pastikan adzan berhenti saat berpindah fase
+          _nextState();
+        }
       } else {
-        // Waktu habis, pindah ke state berikutnya
-        _adzanPlayer.stop(); // Pastikan adzan berhenti saat berpindah fase
+        _adzanPlayer.stop();
         _nextState();
       }
     } else {
@@ -258,6 +267,9 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
        _playSound();
     }
     
+    final now = ref.read(timeSyncServiceProvider).now();
+    _targetEndTime = now.add(Duration(seconds: remainingSeconds));
+    
     state = PrayerTransitionState(
       status: status,
       prayerName: name,
@@ -293,11 +305,15 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     }
 
     if (nextStatus == PrayerState.idle) {
+      _targetEndTime = null;
       state = PrayerTransitionState(); // Reset
       _navigateToMain();
     } else {
       _hasPlayedIqomahBeep = false;
       int durationMinutes = _getDurationForState(nextStatus, name, durasi);
+      
+      _targetEndTime = now.add(Duration(minutes: durationMinutes));
+      
       state = state.copyWith(
         status: nextStatus,
         totalSeconds: durationMinutes * 60,
