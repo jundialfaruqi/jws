@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../time/time_sync_service.dart';
 import '../constants/app_colors.dart';
@@ -14,27 +14,28 @@ class AppAnalogClock extends ConsumerStatefulWidget {
   ConsumerState<AppAnalogClock> createState() => _AppAnalogClockState();
 }
 
-class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
-  late Timer _timer;
+class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
+    with SingleTickerProviderStateMixin {
+  late Ticker _ticker;
   late DateTime _now;
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi awal
     _now = ref.read(timeSyncServiceProvider).now();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _ticker = createTicker((_) {
       if (mounted) {
         setState(() {
           _now = ref.read(timeSyncServiceProvider).now();
         });
       }
     });
+    _ticker.start();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _ticker.dispose();
     super.dispose();
   }
 
@@ -171,7 +172,7 @@ class AnalogClockPainter extends CustomPainter {
               blurRadius: 4,
               color: Colors.black.withValues(alpha: 0.6),
               offset: const Offset(1, 2),
-            )
+            ),
           ],
         ),
       );
@@ -192,9 +193,13 @@ class AnalogClockPainter extends CustomPainter {
         ..strokeWidth = paint.strokeWidth
         ..strokeCap = StrokeCap.round
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-        
+
       // Gambar shadow
-      canvas.drawLine(p1 + const Offset(2, 3), p2 + const Offset(2, 3), shadowPaint);
+      canvas.drawLine(
+        p1 + const Offset(2, 3),
+        p2 + const Offset(2, 3),
+        shadowPaint,
+      );
       // Gambar jarum asli
       canvas.drawLine(p1, p2, paint);
     }
@@ -203,10 +208,14 @@ class AnalogClockPainter extends CustomPainter {
     final hour = dateTime.hour % 12;
     final minute = dateTime.minute;
     final second = dateTime.second;
+    final millisecond = dateTime.millisecond;
 
-    final hourAngle = (hour * 30 + minute * 0.5 - 90) * pi / 180;
-    final minuteAngle = (minute * 6 + second * 0.1 - 90) * pi / 180;
-    final secondAngle = (second * 6 - 90) * pi / 180;
+    // Hitungan sudut presisi hingga tingkat pecahan desimal (smooth sweep)
+    final hourAngle =
+        ((hour + (minute / 60) + (second / 3600)) * 30 - 90) * pi / 180;
+    final minuteAngle =
+        ((minute + (second / 60) + (millisecond / 60000)) * 6 - 90) * pi / 180;
+    final secondAngle = ((second + (millisecond / 1000)) * 6 - 90) * pi / 180;
 
     // Jarum Jam (Hour Hand)
     final hourPaint = Paint()

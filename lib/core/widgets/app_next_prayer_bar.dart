@@ -7,7 +7,7 @@ import '../../features/main/models/jadwal_sholat_model.dart';
 import '../time/time_sync_service.dart';
 import 'package:hijri/hijri_calendar.dart';
 
-class AppNextPrayerBar extends ConsumerWidget {
+class AppNextPrayerBar extends ConsumerStatefulWidget {
   final double leftMargin;
   final List<JadwalSholatModel> jadwalSholatList;
   final bool countdownOnly;
@@ -23,6 +23,38 @@ class AppNextPrayerBar extends ConsumerWidget {
     this.fontSize = 28.0,
   });
 
+  @override
+  ConsumerState<AppNextPrayerBar> createState() => _AppNextPrayerBarState();
+}
+
+class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncAndScheduleNext();
+    });
+  }
+
+  void _syncAndScheduleNext() {
+    if (!mounted) return;
+    setState(() {}); // Picu rebuild layar
+
+    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    final int msUntilNext = 1000 - (nowMs % 1000);
+    
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: msUntilNext), _syncAndScheduleNext);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   DateTime _parseTime(String timeStr, DateTime now) {
     if (timeStr == '--:--' || timeStr.isEmpty) return now;
     final parts = timeStr.split(':');
@@ -37,32 +69,29 @@ class AppNextPrayerBar extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return StreamBuilder(
-      stream: Stream.periodic(const Duration(seconds: 1)),
-      builder: (context, snapshot) {
-        final now = ref.read(timeSyncServiceProvider).now();
+  Widget build(BuildContext context) {
+    final now = ref.read(timeSyncServiceProvider).now();
 
         String nextPrayer = '...';
         Duration countdown = Duration.zero;
         JadwalSholatModel? todayJadwal;
         JadwalSholatModel? tomorrowJadwal;
 
-        if (jadwalSholatList.isNotEmpty) {
+        if (widget.jadwalSholatList.isNotEmpty) {
           final dateStr =
               "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
           try {
-            todayJadwal = jadwalSholatList.firstWhere((j) => j.date == dateStr);
+            todayJadwal = widget.jadwalSholatList.firstWhere((j) => j.date == dateStr);
           } catch (_) {
-            todayJadwal = jadwalSholatList.first;
+            todayJadwal = widget.jadwalSholatList.first;
           }
 
           final tomorrow = now.add(const Duration(days: 1));
           final tomorrowStr =
               "${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}";
           try {
-            tomorrowJadwal = jadwalSholatList.firstWhere(
+            tomorrowJadwal = widget.jadwalSholatList.firstWhere(
               (j) => j.date == tomorrowStr,
             );
           } catch (_) {
@@ -166,7 +195,7 @@ class AppNextPrayerBar extends ConsumerWidget {
               'MENUJU $nextPrayer',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: fontSize,
+                  fontSize: widget.fontSize,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
                 letterSpacing: 2.0,
@@ -184,7 +213,7 @@ class AppNextPrayerBar extends ConsumerWidget {
                 countdownStr,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: fontSize,
+                  fontSize: widget.fontSize,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'JetBrainsMono',
                 ),
@@ -193,7 +222,7 @@ class AppNextPrayerBar extends ConsumerWidget {
           ],
         );
 
-        if (countdownOnly) {
+        if (widget.countdownOnly) {
           return countdownWidget;
         }
 
@@ -235,20 +264,18 @@ class AppNextPrayerBar extends ConsumerWidget {
         return Container(
           color: AppColors.bgNavy,
           padding: EdgeInsets.only(
-            left: leftMargin + 32,
+            left: widget.leftMargin + 32,
             right: 48,
             top: 16,
             bottom: 16,
           ),
           child: Row(
-            mainAxisAlignment: dateOnly
+            mainAxisAlignment: widget.dateOnly
                 ? MainAxisAlignment.end
                 : MainAxisAlignment.spaceBetween,
-            children: [if (!dateOnly) countdownWidget, dateWidget],
+            children: [if (!widget.dateOnly) countdownWidget, dateWidget],
           ),
         );
-      },
-    );
   }
 }
 

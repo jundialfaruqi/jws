@@ -42,14 +42,14 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
   }
 
   void _startSyncTimer() {
+    if (!mounted) return;
+    setState(() {}); // Picu rebuild UI pada kelipatan detik yang tepat
+
+    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    final int msUntilNext = 1000 - (nowMs % 1000);
+    
     _timer?.cancel();
-    // Gunakan periodic timer (1 detik) hanya untuk men-trigger build ulang UI.
-    // Kalkulasi index mutlak akan dilakukan di dalam build() berdasarkan waktu server.
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    _timer = Timer(Duration(milliseconds: msUntilNext), _startSyncTimer);
   }
 
   @override

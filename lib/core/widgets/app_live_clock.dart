@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../time/time_sync_service.dart';
 import 'package:intl/intl.dart';
 
-class AppLiveClock extends ConsumerWidget {
+class AppLiveClock extends ConsumerStatefulWidget {
   final TextStyle textStyle;
   final String prefix;
   final bool showDate;
@@ -19,34 +20,61 @@ class AppLiveClock extends ConsumerWidget {
     this.blinkSeparator = false,
   });
 
+  @override
+  ConsumerState<AppLiveClock> createState() => _AppLiveClockState();
+}
+
+class _AppLiveClockState extends ConsumerState<AppLiveClock> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncAndScheduleNext();
+    });
+  }
+
+  void _syncAndScheduleNext() {
+    if (!mounted) return;
+    setState(() {}); // Picu rebuild layar
+
+    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    // Hitung sisa waktu hingga menyentuh detik (kelipatan 1000 ms) berikutnya secara presisi
+    final int msUntilNext = 1000 - (nowMs % 1000);
+    
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: msUntilNext), _syncAndScheduleNext);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   String _formatNumber(int number) => number.toString().padLeft(2, '0');
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return StreamBuilder(
-      // Berdetak setiap 1 detik
-      stream: Stream.periodic(const Duration(seconds: 1)),
-      builder: (context, snapshot) {
-        final now = ref.read(timeSyncServiceProvider).now();
-        var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
-        dateStr = dateStr.replaceAll('Minggu', 'Ahad');
-        
-        final separator = (blinkSeparator && now.second % 2 != 0) ? " " : ":";
-        
-        final timeStr = showSeconds
-            ? "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}$separator${_formatNumber(now.second)}"
-            : "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}";
-        
-        String baseText = showDate ? '$dateStr $timeStr' : timeStr;
-        final displayText = prefix.isNotEmpty 
-            ? '$prefix • $baseText' 
-            : baseText;
+  Widget build(BuildContext context) {
+    final now = ref.read(timeSyncServiceProvider).now();
+    var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    dateStr = dateStr.replaceAll('Minggu', 'Ahad');
+    
+    final separator = (widget.blinkSeparator && now.second % 2 != 0) ? " " : ":";
+    
+    final timeStr = widget.showSeconds
+        ? "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}$separator${_formatNumber(now.second)}"
+        : "${_formatNumber(now.hour)}$separator${_formatNumber(now.minute)}";
+    
+    String baseText = widget.showDate ? '$dateStr $timeStr' : timeStr;
+    final displayText = widget.prefix.isNotEmpty 
+        ? '${widget.prefix} • $baseText' 
+        : baseText;
 
-        return Text(
-          displayText,
-          style: textStyle,
-        );
-      },
+    return Text(
+      displayText,
+      style: widget.textStyle,
     );
   }
 }

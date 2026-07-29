@@ -48,23 +48,30 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
   @override
   void initState() {
     super.initState();
-    // Berdetak setiap 1 detik agar warna sholat akurat,
-    // dan menghitung toggle Imsak/Subuh berbasis waktu absolut server
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        final now = ref.read(timeSyncServiceProvider).now();
-        final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
-
-        // 1 Siklus total = 14 detik (7 detik Imsak, 7 detik Syuruq)
-        final int cyclePosition = epochSeconds % 14;
-
-        setState(() {
-          // true (0-6) tampilkan Imsak/Terbit
-          // false (7-13) tampilkan Subuh/Dhuha
-          _showPrimary = cyclePosition < 7;
-        });
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncAndScheduleNext();
     });
+  }
+
+  void _syncAndScheduleNext() {
+    if (!mounted) return;
+
+    final now = ref.read(timeSyncServiceProvider).now();
+    final int nowMs = now.millisecondsSinceEpoch;
+    final int epochSeconds = nowMs ~/ 1000;
+
+    // 1 Siklus total = 14 detik (7 detik Imsak, 7 detik Syuruq)
+    final int cyclePosition = epochSeconds % 14;
+
+    setState(() {
+      // true (0-6) tampilkan Imsak/Terbit
+      // false (7-13) tampilkan Subuh/Dhuha
+      _showPrimary = cyclePosition < 7;
+    });
+
+    final int msUntilNext = 1000 - (nowMs % 1000);
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: msUntilNext), _syncAndScheduleNext);
   }
 
   @override
