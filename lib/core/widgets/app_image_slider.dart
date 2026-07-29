@@ -29,7 +29,7 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
-    
+
     // Gunakan post-frame untuk mengatur initial index secara presisi absolut
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && widget.imageUrls.isNotEmpty) {
@@ -41,30 +41,38 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   void _syncAndScheduleNext({bool initial = false}) {
     if (!mounted || widget.imageUrls.isEmpty) return;
 
-    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    final nowMs = ref
+        .read(timeSyncServiceProvider)
+        .now()
+        .millisecondsSinceEpoch;
     final blockStartTimeMs = ref.read(slideStartTimeProvider);
-    
+
     // Jika provider berisi waktu mulai, gunakan waktu relatif dari waktu mulai blok.
     // Jika null (misal Iqomah/Jumat), gunakan waktu absolut epoch.
-    final relativeMs = blockStartTimeMs != null ? (nowMs - blockStartTimeMs) : nowMs;
-    
+    final relativeMs = blockStartTimeMs != null
+        ? (nowMs - blockStartTimeMs)
+        : nowMs;
+
     // Indeks dihitung secara presisi berdasarkan kelipatan 10.000 ms
     final int nextIndex = (relativeMs ~/ 10000) % widget.imageUrls.length;
-    
+
     if (_currentPage != nextIndex || initial) {
       setState(() {
         _currentPage = nextIndex;
       });
-      
+
       if (_pageController.hasClients) {
         if (initial) {
           _pageController.jumpToPage(_currentPage);
         } else {
           // Hanya gunakan animasi jika bergeser 1 slide (normal flow)
-          bool isAdjacent = (_pageController.page?.round() ?? 0) == _currentPage - 1 || 
-                            (_pageController.page?.round() ?? 0) == _currentPage + 1 ||
-                            (_currentPage == 0 && (_pageController.page?.round() ?? 0) == widget.imageUrls.length - 1);
-                            
+          bool isAdjacent =
+              (_pageController.page?.round() ?? 0) == _currentPage - 1 ||
+              (_pageController.page?.round() ?? 0) == _currentPage + 1 ||
+              (_currentPage == 0 &&
+                  (_pageController.page?.round() ?? 0) ==
+                      widget.imageUrls.length - 1);
+
           if (isAdjacent) {
             _pageController.animateToPage(
               _currentPage,
@@ -81,7 +89,10 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
     // Jadwalkan eksekusi timer meledak persis di kelipatan 10.000 ms berikutnya
     int msUntilNext = 10000 - (relativeMs % 10000);
     _timer?.cancel();
-    _timer = Timer(Duration(milliseconds: msUntilNext), () => _syncAndScheduleNext());
+    _timer = Timer(
+      Duration(milliseconds: msUntilNext),
+      () => _syncAndScheduleNext(),
+    );
   }
 
   @override
@@ -118,7 +129,11 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
       return Container(
         color: Colors.blueGrey.shade900,
         child: const Center(
-          child: Icon(Icons.image_not_supported, color: Colors.white24, size: 64),
+          child: Icon(
+            Icons.image_not_supported,
+            color: Colors.white24,
+            size: 64,
+          ),
         ),
       );
     }
@@ -127,7 +142,8 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
       padding: EdgeInsets.only(left: widget.leftMargin),
       child: PageView.builder(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // Biarkan timer yang scroll
+        physics:
+            const NeverScrollableScrollPhysics(), // Biarkan timer yang scroll
         itemCount: widget.imageUrls.length,
         itemBuilder: (context, index) {
           final fullUrl = _getFullUrl(widget.imageUrls[index]);
@@ -146,7 +162,8 @@ class _KeepAliveImage extends StatefulWidget {
   State<_KeepAliveImage> createState() => _KeepAliveImageState();
 }
 
-class _KeepAliveImageState extends State<_KeepAliveImage> with AutomaticKeepAliveClientMixin {
+class _KeepAliveImageState extends State<_KeepAliveImage>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
