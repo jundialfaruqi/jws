@@ -172,22 +172,37 @@ class AdzanScreen extends ConsumerWidget {
                               currentSeconds <= 10 && currentSeconds > 0;
                           final barColor = isBlinking
                               ? ((floatSeconds * 2).floor() % 2 == 0
-                                    ? Colors.redAccent
+                                    ? Colors.red
                                     : AppColors.textYellow)
                               : AppColors.textYellow;
 
                           return Column(
                             children: [
-                              SizedBox(
-                                width: 750,
-                                child: LinearProgressIndicator(
-                                  value: value,
-                                  minHeight: 80,
-                                  backgroundColor: Colors.white.withValues(
-                                    alpha: 0.2,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Container(
+                                  width: 750,
+                                  height: 80,
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  child: Stack(
+                                    children: [
+                                      Positioned(
+                                        top: 0,
+                                        bottom: 0,
+                                        left:
+                                            -750 * (1 - value.clamp(0.0, 1.0)),
+                                        child: Container(
+                                          width: 750,
+                                          decoration: BoxDecoration(
+                                            color: barColor,
+                                            borderRadius: BorderRadius.circular(
+                                              40,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  color: barColor,
-                                  borderRadius: BorderRadius.circular(40),
                                 ),
                               ),
                               const SizedBox(height: 20),
