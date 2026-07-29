@@ -186,6 +186,12 @@ class JumatScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgBlack,
       body: Stack(
         children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/iqomah-screen/bg-iqomah-jumat-screen.png',
+              fit: BoxFit.cover,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(64.0),
             child: Row(

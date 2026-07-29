@@ -88,7 +88,7 @@ class AlertScreen extends ConsumerWidget {
     }
 
     final String displayPrayerName = transitionState.prayerName.isEmpty
-        ? 'IMSAK'
+        ? 'SYURUQ'
         : transitionState.prayerName;
 
     double progress = transitionState.totalSeconds > 0
@@ -130,7 +130,7 @@ class AlertScreen extends ConsumerWidget {
                 Text(
                   displayPrayerName,
                   style: const TextStyle(
-                    fontSize: 160,
+                    fontSize: 140,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 12,
@@ -146,35 +146,49 @@ class AlertScreen extends ConsumerWidget {
                     children: [
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(
-                          begin: transitionState.totalSeconds == 0 ? 1.0 : progress,
-                          end: transitionState.totalSeconds == 0 ? 0.0 : progress,
+                          begin: transitionState.totalSeconds == 0
+                              ? 1.0
+                              : progress,
+                          end: transitionState.totalSeconds == 0
+                              ? 0.0
+                              : progress,
                         ),
                         duration: transitionState.totalSeconds == 0
-                            ? const Duration(seconds: 90) // Simulasi lambat 1.5 menit
+                            ? const Duration(
+                                seconds: 90,
+                              ) // Simulasi lambat 1.5 menit
                             : const Duration(seconds: 1),
                         curve: Curves.linear,
                         builder: (context, value, child) {
                           final floatSeconds = transitionState.totalSeconds == 0
                               ? value * 90
                               : value * transitionState.totalSeconds;
-                              
+
                           final currentSeconds = floatSeconds.ceil();
 
-                          final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
+                          final isBlinking =
+                              currentSeconds <= 10 && currentSeconds > 0;
                           final barColor = isBlinking
-                              ? ((floatSeconds * 2).floor() % 2 == 0 ? Colors.redAccent : AppColors.textYellow)
+                              ? ((floatSeconds * 2).floor() % 2 == 0
+                                    ? Colors.redAccent
+                                    : AppColors.textYellow)
                               : AppColors.textYellow;
 
                           return Column(
                             children: [
-                              LinearProgressIndicator(
-                                value: value,
-                                minHeight: 60,
-                                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                color: barColor,
-                                borderRadius: BorderRadius.circular(16),
+                              SizedBox(
+                                width: 750,
+                                child: LinearProgressIndicator(
+                                  value: value,
+                                  minHeight: 80,
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  color: barColor,
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
                               ),
-                              const SizedBox(height: 35),
+                              const SizedBox(height: 20),
                               Text(
                                 _formatCountdown(currentSeconds),
                                 style: TextStyle(

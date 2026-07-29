@@ -123,6 +123,12 @@ class IqomahScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgBlack,
       body: Stack(
         children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/iqomah-screen/bg-iqomah-jumat-screen.png',
+              fit: BoxFit.cover,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(64.0),
             child: Row(
@@ -153,7 +159,7 @@ class IqomahScreen extends ConsumerWidget {
                         Text(
                           displayPrayerName,
                           style: const TextStyle(
-                            fontSize: 100,
+                            fontSize: 130,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                             letterSpacing: 12,
@@ -165,39 +171,54 @@ class IqomahScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 64),
                           child: TweenAnimationBuilder<double>(
                             tween: Tween<double>(
-                              begin: transitionState.totalSeconds == 0 ? 1.0 : progress,
-                              end: transitionState.totalSeconds == 0 ? 0.0 : progress,
+                              begin: transitionState.totalSeconds == 0
+                                  ? 1.0
+                                  : progress,
+                              end: transitionState.totalSeconds == 0
+                                  ? 0.0
+                                  : progress,
                             ),
                             duration: transitionState.totalSeconds == 0
-                                ? const Duration(seconds: 300) // Simulasi lambat 5 menit
+                                ? const Duration(
+                                    seconds: 300,
+                                  ) // Simulasi lambat 5 menit
                                 : const Duration(seconds: 1),
                             curve: Curves.linear,
                             builder: (context, value, child) {
-                              final floatSeconds = transitionState.totalSeconds == 0
+                              final floatSeconds =
+                                  transitionState.totalSeconds == 0
                                   ? value * 300
                                   : value * transitionState.totalSeconds;
-                                  
+
                               final currentSeconds = floatSeconds.ceil();
 
-                              final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
+                              final isBlinking =
+                                  currentSeconds <= 10 && currentSeconds > 0;
                               final barColor = isBlinking
-                                  ? ((floatSeconds * 2).floor() % 2 == 0 ? Colors.redAccent : AppColors.textYellow)
+                                  ? ((floatSeconds * 2).floor() % 2 == 0
+                                        ? Colors.redAccent
+                                        : AppColors.textYellow)
                                   : AppColors.textYellow;
 
                               return Column(
                                 children: [
-                                  LinearProgressIndicator(
-                                    value: value,
-                                    minHeight: 60,
-                                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                    color: barColor,
-                                    borderRadius: BorderRadius.circular(16),
+                                  SizedBox(
+                                    width: 700,
+                                    child: LinearProgressIndicator(
+                                      value: value,
+                                      minHeight: 80,
+                                      backgroundColor: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      color: barColor,
+                                      borderRadius: BorderRadius.circular(40),
+                                    ),
                                   ),
                                   const SizedBox(height: 24),
                                   Text(
                                     _formatCountdown(currentSeconds),
                                     style: TextStyle(
-                                      fontSize: 200,
+                                      fontSize: 240,
                                       fontWeight: FontWeight.bold,
                                       color: barColor,
                                       fontFamily: 'JetBrainsMono',

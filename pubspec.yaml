@@ -46,6 +46,7 @@ flutter:
     - assets/logo/
     - assets/sounds/
     - assets/adzan/
+    - assets/iqomah-screen/
   fonts:
     - family: Arial
       fonts:
