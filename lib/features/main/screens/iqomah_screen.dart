@@ -119,8 +119,7 @@ class IqomahScreen extends ConsumerWidget {
         : 300; // 5 menit default untuk preview
 
     double progress = transitionState.totalSeconds > 0
-        ? 1.0 -
-              (transitionState.remainingSeconds / transitionState.totalSeconds)
+        ? (transitionState.remainingSeconds / transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
@@ -167,25 +166,43 @@ class IqomahScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 64),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 60,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.2,
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: transitionState.totalSeconds == 0 ? 1.0 : progress,
+                              end: transitionState.totalSeconds == 0 ? 0.0 : progress,
                             ),
-                            color: AppColors.textYellow,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          _formatCountdown(displayRemaining),
-                          style: const TextStyle(
-                            fontSize: 200,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textYellow,
-                            fontFamily: 'JetBrainsMono',
-                            height: 1.0,
+                            duration: transitionState.totalSeconds == 0
+                                ? const Duration(seconds: 300) // Simulasi lambat 5 menit
+                                : const Duration(seconds: 1),
+                            curve: Curves.linear,
+                            builder: (context, value, child) {
+                              final currentSeconds = transitionState.totalSeconds == 0
+                                  ? (value * 300).ceil()
+                                  : displayRemaining;
+
+                              return Column(
+                                children: [
+                                  LinearProgressIndicator(
+                                    value: value,
+                                    minHeight: 60,
+                                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                                    color: AppColors.textYellow,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    _formatCountdown(currentSeconds),
+                                    style: const TextStyle(
+                                      fontSize: 200,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textYellow,
+                                      fontFamily: 'JetBrainsMono',
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       ], // Penutup children Column

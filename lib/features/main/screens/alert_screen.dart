@@ -95,8 +95,7 @@ class AlertScreen extends ConsumerWidget {
         : 90; // 1 menit 30 detik
 
     double progress = transitionState.totalSeconds > 0
-        ? 1.0 -
-              (transitionState.remainingSeconds / transitionState.totalSeconds)
+        ? (transitionState.remainingSeconds / transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
@@ -148,23 +147,43 @@ class AlertScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 500),
                   child: Column(
                     children: [
-                      LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 60,
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
-                        color: AppColors.textYellow,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      const SizedBox(height: 35),
-                      Text(
-                        _formatCountdown(displayRemaining),
-                        style: const TextStyle(
-                          fontSize: 260,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'JetBrainsMono',
-                          height: 1.0,
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: transitionState.totalSeconds == 0 ? 1.0 : progress,
+                          end: transitionState.totalSeconds == 0 ? 0.0 : progress,
                         ),
+                        duration: transitionState.totalSeconds == 0
+                            ? const Duration(seconds: 90) // Simulasi lambat 1.5 menit
+                            : const Duration(seconds: 1),
+                        curve: Curves.linear,
+                        builder: (context, value, child) {
+                          final currentSeconds = transitionState.totalSeconds == 0
+                              ? (value * 90).ceil()
+                              : displayRemaining;
+
+                          return Column(
+                            children: [
+                              LinearProgressIndicator(
+                                value: value,
+                                minHeight: 60,
+                                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                                color: AppColors.textYellow,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              const SizedBox(height: 35),
+                              Text(
+                                _formatCountdown(currentSeconds),
+                                style: const TextStyle(
+                                  fontSize: 260,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'JetBrainsMono',
+                                  height: 1.0,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
