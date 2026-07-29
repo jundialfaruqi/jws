@@ -21,7 +21,7 @@ class FinalScreen extends ConsumerWidget {
     
     // Jika tidak ada data dari backend, gunakan gambar default
     if (slideFinals.isEmpty) {
-      slideFinals.add('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1920');
+      slideFinals.add('assets/final-screen/final-screen-default.jpg');
     }
 
     return TvScaffold(

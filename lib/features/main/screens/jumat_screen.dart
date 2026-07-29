@@ -57,9 +57,10 @@ class JumatScreen extends ConsumerWidget {
 
     // Jika tidak ada data dari backend, gunakan gambar default
     if (slideJumats.isEmpty) {
-      slideJumats.add(
-        'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
-      );
+      slideJumats.add('assets/jumat-screen/slide-jumat-default-1.jpg');
+      slideJumats.add('assets/jumat-screen/slide-jumat-default-2.jpg');
+      slideJumats.add('assets/jumat-screen/slide-jumat-default-3.jpg');
+      slideJumats.add('assets/jumat-screen/slide-jumat-default-4.jpg');
     }
 
     List<Widget> logoWidgets = [];

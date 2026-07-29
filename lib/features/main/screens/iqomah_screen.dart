@@ -58,9 +58,9 @@ class IqomahScreen extends ConsumerWidget {
 
     // Jika tidak ada data dari backend, gunakan gambar default
     if (slideIqomahs.isEmpty) {
-      slideIqomahs.add(
-        'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=1000',
-      );
+      slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-1.jpg');
+      slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-2.jpg');
+      slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-3.jpg');
     }
 
     List<Widget> logoWidgets = [];

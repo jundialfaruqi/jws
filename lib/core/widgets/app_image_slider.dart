@@ -113,6 +113,7 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   String _getFullUrl(String path) {
     if (path.isEmpty) return '';
     if (path.startsWith('http')) return path;
+    if (path.startsWith('assets/')) return path;
 
     final baseUrl = ApiConstant.baseUrl;
     final cleanBase = baseUrl.endsWith('/')
@@ -170,6 +171,21 @@ class _KeepAliveImageState extends State<_KeepAliveImage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Wajib dipanggil untuk AutomaticKeepAliveClientMixin
+    if (!widget.url.startsWith('http')) {
+      return Image.asset(
+        widget.url,
+        fit: BoxFit.fill,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.blueGrey.shade900,
+            child: const Center(
+              child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+            ),
+          );
+        },
+      );
+    }
+
     return CachedNetworkImage(
       imageUrl: widget.url,
       fit: BoxFit.fill,
