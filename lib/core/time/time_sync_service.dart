@@ -8,9 +8,16 @@ class TimeSyncService {
   int? _serverTimestampMs;
   Stopwatch? _stopwatch;
 
-  /// Sinkronisasi waktu menggunakan timestamp dari server (dalam detik)
-  void sync(int serverTimestampSeconds) {
-    _serverTimestampMs = serverTimestampSeconds * 1000;
+  /// Sinkronisasi waktu menggunakan timestamp dari server.
+  /// Mendukung format detik (10 digit) maupun milidetik (13 digit).
+  void sync(int serverTimestamp, {int latencyMs = 0}) {
+    if (serverTimestamp < 10000000000) {
+      // Format detik (contoh: 1785163942)
+      _serverTimestampMs = (serverTimestamp * 1000) + latencyMs;
+    } else {
+      // Format milidetik (contoh: 1785163942000)
+      _serverTimestampMs = serverTimestamp + latencyMs;
+    }
     _stopwatch = Stopwatch()..start();
   }
 

@@ -3,6 +3,7 @@ import '../models/my_masjid_model.dart';
 import '../services/my_masjid_service.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/services/audio_downloader_service.dart';
+import '../../../core/services/image_downloader_service.dart';
 
 import 'dart:async';
 
@@ -24,6 +25,9 @@ final myMasjidProvider = FutureProvider.family<MyMasjidModel, int>((ref, id) asy
   
   // Sinkronisasi audio secara background
   ref.read(audioDownloaderProvider.notifier).syncAudios(result.data);
+  
+  // Sinkronisasi gambar secara background (Pre-cache semua gambar Iqomah, Jumat, Slide)
+  ref.read(imageDownloaderProvider).preCacheAllImages(result.data);
   
   return result.data;
 });
