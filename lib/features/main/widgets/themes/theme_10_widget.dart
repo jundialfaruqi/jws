@@ -65,7 +65,7 @@ class Theme10Widget extends StatelessWidget {
                               Expanded(
                                 child: AppImageSlider(
                                   imageUrls: slideUrls,
-                                  leftMargin: 500,
+                                  leftMargin: 0, // Dihapus karena sudah berada di sebelah kolom Keuangan (500px)
                                 ),
                               ),
                               Container(
