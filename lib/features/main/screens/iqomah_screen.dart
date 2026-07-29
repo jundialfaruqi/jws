@@ -114,9 +114,6 @@ class IqomahScreen extends ConsumerWidget {
     final String displayPrayerName = transitionState.prayerName.isEmpty
         ? 'MAGHRIB'
         : transitionState.prayerName;
-    final int displayRemaining = transitionState.totalSeconds > 0
-        ? transitionState.remainingSeconds
-        : 300; // 5 menit default untuk preview
 
     double progress = transitionState.totalSeconds > 0
         ? (transitionState.remainingSeconds / transitionState.totalSeconds)
@@ -176,13 +173,11 @@ class IqomahScreen extends ConsumerWidget {
                                 : const Duration(seconds: 1),
                             curve: Curves.linear,
                             builder: (context, value, child) {
-                              final currentSeconds = transitionState.totalSeconds == 0
-                                  ? (value * 300).ceil()
-                                  : displayRemaining;
-                              
                               final floatSeconds = transitionState.totalSeconds == 0
                                   ? value * 300
                                   : value * transitionState.totalSeconds;
+                                  
+                              final currentSeconds = floatSeconds.ceil();
 
                               final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
                               final barColor = isBlinking

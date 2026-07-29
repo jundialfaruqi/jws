@@ -90,9 +90,6 @@ class AlertScreen extends ConsumerWidget {
     final String displayPrayerName = transitionState.prayerName.isEmpty
         ? 'IMSAK'
         : transitionState.prayerName;
-    final int displayRemaining = transitionState.totalSeconds > 0
-        ? transitionState.remainingSeconds
-        : 90; // 1 menit 30 detik
 
     double progress = transitionState.totalSeconds > 0
         ? (transitionState.remainingSeconds / transitionState.totalSeconds)
@@ -157,13 +154,11 @@ class AlertScreen extends ConsumerWidget {
                             : const Duration(seconds: 1),
                         curve: Curves.linear,
                         builder: (context, value, child) {
-                          final currentSeconds = transitionState.totalSeconds == 0
-                              ? (value * 90).ceil()
-                              : displayRemaining;
-                          
                           final floatSeconds = transitionState.totalSeconds == 0
                               ? value * 90
                               : value * transitionState.totalSeconds;
+                              
+                          final currentSeconds = floatSeconds.ceil();
 
                           final isBlinking = currentSeconds <= 10 && currentSeconds > 0;
                           final barColor = isBlinking
