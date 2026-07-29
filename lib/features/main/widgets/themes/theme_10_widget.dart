@@ -65,7 +65,7 @@ class Theme10Widget extends StatelessWidget {
                               Expanded(
                                 child: AppImageSlider(
                                   imageUrls: slideUrls,
-                                  externalSync: true,
+                                  leftMargin: 500,
                                 ),
                               ),
                               Container(

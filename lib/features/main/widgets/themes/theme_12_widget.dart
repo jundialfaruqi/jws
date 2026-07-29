@@ -151,7 +151,6 @@ class Theme12Widget extends StatelessWidget {
                             Expanded(
                               child: AppImageSlider(
                                 imageUrls: slideUrls,
-                                externalSync: true,
                                 leftMargin: 0,
                               ),
                             ),

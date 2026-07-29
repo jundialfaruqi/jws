@@ -59,7 +59,6 @@ class Theme7Widget extends StatelessWidget {
                     .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
                 child: AppImageSlider(
                   imageUrls: slideUrls,
-                  externalSync: true,
                   leftMargin:
                       500, // Geser slider ke kanan agar tidak banyak tertutup
                 ),

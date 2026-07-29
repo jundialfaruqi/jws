@@ -1,9 +1,10 @@
+import '../../../core/providers/slide_start_time_provider.dart';
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/selected_profil_provider.dart';
-import '../../../core/providers/main_slide_index_provider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
@@ -25,19 +26,17 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   bool _hasRequestedFocusForRetry = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Berdetak tiap detik untuk sinkronisasi perpindahan playlist jumbotron
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
   void dispose() {
     _timer?.cancel();
     _retryFocusNode.dispose();
     super.dispose();
+  }
+
+  void _scheduleNextUpdate(int delayMs) {
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: delayMs), () {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -56,7 +55,6 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         child: Center(child: AppLoadingSpinner(message: 'Memuat data...')),
       ),
       error: (e, s) {
-        // Tampilkan loading screen jika pengguna menekan "Coba Lagi" (state sedang refreshing)
         if (myMasjidAsync.isLoading) {
           return const Expanded(
             child: Center(
@@ -67,7 +65,6 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
           );
         }
 
-        // Minta fokus ke tombol Coba Lagi HANYA 1 kali saat error terjadi
         if (!_hasRequestedFocusForRetry) {
           _hasRequestedFocusForRetry = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,7 +87,6 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
                 TvButton(
                   focusNode: _retryFocusNode,
                   onPressed: () {
-                    // Reset flag agar jika error lagi bisa minta fokus lagi
                     _hasRequestedFocusForRetry = false;
                     ref.invalidate(myMasjidProvider(profil.id));
                   },
@@ -112,15 +108,10 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             ? (data.jumbotronMasjid?.validSlides ?? [])
             : [];
 
-        // Hitung durasi Main Screen (10s per slide, minimal 30s)
         int mainDuration = mainSlides.isNotEmpty ? mainSlides.length * 10 : 30;
-
         List<Map<String, dynamic>> blocks = [];
-
-        // Selalu mulai dengan Main Screen
         blocks.add({'type': 'main', 'duration': mainDuration});
 
-        // Susun daftar siklus selang-seling (Main -> Pemko -> Main -> Masjid)
         int maxJumbo = pemkoSlides.length > masjidSlides.length
             ? pemkoSlides.length
             : masjidSlides.length;
@@ -130,7 +121,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             blocks.add({
               'type': 'pemko',
               'slide': pemkoSlides[i],
-              'duration': 15, // 15 detik tetap sesuai permintaan
+              'duration': 15,
             });
             blocks.add({'type': 'main', 'duration': mainDuration});
           }
@@ -144,7 +135,6 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
           }
         }
 
-        // Hapus blok Main di akhir jika itu berlebihan (hanya jika ada jumbotron)
         if (blocks.length > 1 && blocks.last['type'] == 'main') {
           blocks.removeLast();
         }
@@ -156,24 +146,31 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
         if (totalDuration == 0) totalDuration = 1;
 
-        final now = ref.read(timeSyncServiceProvider).now();
-        final epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
-        final currentPos = epochSeconds % totalDuration;
+        final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+        final totalDurationMs = totalDuration * 1000;
+        final currentPosMs = nowMs % totalDurationMs;
 
-        int accumulated = 0;
-        int activeBlockStart = 0;
+        int accumulatedMs = 0;
         Map<String, dynamic>? activeBlock;
+        int msUntilNextBlock = 1000; // fallback
+
         for (final b in blocks) {
-          int duration = b['duration'] as int;
-          if (currentPos >= accumulated &&
-              currentPos < accumulated + duration) {
+          int durationMs = (b['duration'] as int) * 1000;
+          if (currentPosMs >= accumulatedMs && currentPosMs < accumulatedMs + durationMs) {
             activeBlock = b;
-            activeBlockStart = accumulated;
+            msUntilNextBlock = (accumulatedMs + durationMs) - currentPosMs;
             break;
           }
-          accumulated += duration;
+          accumulatedMs += durationMs;
         }
         activeBlock ??= blocks.first;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _scheduleNextUpdate(msUntilNextBlock);
+          }
+        });
+
         Widget currentWidget;
         if (activeBlock['type'] == 'pemko') {
           currentWidget = JumbotronPemkoScreen(
@@ -186,13 +183,15 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             imageUrl: activeBlock['slide'],
           );
         } else {
-          int relativeTime = currentPos - activeBlockStart;
-          int mainSlideIndex = relativeTime ~/ 10;
-
+          // loopStartMs adalah waktu absolut saat siklus ini dimulai (diulang setiap totalDuration)
+          final loopStartMs = nowMs - currentPosMs;
+          // activeBlockStartMs adalah waktu absolut saat MainContent ini seharusnya mulai muncul
+          final activeBlockStartMs = loopStartMs + accumulatedMs;
+          
           currentWidget = ProviderScope(
             key: const ValueKey('main'),
             overrides: [
-              mainSlideIndexProvider.overrideWithValue(mainSlideIndex),
+              slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
             ],
             child: const MainContentWidget(),
           );

@@ -3,18 +3,17 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
-import '../providers/main_slide_index_provider.dart';
+import '../time/time_sync_service.dart';
+import '../providers/slide_start_time_provider.dart';
 
 class AppImageSlider extends ConsumerStatefulWidget {
   final List<String> imageUrls;
   final double leftMargin;
-  final bool externalSync; // Default false. Jika true, disetir oleh mainSlideIndexProvider.
 
   const AppImageSlider({
     super.key,
     this.imageUrls = const [],
     this.leftMargin = 0.0,
-    this.externalSync = false,
   });
 
   @override
@@ -29,68 +28,67 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   @override
   void initState() {
     super.initState();
-    // Inisialisasi awal aman
     _pageController = PageController(initialPage: 0);
     
-    if (widget.externalSync) {
-      // Gunakan post-frame untuk mendapatkan initial index dari provider
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final initialIndex = ref.read(mainSlideIndexProvider);
-          if (initialIndex < widget.imageUrls.length && initialIndex != 0) {
-            setState(() {
-              _currentPage = initialIndex;
-            });
-            if (_pageController.hasClients) {
-              _pageController.jumpToPage(_currentPage);
-            }
-          }
-        }
-      });
-    } else {
-      // Internal timer fallback untuk screen seperti Iqomah/Jumat
-      _startLocalTimer();
-    }
+    // Gunakan post-frame untuk mengatur initial index secara presisi absolut
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.imageUrls.isNotEmpty) {
+        _syncAndScheduleNext(initial: true);
+      }
+    });
   }
 
-  void _startLocalTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      if (!mounted || widget.imageUrls.isEmpty) return;
-      
-      final nextIndex = (_currentPage + 1) % widget.imageUrls.length;
+  void _syncAndScheduleNext({bool initial = false}) {
+    if (!mounted || widget.imageUrls.isEmpty) return;
+
+    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    final blockStartTimeMs = ref.read(slideStartTimeProvider);
+    
+    // Jika provider berisi waktu mulai, gunakan waktu relatif dari waktu mulai blok.
+    // Jika null (misal Iqomah/Jumat), gunakan waktu absolut epoch.
+    final relativeMs = blockStartTimeMs != null ? (nowMs - blockStartTimeMs) : nowMs;
+    
+    // Indeks dihitung secara presisi berdasarkan kelipatan 10.000 ms
+    final int nextIndex = (relativeMs ~/ 10000) % widget.imageUrls.length;
+    
+    if (_currentPage != nextIndex || initial) {
       setState(() {
         _currentPage = nextIndex;
       });
       
       if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeInOutCubic,
-        );
+        if (initial) {
+          _pageController.jumpToPage(_currentPage);
+        } else {
+          // Hanya gunakan animasi jika bergeser 1 slide (normal flow)
+          bool isAdjacent = (_pageController.page?.round() ?? 0) == _currentPage - 1 || 
+                            (_pageController.page?.round() ?? 0) == _currentPage + 1 ||
+                            (_currentPage == 0 && (_pageController.page?.round() ?? 0) == widget.imageUrls.length - 1);
+                            
+          if (isAdjacent) {
+            _pageController.animateToPage(
+              _currentPage,
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeInOutCubic,
+            );
+          } else {
+            _pageController.jumpToPage(_currentPage);
+          }
+        }
       }
-    });
+    }
+
+    // Jadwalkan eksekusi timer meledak persis di kelipatan 10.000 ms berikutnya
+    int msUntilNext = 10000 - (relativeMs % 10000);
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: msUntilNext), () => _syncAndScheduleNext());
   }
 
   @override
   void didUpdateWidget(AppImageSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.externalSync != oldWidget.externalSync) {
-      if (widget.externalSync) {
-        _timer?.cancel();
-      } else {
-        _startLocalTimer();
-      }
-    }
-    
     if (widget.imageUrls.length != oldWidget.imageUrls.length) {
-      if (_currentPage >= widget.imageUrls.length && widget.imageUrls.isNotEmpty) {
-        _currentPage = widget.imageUrls.length - 1;
-        if (_pageController.hasClients) {
-          _pageController.jumpToPage(_currentPage);
-        }
-      }
+      _syncAndScheduleNext(initial: true);
     }
   }
 
@@ -117,36 +115,12 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   @override
   Widget build(BuildContext context) {
     if (widget.imageUrls.isEmpty) {
-      // Tampilkan default/dummy atau biarkan kosong jika benar-benar tak ada slide
       return Container(
         color: Colors.blueGrey.shade900,
         child: const Center(
           child: Icon(Icons.image_not_supported, color: Colors.white24, size: 64),
         ),
       );
-    }
-
-    if (widget.externalSync) {
-      ref.listen<int>(mainSlideIndexProvider, (previous, next) {
-        if (next != _currentPage && next < widget.imageUrls.length && mounted) {
-          setState(() {
-            _currentPage = next;
-          });
-          if (_pageController.hasClients) {
-            if ((_pageController.page?.round() ?? 0) != _currentPage && 
-                (_pageController.page?.round() ?? 0) != _currentPage - 1 && 
-                (_pageController.page?.round() ?? 0) != _currentPage + 1) {
-              _pageController.jumpToPage(_currentPage);
-            } else {
-              _pageController.animateToPage(
-                _currentPage,
-                duration: const Duration(milliseconds: 1000),
-                curve: Curves.easeInOutCubic,
-              );
-            }
-          }
-        }
-      });
     }
 
     return Padding(

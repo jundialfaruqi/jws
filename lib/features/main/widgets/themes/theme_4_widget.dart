@@ -59,7 +59,6 @@ class Theme4Widget extends StatelessWidget {
                 color: AppColors.bgNavy,
                 child: AppImageSlider(
                   imageUrls: slideUrls,
-                  externalSync: true,
                   leftMargin: 500,
                 ),
               ),
