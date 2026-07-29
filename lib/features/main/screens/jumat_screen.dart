@@ -286,15 +286,69 @@ class JumatScreen extends ConsumerWidget {
                         ),
                       ),
                       // Kelompok Bawah: Jam Digital
-                      const AppLiveClock(
-                        showDate: false,
-                        textStyle: TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'JetBrainsMono',
-                          letterSpacing: 8,
-                        ),
+                      AppLiveClock(
+                        builder: (context, now) {
+                          final hour = now.hour.toString().padLeft(2, '0');
+                          final minute = now.minute.toString().padLeft(2, '0');
+                          final second = now.second.toString().padLeft(2, '0');
+                          
+                          String timeZone = 'WIB';
+                          if (now.timeZoneOffset.inHours == 8) timeZone = 'WITA';
+                          if (now.timeZoneOffset.inHours == 9) timeZone = 'WIT';
+
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Gunakan Transform.translate untuk penyesuaian tengah secara visual (Optical Alignment).
+                              // Ubah nilai -8 (Y) jika ikon terasa masih terlalu tinggi atau rendah.
+                              Transform.translate(
+                                offset: const Offset(0, -8),
+                                child: const Icon(TablerIcons.clock, color: Colors.white70, size: 120),
+                              ),
+                              const SizedBox(width: 32),
+                              Text(
+                                '$hour:$minute',
+                                style: const TextStyle(
+                                  fontSize: 120,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 4,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    second,
+                                    style: const TextStyle(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textYellow,
+                                      fontFamily: 'Poppins',
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    timeZone,
+                                    style: const TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white70,
+                                      fontFamily: 'Poppins',
+                                      letterSpacing: 2,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ], // Penutup children Column
                   ), // Penutup Column

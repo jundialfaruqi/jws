@@ -11,13 +11,16 @@ class AppLiveClock extends ConsumerStatefulWidget {
   final bool showSeconds;
   final bool blinkSeparator;
 
+  final Widget Function(BuildContext context, DateTime now)? builder;
+
   const AppLiveClock({
     super.key,
-    required this.textStyle,
+    this.textStyle = const TextStyle(),
     this.prefix = '',
     this.showDate = true,
     this.showSeconds = true,
     this.blinkSeparator = false,
+    this.builder,
   });
 
   @override
@@ -58,6 +61,11 @@ class _AppLiveClockState extends ConsumerState<AppLiveClock> {
   @override
   Widget build(BuildContext context) {
     final now = ref.read(timeSyncServiceProvider).now();
+
+    if (widget.builder != null) {
+      return widget.builder!(context, now);
+    }
+
     var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
     dateStr = dateStr.replaceAll('Minggu', 'Ahad');
     
