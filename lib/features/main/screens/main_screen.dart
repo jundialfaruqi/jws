@@ -53,6 +53,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 left: 0,
                 right: 0,
                 child: AppOfflineBanner(
+                  isDot: true,
                   onRetry: () {},
                 ),
               ),
