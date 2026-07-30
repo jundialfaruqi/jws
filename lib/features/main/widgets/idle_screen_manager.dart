@@ -55,9 +55,8 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     // Jika awalnya putus (false) lalu tersambung lagi (true), otomatis refresh data utama jika sedang error.
     ref.listen<AsyncValue<bool>>(isConnectedProvider, (previous, next) {
       if (previous?.value == false && next.value == true) {
-        if (myMasjidAsync.hasError) {
-          ref.invalidate(myMasjidProvider(profil.id));
-        }
+        // Hapus pengecekan hasError agar selalu refresh data saat internet kembali
+        ref.invalidate(myMasjidProvider(profil.id));
       }
     });
 

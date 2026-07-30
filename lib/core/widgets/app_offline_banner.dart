@@ -7,11 +7,7 @@ class AppOfflineBanner extends ConsumerStatefulWidget {
   final VoidCallback? onRetry;
   final bool isDot;
 
-  const AppOfflineBanner({
-    super.key,
-    this.onRetry,
-    this.isDot = false,
-  });
+  const AppOfflineBanner({super.key, this.onRetry, this.isDot = false});
 
   @override
   ConsumerState<AppOfflineBanner> createState() => _AppOfflineBannerState();
@@ -63,7 +59,7 @@ class _AppOfflineBannerState extends ConsumerState<AppOfflineBanner> {
       return Align(
         alignment: Alignment.topRight,
         child: Padding(
-          padding: const EdgeInsets.only(top: 24, right: 24),
+          padding: const EdgeInsets.only(top: 10, right: 10),
           child: Opacity(
             opacity: _isVisible ? 1.0 : 0.0,
             child: Container(
