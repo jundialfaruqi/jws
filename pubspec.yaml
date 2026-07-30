@@ -68,4 +68,7 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
+  macos:
+    generate: true
+    image_path: "assets/logo/icon-jws-kominfo.png"
   image_path: "assets/logo/icon-jws-kominfo.png"
