@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/selected_profil_provider.dart';
+import '../../../core/providers/connectivity_provider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
@@ -49,6 +50,16 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     }
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
+
+    // Dengarkan perubahan jaringan secara diam-diam.
+    // Jika awalnya putus (false) lalu tersambung lagi (true), otomatis refresh data utama jika sedang error.
+    ref.listen<AsyncValue<bool>>(isConnectedProvider, (previous, next) {
+      if (previous?.value == false && next.value == true) {
+        if (myMasjidAsync.hasError) {
+          ref.invalidate(myMasjidProvider(profil.id));
+        }
+      }
+    });
 
     return myMasjidAsync.when(
       loading: () => const Expanded(
