@@ -25,9 +25,7 @@ class Theme7Widget extends StatelessWidget {
     final slideUrls = (data.slides?.validSlides.isNotEmpty == true)
         ? data.slides!.validSlides
         : [
-            'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000',
-            'https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000',
-            'https://images.unsplash.com/photo-1584551246679-0daf3d275d05?q=80&w=2000',
+            'assets/slide-default/slide-main-default.jpg',
           ];
 
     return Stack(

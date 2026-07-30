@@ -49,6 +49,7 @@ flutter:
     - assets/iqomah-screen/
     - assets/jumat-screen/
     - assets/final-screen/
+    - assets/slide-default/
   fonts:
     - family: Arial
       fonts:
