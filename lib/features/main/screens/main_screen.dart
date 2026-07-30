@@ -44,14 +44,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           body: Stack(
             children: [
               Column(
-                children: [
-                  AppOfflineBanner(
-                    onRetry: () {
-                      // Reload logika di sini
-                    },
-                  ),
-                  const IdleScreenManager(),
+                children: const [
+                  IdleScreenManager(),
                 ],
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AppOfflineBanner(
+                  onRetry: () {},
+                ),
               ),
               TvDrawerMenu(
                 key: _drawerKey,

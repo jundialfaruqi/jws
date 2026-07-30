@@ -21,14 +21,12 @@ class AppScaffold extends StatelessWidget {
       appBar: appBar,
       body: Stack(
         children: [
-          Column(
-            children: [
-              // Banner otomatis muncul di atas seluruh body halaman (tanpa menimpa AppBar)
-              AppOfflineBanner(
-                onRetry: () {},
-              ),
-              Expanded(child: body),
-            ],
+          body,
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppOfflineBanner(),
           ),
           const AudioDownloadOverlay(),
         ],
