@@ -19,7 +19,9 @@ class AppOfflineBanner extends ConsumerWidget {
     });
 
     final connectivityState = ref.watch(isConnectedProvider);
-    final isConnected = connectivityState.value ?? true; // Default anggap online jika belum ada data
+    final isConnected =
+        connectivityState.value ??
+        true; // Default anggap online jika belum ada data
 
     if (isConnected) {
       return const SizedBox.shrink(); // Sembunyikan banner jika online
@@ -33,24 +35,8 @@ class AppOfflineBanner extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Tidak ada internet. Tunggu koneksi terhubung, atau',
-            style: TextStyle(
-              color: Colors.red.shade900,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(width: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (onRetry != null) {
-                onRetry!();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade700,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Coba Lagi'),
+            'Tidak ada internet. Tunggu koneksi terhubung...',
+            style: TextStyle(color: Colors.red.shade900, fontSize: 16),
           ),
         ],
       ),
