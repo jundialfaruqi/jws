@@ -218,7 +218,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
       if (now.compareTo(phaseStart) >= 0 && now.isBefore(phase1End)) {
         // Sedang berada di Fase 1
-        _jumpToState(phase1State, name, timeStr, phase1Mins * 60, phase1End.difference(now).inSeconds);
+        _jumpToState(phase1State, name, timeStr, phase1Mins * 60, phase1End);
         return;
       }
 
@@ -230,7 +230,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
           DateTime jumatEnd = phase1End.add(Duration(minutes: jumatMins));
           
           if (now.compareTo(phase1End) >= 0 && now.isBefore(jumatEnd)) {
-             _jumpToState(PrayerState.jumat, name, timeStr, jumatMins * 60, jumatEnd.difference(now).inSeconds);
+             _jumpToState(PrayerState.jumat, name, timeStr, jumatMins * 60, jumatEnd);
              return;
           }
         } else {
@@ -239,7 +239,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
           DateTime iqomahEnd = phase1End.add(Duration(minutes: iqomahMins));
           
           if (now.compareTo(phase1End) >= 0 && now.isBefore(iqomahEnd)) {
-             _jumpToState(PrayerState.iqomah, name, timeStr, iqomahMins * 60, iqomahEnd.difference(now).inSeconds);
+             _jumpToState(PrayerState.iqomah, name, timeStr, iqomahMins * 60, iqomahEnd);
              return;
           }
 
@@ -248,7 +248,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
           DateTime finalEnd = iqomahEnd.add(Duration(minutes: finalMins));
           
           if (now.compareTo(iqomahEnd) >= 0 && now.isBefore(finalEnd)) {
-             _jumpToState(PrayerState.finalScreen, name, timeStr, finalMins * 60, finalEnd.difference(now).inSeconds);
+             _jumpToState(PrayerState.finalScreen, name, timeStr, finalMins * 60, finalEnd);
              return;
           }
         }
@@ -256,8 +256,11 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
     }
   }
 
-  void _jumpToState(PrayerState status, String name, String time, int totalSeconds, int remainingSeconds) {
-    if (remainingSeconds <= 0) return;
+  void _jumpToState(PrayerState status, String name, String time, int totalSeconds, DateTime exactEndTime) {
+    final now = ref.read(timeSyncServiceProvider).now();
+    int remainingSeconds = exactEndTime.difference(now).inSeconds;
+
+    if (now.compareTo(exactEndTime) >= 0) return;
     
     // Reset status bunyi beep khusus iqomah
     _hasPlayedIqomahBeep = false;
@@ -267,8 +270,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
        _playSound();
     }
     
-    final now = ref.read(timeSyncServiceProvider).now();
-    _targetEndTime = now.add(Duration(seconds: remainingSeconds));
+    _targetEndTime = exactEndTime; // 100% Presisi tanpa pembulatan
     
     state = PrayerTransitionState(
       status: status,
