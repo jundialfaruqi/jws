@@ -144,7 +144,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
         final now = ref.read(timeSyncServiceProvider).now();
         final newRemaining = _targetEndTime!.difference(now).inSeconds;
 
-        if (newRemaining > 0) {
+        if (now.isBefore(_targetEndTime!)) {
           // Update state hanya jika detik (integer) benar-benar berubah (mencegah spam rebuild UI 10x per detik)
           if (newRemaining != state.remainingSeconds) {
             // Cek beep 5 detik terakhir di iqomah
