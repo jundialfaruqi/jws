@@ -14,6 +14,7 @@ import '../../../core/widgets/app_view_selection_dialog.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
+import '../../../core/providers/connectivity_provider.dart';
 import '../providers/profil_masjid_provider.dart';
 import '../models/profil_masjid_model.dart';
 import '../widgets/profil_card_widget.dart';
@@ -139,6 +140,16 @@ class _SelectProfilScreenState extends ConsumerState<SelectProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Dengarkan perubahan jaringan secara diam-diam.
+    // Jika awalnya putus (false) lalu tersambung lagi (true), otomatis refresh data.
+    ref.listen<AsyncValue<bool>>(isConnectedProvider, (previous, next) {
+      if (previous?.value == false && next.value == true) {
+        if (_items.isEmpty || _error != null) {
+          _fetchPage();
+        }
+      }
+    });
+
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Arial'),
