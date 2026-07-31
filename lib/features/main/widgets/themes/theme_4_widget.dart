@@ -26,6 +26,7 @@ class Theme4Widget extends StatelessWidget {
         ? data.slides!.validSlides
         : [
             'assets/slide-default/slide-main-default.jpg',
+            'assets/slide-default/slide-main-default-2.jpg',
           ];
 
     return Stack(
@@ -55,10 +56,7 @@ class Theme4Widget extends StatelessWidget {
             Expanded(
               child: Container(
                 color: AppColors.bgNavy,
-                child: AppImageSlider(
-                  imageUrls: slideUrls,
-                  leftMargin: 500,
-                ),
+                child: AppImageSlider(imageUrls: slideUrls, leftMargin: 500),
               ),
             ),
 
@@ -81,7 +79,10 @@ class Theme4Widget extends StatelessWidget {
         Positioned(
           left: 600, // Menjorok ke kanan dari card jadwal sholat
           bottom: 140, // Diberi jarak agar tidak menempel dengan marquee
-          child: AppAgendaWidget(agendas: data.agenda, slideLeft: true), // Bergeser ke/dari kiri
+          child: AppAgendaWidget(
+            agendas: data.agenda,
+            slideLeft: true,
+          ), // Bergeser ke/dari kiri
         ),
 
         // Jadwal Sholat Melayang di Kiri (Akan menutupi agenda saat tersembunyi)
@@ -111,8 +112,6 @@ class Theme4Widget extends StatelessWidget {
           bottom: 0,
           child: const Center(child: AppAnalogClock(size: 380)),
         ),
-
-
 
         // Teks menuju waktu sholat berikutnya beserta countdown melayang di kanan layar atas marquee
         Positioned(

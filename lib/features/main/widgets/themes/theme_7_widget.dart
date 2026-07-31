@@ -26,6 +26,7 @@ class Theme7Widget extends StatelessWidget {
         ? data.slides!.validSlides
         : [
             'assets/slide-default/slide-main-default.jpg',
+            'assets/slide-default/slide-main-default-2.jpg',
           ];
 
     return Stack(

@@ -27,6 +27,7 @@ class Theme12Widget extends StatelessWidget {
         ? data.slides!.validSlides
         : [
             'assets/slide-default/slide-main-default.jpg',
+            'assets/slide-default/slide-main-default-2.jpg',
           ];
 
     return Scaffold(
@@ -63,7 +64,7 @@ class Theme12Widget extends StatelessWidget {
                       final hour = now.hour.toString().padLeft(2, '0');
                       final minute = now.minute.toString().padLeft(2, '0');
                       final second = now.second.toString().padLeft(2, '0');
-                      
+
                       String timeZone = 'WIB';
                       if (now.timeZoneOffset.inHours == 8) timeZone = 'WITA';
                       if (now.timeZoneOffset.inHours == 9) timeZone = 'WIT';

@@ -27,6 +27,7 @@ class Theme10Widget extends StatelessWidget {
         ? data.slides!.validSlides
         : [
             'assets/slide-default/slide-main-default.jpg',
+            'assets/slide-default/slide-main-default-2.jpg',
           ];
 
     return Stack(
@@ -63,7 +64,8 @@ class Theme10Widget extends StatelessWidget {
                               Expanded(
                                 child: AppImageSlider(
                                   imageUrls: slideUrls,
-                                  leftMargin: 0, // Dihapus karena sudah berada di sebelah kolom Keuangan (500px)
+                                  leftMargin:
+                                      0, // Dihapus karena sudah berada di sebelah kolom Keuangan (500px)
                                 ),
                               ),
                               Container(
