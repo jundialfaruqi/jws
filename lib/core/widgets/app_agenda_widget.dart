@@ -12,7 +12,13 @@ class AppAgendaWidget extends ConsumerStatefulWidget {
   final bool continuous;
   final double borderRadius;
 
-  const AppAgendaWidget({super.key, required this.agendas, this.slideLeft = false, this.continuous = false, this.borderRadius = 24.0});
+  const AppAgendaWidget({
+    super.key,
+    required this.agendas,
+    this.slideLeft = false,
+    this.continuous = false,
+    this.borderRadius = 24.0,
+  });
 
   @override
   ConsumerState<AppAgendaWidget> createState() => _AppAgendaWidgetState();
@@ -45,9 +51,12 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     if (!mounted) return;
     setState(() {}); // Picu rebuild UI pada kelipatan detik yang tepat
 
-    final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+    final nowMs = ref
+        .read(timeSyncServiceProvider)
+        .now()
+        .millisecondsSinceEpoch;
     final int msUntilNext = 1000 - (nowMs % 1000);
-    
+
     _timer?.cancel();
     _timer = Timer(Duration(milliseconds: msUntilNext), _startSyncTimer);
   }
@@ -95,9 +104,10 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     final int currentEpoch = now.millisecondsSinceEpoch ~/ 1000;
 
     final int activeCount = validAgendas.length;
-    final int cycleTime = widget.continuous 
+    final int cycleTime = widget.continuous
         ? (activeCount * 10)
-        : (activeCount * 10) + 5; // 10s tiap item + 5s istirahat (jika tidak continuous)
+        : (activeCount * 10) +
+              5; // 10s tiap item + 5s istirahat (jika tidak continuous)
     final int cyclePosition = currentEpoch % cycleTime;
 
     if (widget.continuous) {
@@ -125,7 +135,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
           int.parse(dateParts[1]),
           int.parse(dateParts[2]),
         );
-        
+
         if (agendaDate.isAtSameMomentAs(today)) {
           dynamicDaysLabel = 'Hari ini';
         } else {
@@ -142,7 +152,9 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
     String dateStr = agenda.date;
 
     return AnimatedSlide(
-      offset: _isResting ? Offset(widget.slideLeft ? -1.5 : 1.5, 0) : Offset.zero,
+      offset: _isResting
+          ? Offset(widget.slideLeft ? -1.5 : 1.5, 0)
+          : Offset.zero,
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeInOutCubic,
       child: Container(
@@ -168,15 +180,17 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
                 const Icon(
                   TablerIcons.calendar_event,
                   color: Colors.white,
-                  size: 32,
+                  size: 42,
                 ),
                 const SizedBox(width: 16),
-                const Text(
-                  'Agenda Masjid',
+                Text(
+                  dynamicDaysLabel,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 36,
                     fontWeight: FontWeight.bold,
+                    color: dynamicDaysLabel.toLowerCase() == 'hari ini'
+                        ? Colors.yellow
+                        : Colors.white,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -186,8 +200,8 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
             Text(
               _truncateText(agenda.name),
               style: const TextStyle(
-                color: AppColors.textYellow,
-                fontSize: 32,
+                color: AppColors.textInverse,
+                fontSize: 28,
                 fontWeight: FontWeight.w900,
                 fontFamily: 'Poppins',
               ),
@@ -195,39 +209,13 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
               overflow: TextOverflow.visible,
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  dateStr,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: dynamicDaysLabel.toLowerCase() == 'hari ini'
-                        ? Colors.red.shade400
-                        : Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    dynamicDaysLabel,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              dateStr,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
