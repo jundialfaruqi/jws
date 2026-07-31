@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/services/prayer_transition_service.dart';
+import '../../../core/time/time_sync_service.dart';
 
 class AlertScreen extends ConsumerWidget {
   const AlertScreen({super.key});
@@ -87,9 +88,14 @@ class AlertScreen extends ConsumerWidget {
       }
     }
 
-    final String displayPrayerName = transitionState.prayerName.isEmpty
+    final now = ref.watch(timeSyncServiceProvider).now();
+    String displayPrayerName = transitionState.prayerName.isEmpty
         ? 'SYURUQ'
         : transitionState.prayerName;
+
+    if (displayPrayerName == 'DZUHUR' && now.weekday == DateTime.friday) {
+      displayPrayerName = "JUM'AT";
+    }
 
     double progress = transitionState.totalSeconds > 0
         ? (transitionState.remainingSeconds / transitionState.totalSeconds)
