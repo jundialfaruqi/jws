@@ -283,86 +283,92 @@ class JumatScreen extends ConsumerWidget {
                         width: 750,
                         child: AppLiveClock(
                           builder: (context, now) {
-                          final hour = now.hour.toString().padLeft(2, '0');
-                          final minute = now.minute.toString().padLeft(2, '0');
-                          final second = now.second.toString().padLeft(2, '0');
+                            final hour = now.hour.toString().padLeft(2, '0');
+                            final minute = now.minute.toString().padLeft(
+                              2,
+                              '0',
+                            );
+                            final second = now.second.toString().padLeft(
+                              2,
+                              '0',
+                            );
 
-                          String timeZone = 'WIB';
-                          if (now.timeZoneOffset.inHours == 8) {
-                            timeZone = 'WITA';
-                          }
-                          if (now.timeZoneOffset.inHours == 9) {
-                            timeZone = 'WIT';
-                          }
+                            String timeZone = 'WIB';
+                            if (now.timeZoneOffset.inHours == 8) {
+                              timeZone = 'WITA';
+                            }
+                            if (now.timeZoneOffset.inHours == 9) {
+                              timeZone = 'WIT';
+                            }
 
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                hour,
-                                style: const TextStyle(
-                                  fontSize: 120,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  height: 1.0,
-                                ),
-                              ),
-                              Container(
-                                height: 80,
-                                width: 4,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.withValues(alpha: 0.5),
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              Text(
-                                minute,
-                                style: const TextStyle(
-                                  fontSize: 120,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  height: 1.0,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    second,
-                                    style: const TextStyle(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textYellow,
-                                      fontFamily: 'Poppins',
-                                      height: 1.0,
-                                    ),
+                            return Row(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  hour,
+                                  style: const TextStyle(
+                                    fontSize: 120,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    height: 1.0,
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    timeZone,
-                                    style: const TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white70,
-                                      fontFamily: 'Poppins',
-                                      letterSpacing: 2,
-                                      height: 1.0,
-                                    ),
+                                ),
+                                Container(
+                                  height: 80,
+                                  width: 4,
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 20,
                                   ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                Text(
+                                  minute,
+                                  style: const TextStyle(
+                                    fontSize: 120,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    height: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      second,
+                                      style: const TextStyle(
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textYellow,
+                                        fontFamily: 'Poppins',
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      timeZone,
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white70,
+                                        fontFamily: 'Poppins',
+                                        letterSpacing: 2,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ], // Penutup children Column
                   ), // Penutup Column
