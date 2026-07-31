@@ -7,6 +7,7 @@ import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/services/prayer_transition_service.dart';
 import '../../../core/time/time_sync_service.dart';
+import '../providers/my_masjid_provider.dart';
 
 class AdzanScreen extends ConsumerWidget {
   const AdzanScreen({super.key});
@@ -33,10 +34,14 @@ class AdzanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
+    final myMasjidData = profil != null
+        ? ref.watch(myMasjidProvider(profil.id)).value
+        : null;
+
     final transitionState = ref.watch(prayerTransitionProvider);
 
-    final String logo1 = _getFullUrl(profil?.logoMasjid);
-    final String logo2 = _getFullUrl(profil?.logoPemerintah);
+    final String logo1 = _getFullUrl(myMasjidData?.profil.logoMasjid ?? profil?.logoMasjid);
+    final String logo2 = _getFullUrl(myMasjidData?.profil.logoPemerintah ?? profil?.logoPemerintah);
     final bool hasLogo1 = logo1.isNotEmpty;
     final bool hasLogo2 = logo2.isNotEmpty;
 

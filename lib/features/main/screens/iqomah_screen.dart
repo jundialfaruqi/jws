@@ -38,14 +38,14 @@ class IqomahScreen extends ConsumerWidget {
     final profil = ref.watch(selectedProfilProvider);
     final transitionState = ref.watch(prayerTransitionProvider);
 
-    final String logo1 = _getFullUrl(profil?.logoMasjid);
-    final String logo2 = _getFullUrl(profil?.logoPemerintah);
-    final bool hasLogo1 = logo1.isNotEmpty;
-    final bool hasLogo2 = logo2.isNotEmpty;
-
     final myMasjidData = profil != null
         ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
+
+    final String logo1 = _getFullUrl(myMasjidData?.profil.logoMasjid ?? profil?.logoMasjid);
+    final String logo2 = _getFullUrl(myMasjidData?.profil.logoPemerintah ?? profil?.logoPemerintah);
+    final bool hasLogo1 = logo1.isNotEmpty;
+    final bool hasLogo2 = logo2.isNotEmpty;
     List<String> slideIqomahs = [];
     if (myMasjidData != null && myMasjidData.slideIqomah != null) {
       final s = myMasjidData.slideIqomah!;

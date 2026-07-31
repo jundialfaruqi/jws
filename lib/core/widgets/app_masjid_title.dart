@@ -13,6 +13,7 @@ class AppMasjidTitle extends StatelessWidget {
   final bool isRightAligned;
   final bool isLeftAligned;
   final bool showText;
+  final double? customLogoSize;
 
   const AppMasjidTitle({
     super.key,
@@ -26,6 +27,7 @@ class AppMasjidTitle extends StatelessWidget {
     this.isRightAligned = false,
     this.isLeftAligned = false,
     this.showText = true,
+    this.customLogoSize,
   });
 
   String _getFullUrl(String? path) {
@@ -50,7 +52,7 @@ class AppMasjidTitle extends StatelessWidget {
 
     List<Widget> logoWidgets = [];
 
-    final double logoSize = 100.0;
+    final double logoSize = customLogoSize ?? 100.0;
 
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(

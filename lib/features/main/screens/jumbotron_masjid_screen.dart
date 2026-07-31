@@ -29,9 +29,14 @@ class JumbotronMasjidScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profil = ref.watch(selectedProfilProvider);
-    final logoPemerintah = profil?.logoPemerintah;
-    final logoMasjid = profil?.logoMasjid;
+    final initialProfil = ref.watch(selectedProfilProvider);
+    final liveData = initialProfil != null
+        ? ref.watch(myMasjidProvider(initialProfil.id)).value
+        : null;
+
+    final logoPemerintah =
+        liveData?.profil.logoPemerintah ?? initialProfil?.logoPemerintah;
+    final logoMasjid = liveData?.profil.logoMasjid ?? initialProfil?.logoMasjid;
 
     return TvScaffold(
       backgroundColor: Colors.black,
@@ -56,26 +61,42 @@ class JumbotronMasjidScreen extends ConsumerWidget {
 
           // Pojok Kiri Atas: Logo Pemko dan Masjid
           Positioned(
-            top: 24,
-            left: 24,
-            child: AppMasjidTitle(
-              title: '',
-              logoPemerintah: logoPemerintah,
-              logoMasjid: logoMasjid,
-              showText: false,
+            top: 0,
+            left: 0,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 24,
+                left: 24,
+                right: 32,
+                bottom: 24,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              child: AppMasjidTitle(
+                title: '',
+                logoPemerintah: logoPemerintah,
+                logoMasjid: logoMasjid,
+                showText: false,
+                customLogoSize: 70.0,
+              ),
             ),
           ),
 
           // Pojok Kiri Bawah: Jam Digital Melayang
           Positioned(
-            bottom: 24,
-            left: 24,
+            bottom: 0,
+            left: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white24),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(32),
+                ),
               ),
               child: const AppLiveClock(
                 textStyle: TextStyle(
@@ -89,26 +110,21 @@ class JumbotronMasjidScreen extends ConsumerWidget {
 
           // Pojok Kanan Bawah: Countdown Next Prayer Melayang
           Positioned(
-            bottom: 24,
-            right: 24,
+            bottom: 0,
+            right: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white24),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                ),
               ),
               child: AppNextPrayerBar(
                 countdownOnly: true,
                 fontSize: 48,
                 iconSize: 48,
-                jadwalSholatList: profil != null
-                    ? ref
-                              .watch(myMasjidProvider(profil.id))
-                              .value
-                              ?.jadwalSholat ??
-                          []
-                    : [],
+                jadwalSholatList: liveData?.jadwalSholat ?? [],
               ),
             ),
           ),

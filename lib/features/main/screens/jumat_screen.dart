@@ -36,14 +36,14 @@ class JumatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
 
-    final String logo1 = _getFullUrl(profil?.logoMasjid);
-    final String logo2 = _getFullUrl(profil?.logoPemerintah);
-    final bool hasLogo1 = logo1.isNotEmpty;
-    final bool hasLogo2 = logo2.isNotEmpty;
-
     final myMasjidData = profil != null
         ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
+
+    final String logo1 = _getFullUrl(myMasjidData?.profil.logoMasjid ?? profil?.logoMasjid);
+    final String logo2 = _getFullUrl(myMasjidData?.profil.logoPemerintah ?? profil?.logoPemerintah);
+    final bool hasLogo1 = logo1.isNotEmpty;
+    final bool hasLogo2 = logo2.isNotEmpty;
     List<String> slideJumats = [];
     if (myMasjidData != null && myMasjidData.slideJumat != null) {
       final s = myMasjidData.slideJumat!;
