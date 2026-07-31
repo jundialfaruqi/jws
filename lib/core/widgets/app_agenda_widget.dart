@@ -176,17 +176,26 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Icon(
-                  TablerIcons.calendar_event,
-                  color: Colors.white,
-                  size: 42,
+                const Padding(
+                  padding: EdgeInsets.only(
+                    bottom: 0,
+                    left: 0,
+                  ), // Angkat sedikit ikonnya
+                  child: Icon(
+                    TablerIcons.calendar_event,
+                    color: Colors.white,
+                    size: 42,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(
                   dynamicDaysLabel,
                   style: TextStyle(
                     fontSize: 36,
+                    height:
+                        1.0, // Rapatkan tinggi font agar tidak ada ruang kosong di bawah
                     fontWeight: FontWeight.bold,
                     color: dynamicDaysLabel.toLowerCase() == 'hari ini'
                         ? Colors.yellow
