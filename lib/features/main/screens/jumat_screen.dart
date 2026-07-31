@@ -64,7 +64,7 @@ class JumatScreen extends ConsumerWidget {
     }
 
     List<Widget> logoWidgets = [];
-    final double logoSize = 120.0; // Diperkecil sedikit agar tidak overflow
+    final double logoSize = 100.0; // Diperkecil lagi sesuai permintaan
 
     if (!hasLogo1 && !hasLogo2) {
       logoWidgets.add(
@@ -74,7 +74,7 @@ class JumatScreen extends ConsumerWidget {
           fit: BoxFit.contain,
         ),
       );
-      logoWidgets.add(const SizedBox(width: 24));
+      logoWidgets.add(const SizedBox(width: 18));
       logoWidgets.add(
         Image.asset(
           'assets/logo/logo-pemko-default.png',
@@ -263,28 +263,14 @@ class JumatScreen extends ConsumerWidget {
                         width: 750,
                         child: Column(
                           children: [
-                            const Text(
-                              'PETUGAS JUMAT HARI INI',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textYellow,
-                                letterSpacing: 4,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(height: 24),
                             _buildPetugasRow(
                               'Khatib',
                               petugasHariIni?.khatib ?? '-',
                             ),
-                            const SizedBox(height: 16),
                             _buildPetugasRow(
                               'Imam',
                               petugasHariIni?.imam ?? '-',
                             ),
-                            const SizedBox(height: 16),
                             _buildPetugasRow(
                               'Muadzin',
                               petugasHariIni?.muadzin ?? '-',
@@ -293,18 +279,24 @@ class JumatScreen extends ConsumerWidget {
                         ),
                       ),
                       // Kelompok Bawah: Jam Digital
-                      AppLiveClock(
-                        builder: (context, now) {
+                      SizedBox(
+                        width: 750,
+                        child: AppLiveClock(
+                          builder: (context, now) {
                           final hour = now.hour.toString().padLeft(2, '0');
                           final minute = now.minute.toString().padLeft(2, '0');
                           final second = now.second.toString().padLeft(2, '0');
-                          
+
                           String timeZone = 'WIB';
-                          if (now.timeZoneOffset.inHours == 8) timeZone = 'WITA';
-                          if (now.timeZoneOffset.inHours == 9) timeZone = 'WIT';
+                          if (now.timeZoneOffset.inHours == 8) {
+                            timeZone = 'WITA';
+                          }
+                          if (now.timeZoneOffset.inHours == 9) {
+                            timeZone = 'WIT';
+                          }
 
                           return Row(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
@@ -320,7 +312,9 @@ class JumatScreen extends ConsumerWidget {
                               Container(
                                 height: 80,
                                 width: 4,
-                                margin: const EdgeInsets.symmetric(horizontal: 20),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.grey.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(2),
@@ -369,6 +363,7 @@ class JumatScreen extends ConsumerWidget {
                           );
                         },
                       ),
+                      ),
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Expanded
@@ -410,7 +405,7 @@ class JumatScreen extends ConsumerWidget {
   Widget _buildPetugasRow(String label, String value) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -425,19 +420,20 @@ class JumatScreen extends ConsumerWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 24,
               color: Colors.white70,
               fontFamily: 'Poppins',
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 42,
+              fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'Poppins',
+              height: 1.2,
             ),
           ),
         ],
