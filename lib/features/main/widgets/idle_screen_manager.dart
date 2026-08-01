@@ -118,7 +118,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             ? (data.jumbotronMasjid?.validSlides ?? [])
             : [];
 
-        int mainDuration = mainSlides.isNotEmpty ? mainSlides.length * 10 : 30;
+        int mainDuration = mainSlides.isNotEmpty ? mainSlides.length * 20 : 30;
         List<Map<String, dynamic>> blocks = [];
         blocks.add({'type': 'main', 'duration': mainDuration});
 
@@ -131,7 +131,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             blocks.add({
               'type': 'pemko',
               'slide': pemkoSlides[i],
-              'duration': 15,
+              'duration': 20,
             });
             blocks.add({'type': 'main', 'duration': mainDuration});
           }
@@ -139,7 +139,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             blocks.add({
               'type': 'masjid',
               'slide': masjidSlides[i],
-              'duration': 15,
+              'duration': 20,
             });
             blocks.add({'type': 'main', 'duration': mainDuration});
           }

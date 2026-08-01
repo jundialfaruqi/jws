@@ -53,8 +53,8 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
         ? (nowMs - blockStartTimeMs)
         : nowMs;
 
-    // Indeks dihitung secara presisi berdasarkan kelipatan 10.000 ms
-    final int nextIndex = (relativeMs ~/ 10000) % widget.imageUrls.length;
+    // Indeks dihitung secara presisi berdasarkan kelipatan 20.000 ms (20 detik)
+    final int nextIndex = (relativeMs ~/ 20000) % widget.imageUrls.length;
 
     if (_currentPage != nextIndex || initial) {
       setState(() {
@@ -86,8 +86,8 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
       }
     }
 
-    // Jadwalkan eksekusi timer meledak persis di kelipatan 10.000 ms berikutnya
-    int msUntilNext = 10000 - (relativeMs % 10000);
+    // Jadwalkan eksekusi timer meledak persis di kelipatan 20.000 ms berikutnya
+    int msUntilNext = 20000 - (relativeMs % 20000);
     _timer?.cancel();
     _timer = Timer(
       Duration(milliseconds: msUntilNext),
