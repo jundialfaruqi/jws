@@ -108,55 +108,55 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             children: [
               const Text(
                 'TAUTKAN TV MASJID',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Buka aplikasi Web Admin Masjid, lalu masukkan kode berikut:',
-                    style: TextStyle(color: Colors.white70, fontSize: 24),
-                  ),
-                  const SizedBox(height: 48),
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: Colors.red, fontSize: 24),
-                      ),
-                    ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 24,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.blueAccent, width: 2),
-                    ),
-                    child: Text(
-                      _isLoading ? '...' : (_pairingCode ?? '...'),
-                      style: const TextStyle(
-                        color: Colors.blueAccent,
-                        fontSize: 80,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 64),
-                  const CircularProgressIndicator(color: Colors.white24),
-                  const SizedBox(height: 16),
-                  Text(
-                    _isLoading ? 'Memuat kode aktivasi...' : 'Menunggu konfirmasi admin...',
-                    style: const TextStyle(color: Colors.white54, fontSize: 18),
-                  ),
-                ],
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              const SizedBox(height: 24),
+              const Text(
+                'Buka aplikasi Web Admin Masjid, lalu masukkan kode berikut:',
+                style: TextStyle(color: Colors.white70, fontSize: 24),
+              ),
+              const SizedBox(height: 48),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.red, fontSize: 24),
+                  ),
+                ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48,
+                  vertical: 24,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.blueAccent, width: 2),
+                ),
+                child: Text(
+                  _isLoading ? '...' : (_pairingCode ?? '...'),
+                  style: const TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 80,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 64),
+              const CircularProgressIndicator(color: Colors.white24),
+              const SizedBox(height: 16),
+              Text(
+                _isLoading ? 'Memuat kode aktivasi...' : 'Menunggu aktivasi...',
+                style: const TextStyle(color: Colors.white54, fontSize: 18),
+              ),
+            ],
+          ),
         ),
       ),
     );
