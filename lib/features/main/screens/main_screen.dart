@@ -40,11 +40,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       if (response['status'] != 'linked') {
         _handleUnpaired();
       } else {
-        // Jika masih linked, dengarkan event unpaired secara real-time
+        // Reconnect (putus koneksi lama dari PairingScreen, lalu daftarkan callback baru)
         final wsService = ref.read(deviceWebSocketServiceProvider);
-        wsService.connect(
+        wsService.reconnect(
           deviceId: deviceId,
-          onPairingReceived: (id) {}, // Kita abaikan paired karena sudah di main
+          onPairingReceived: (id) {}, // Abaikan paired karena sudah di main
           onUnpairedReceived: () {
             _handleUnpaired();
           },
