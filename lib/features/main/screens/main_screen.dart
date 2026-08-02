@@ -58,7 +58,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     await storage.delete('selected_profil');
     ref.read(selectedProfilProvider.notifier).setProfil(null);
     if (mounted) {
-      context.go('/pairing');
+      context.go('/');
     }
   }
 

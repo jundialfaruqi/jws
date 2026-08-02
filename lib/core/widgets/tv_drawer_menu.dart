@@ -19,7 +19,6 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
   Timer? _hideTimer;
 
   final FocusNode _drawerWrapperFocusNode = FocusNode();
-  final FocusNode _gantiProfilFocusNode = FocusNode();
   final FocusNode _settingsFocusNode = FocusNode();
 
   @override
@@ -43,16 +42,9 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
     });
 
     // Cegah fokus melompat keluar dari laci (menghilang ke ruang hampa)
-    _gantiProfilFocusNode.onKeyEvent = (node, event) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp ||
-          event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    };
-
     _settingsFocusNode.onKeyEvent = (node, event) {
       if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+          event.logicalKey == LogicalKeyboardKey.arrowUp ||
           event.logicalKey == LogicalKeyboardKey.arrowRight) {
         return KeyEventResult.handled;
       }
@@ -63,7 +55,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
   void showDrawer() {
     _animationController.forward();
     _startHideTimer();
-    _gantiProfilFocusNode.requestFocus();
+    _settingsFocusNode.requestFocus();
   }
 
   void hideDrawer() {
@@ -83,7 +75,6 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
 
   void _onFocusChanged(bool _) {
     final isFocused =
-        _gantiProfilFocusNode.hasFocus ||
         _settingsFocusNode.hasFocus ||
         _drawerWrapperFocusNode.hasFocus;
 
@@ -93,10 +84,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
     }
   }
 
-  void _handlePressProfil() {
-    hideDrawer();
-    context.pushNamed('select_profil');
-  }
+
 
   void _handlePressSettings() {
     hideDrawer();
@@ -108,7 +96,6 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
     _animationController.dispose();
     _hideTimer?.cancel();
     _drawerWrapperFocusNode.dispose();
-    _gantiProfilFocusNode.dispose();
     _settingsFocusNode.dispose();
     super.dispose();
   }
@@ -181,13 +168,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                       ),
                     ),
                     const SizedBox(height: 48),
-                    _TvDrawerMenuItem(
-                      focusNode: _gantiProfilFocusNode,
-                      onFocusChange: _onFocusChanged,
-                      onPressed: _handlePressProfil,
-                      icon: Icons.swap_horiz,
-                      label: 'Ganti Profil',
-                    ),
+
                     _TvDrawerMenuItem(
                       focusNode: _settingsFocusNode,
                       onFocusChange: _onFocusChanged,
