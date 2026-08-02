@@ -41,6 +41,9 @@ Future<void> main() async {
   if (savedProfilJson != null) {
     try {
       initialProfil = ProfilMasjidModel.fromJson(jsonDecode(savedProfilJson));
+      if (initialProfil.id == 0) {
+        initialProfil = null;
+      }
     } catch (_) {}
   }
 

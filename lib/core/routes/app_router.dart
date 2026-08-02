@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/select_profil/screens/select_profil_screen.dart';
+import '../../features/select_profil/screens/pairing_screen.dart';
 import '../../features/main/screens/main_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/main/screens/adzan_screen.dart';
@@ -36,8 +36,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        name: 'select_profil',
-        builder: (context, state) => const SelectProfilScreen(),
+        name: 'pairing',
+        builder: (context, state) => const PairingScreen(),
       ),
       GoRoute(
         path: '/main',

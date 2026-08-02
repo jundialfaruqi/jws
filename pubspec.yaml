@@ -32,6 +32,7 @@ dependencies:
   path_provider_tizen: any
   webview_flutter_tizen: any
   sqflite_tizen: any
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
