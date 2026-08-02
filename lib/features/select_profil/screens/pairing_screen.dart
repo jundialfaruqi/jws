@@ -53,8 +53,8 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
   void _listenToWebSocket(String deviceId) {
     final wsService = ref.read(deviceWebSocketServiceProvider);
-    // Connect websocket if not connected
-    wsService.connect(
+    // Reconnect (putus koneksi lama jika ada, lalu connect ulang dengan callback baru)
+    wsService.reconnect(
       deviceId: deviceId,
       onPairingReceived: (masjidId) {
         _loadAndSaveProfil(masjidId);

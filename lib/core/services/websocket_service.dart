@@ -127,10 +127,26 @@ class WebSocketService {
       _connectionSub?.cancel();
       _pusherClient!.disconnect();
       _isConnected = false;
+      _pusherClient = null;
       debugPrint("WebSocket Disconnected");
     } catch (e) {
       debugPrint("WebSocket Disconnect Error: $e");
     }
+  }
+
+  /// Memutus koneksi lama lalu menghubungkan ulang dengan callback baru.
+  /// Gunakan ini saat PairingScreen perlu mendengar event paired setelah di-kick dari MainScreen.
+  Future<void> reconnect({
+    String? deviceId,
+    Function(int masjidId)? onPairingReceived,
+    Function()? onUnpairedReceived,
+  }) async {
+    await disconnect();
+    await connect(
+      deviceId: deviceId,
+      onPairingReceived: onPairingReceived,
+      onUnpairedReceived: onUnpairedReceived,
+    );
   }
 }
 

@@ -33,6 +33,7 @@ dependencies:
   webview_flutter_tizen: any
   sqflite_tizen: any
   uuid: ^4.6.0
+  device_info_plus: ^12.4.0
 
 dev_dependencies:
   flutter_test:
