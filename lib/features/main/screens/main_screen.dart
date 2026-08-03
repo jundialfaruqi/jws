@@ -37,10 +37,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       final deviceId = await deviceService.getDeviceId();
       final response = await deviceService.requestPairingCode();
       
-      if (response['status'] != 'linked') {
+      if (response['status'] == 'pending') {
+        // Hanya unpair jika server secara eksplisit mengembalikan status 'pending' (TV sudah diputus oleh admin)
         _handleUnpaired();
       } else {
-        // Reconnect (putus koneksi lama dari PairingScreen, lalu daftarkan callback baru)
+        // Jika status 'linked' ATAU 'error' (sedang offline), tetap nyalakan websocket.
+        // Dengan begitu, Pusher client akan terus mencoba reconnect di background.
+        // Saat internet kembali hidup, TV akan otomatis berstatus Online.
         final wsService = ref.read(deviceWebSocketServiceProvider);
         wsService.reconnect(
           deviceId: deviceId,

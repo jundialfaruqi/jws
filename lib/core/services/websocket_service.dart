@@ -45,8 +45,12 @@ class WebSocketService {
       final host = dotenv.env['REVERB_HOST'] ?? '127.0.0.1';
       final port = int.tryParse(dotenv.env['REVERB_PORT'] ?? '8080') ?? 8080;
       final scheme = dotenv.env['REVERB_SCHEME'] ?? 'http';
+      final baseUrl = dotenv.env['BASE_URL'] ?? 'http://127.0.0.1:8000/';
 
       final wsScheme = scheme == 'https' ? 'wss' : 'ws';
+
+      // URL auth endpoint kustom untuk TV (tanpa login email/password)
+      final authUrl = '${baseUrl}api/v2/device/broadcasting/auth';
 
       final options = PusherChannelsOptions.fromHost(
         scheme: wsScheme,
@@ -59,7 +63,9 @@ class WebSocketService {
         options: options,
         connectionErrorHandler: (error, trace, refresh) {
           debugPrint("WebSocket Error: $error");
-          refresh();
+          Future.delayed(const Duration(seconds: 5), () {
+            refresh();
+          });
         },
       );
 
@@ -67,9 +73,18 @@ class WebSocketService {
         _isConnected = true;
         
         if (deviceId != null) {
-          debugPrint("WebSocket Subscribed to device-$deviceId at $wsScheme://$host:$port");
-          final channel = _pusherClient!.publicChannel('device-$deviceId');
+          debugPrint("WebSocket Subscribed to presence-device-$deviceId at $wsScheme://$host:$port");
+
+          // Gunakan Presence Channel agar admin bisa melihat status online/offline TV
+          final channel = _pusherClient!.presenceChannel(
+            'presence-device-$deviceId',
+            authorizationDelegate: EndpointAuthorizableChannelTokenAuthorizationDelegate.forPresenceChannel(
+              authorizationEndpoint: Uri.parse(authUrl),
+              headers: {'X-Device-ID': deviceId},
+            ),
+          );
           channel.subscribe();
+
           channel.bind('device.paired').listen((event) {
             debugPrint("WebSocket Event Received: device.paired");
             if (event.data != null) {
@@ -149,4 +164,3 @@ class WebSocketService {
     );
   }
 }
-
