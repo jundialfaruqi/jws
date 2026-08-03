@@ -63,7 +63,7 @@ class WebSocketService {
         options: options,
         connectionErrorHandler: (error, trace, refresh) {
           debugPrint("WebSocket Error: $error");
-          Future.delayed(const Duration(seconds: 5), () {
+          Future.delayed(const Duration(seconds: 15), () {
             refresh();
           });
         },
