@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import '../../../core/constants/api_constant.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
@@ -128,25 +129,45 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                     style: const TextStyle(color: Colors.red, fontSize: 24),
                   ),
                 ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 48,
-                  vertical: 24,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.blueAccent, width: 2),
-                ),
-                child: Text(
-                  _isLoading ? '...' : (_pairingCode ?? '...'),
-                  style: const TextStyle(
-                    color: Colors.blueAccent,
-                    fontSize: 80,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 16,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_pairingCode != null)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: QrImageView(
+                        data: _pairingCode!,
+                        version: QrVersions.auto,
+                        size: 200.0,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  if (_pairingCode != null) const SizedBox(width: 48),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 48,
+                      vertical: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.blueAccent, width: 2),
+                    ),
+                    child: Text(
+                      _isLoading ? '...' : (_pairingCode ?? '...'),
+                      style: const TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 80,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 16,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 64),
               const CircularProgressIndicator(color: Colors.white24),
