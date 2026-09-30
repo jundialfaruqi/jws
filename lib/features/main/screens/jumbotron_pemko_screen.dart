@@ -34,6 +34,7 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   bool _isInitialized = false;
   bool _hasError = false;
   bool _isCompleted = false;
+  VideoPlaybackNotifier? _audioNotifier;
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -67,6 +68,9 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.hasAudio) {
+      _audioNotifier = ref.read(isVideoPlayingWithAudioProvider.notifier);
+    }
     if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
       _initVideoPlayer();
     }
@@ -87,6 +91,13 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
 
       if (reachedEnd) {
         _isCompleted = true;
+        try {
+          _videoController?.setVolume(0.0);
+          _videoController?.pause();
+        } catch (_) {}
+        if (widget.hasAudio) {
+          ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+        }
         widget.onFinished?.call();
       }
     }
@@ -101,7 +112,10 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
       _videoController = controller;
 
       await controller.initialize();
-      if (!mounted) return;
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
 
       final durationSec = controller.value.duration.inSeconds;
       if (durationSec > 0 && widget.videoUrl != null) {
@@ -120,9 +134,11 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
       await controller.setLooping(false);
       await controller.play();
 
-      setState(() {
-        _isInitialized = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     } catch (e) {
       debugPrint('Error saat memutar video jumbotron di Flutter: $e');
       if (mounted) {
@@ -142,11 +158,17 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   @override
   void dispose() {
     if (widget.hasAudio) {
-      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      Future.microtask(() {
+        _audioNotifier?.setPlaying(false);
+      });
     }
     _videoController?.removeListener(_videoListener);
-    _videoController?.pause();
+    try {
+      _videoController?.setVolume(0.0);
+      _videoController?.pause();
+    } catch (_) {}
     _videoController?.dispose();
+    _videoController = null;
     super.dispose();
   }
 

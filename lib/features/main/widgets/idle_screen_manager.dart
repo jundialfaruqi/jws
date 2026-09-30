@@ -23,22 +23,101 @@ class IdleScreenManager extends ConsumerStatefulWidget {
 }
 
 class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
-  Timer? _timer;
+  Timer? _staticTimer;
+  Timer? _videoPhaseTimer;
+  Timer? _videoWatchdogTimer;
   final FocusNode _retryFocusNode = FocusNode();
   bool _hasRequestedFocusForRetry = false;
-  String? _completedVideoBlockKey;
+
+  // State rotasi event-driven khusus ketika ada video jumbotron
+  bool _isVideoPlaying = false;
+  bool _isInMainPhase = true;
+  int _jumbotronStepIndex = 0;
+  int _activeBlockStartMs = 0;
+  int _currentMainDuration = 30;
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _staticTimer?.cancel();
+    _videoPhaseTimer?.cancel();
+    _videoWatchdogTimer?.cancel();
     _retryFocusNode.dispose();
     super.dispose();
   }
 
-  void _scheduleNextUpdate(int delayMs) {
-    _timer?.cancel();
-    _timer = Timer(Duration(milliseconds: delayMs), () {
+  void _scheduleStaticUpdate(int delayMs) {
+    _staticTimer?.cancel();
+    _staticTimer = Timer(Duration(milliseconds: delayMs), () {
       if (mounted) setState(() {});
+    });
+  }
+
+  void _switchToJumbotron(List<Map<String, dynamic>> jumbotronItems) {
+    _videoPhaseTimer?.cancel();
+    _videoPhaseTimer = null;
+    _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
+
+    if (!mounted || jumbotronItems.isEmpty) return;
+
+    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+    _isInMainPhase = false;
+    _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+
+    if (item['type'] == 'pemko_video') {
+      _isVideoPlaying = true;
+      setState(() {});
+
+      final durationSec = (item['duration'] as int?) ?? 30;
+      final timeoutSec = durationSec > 0 ? durationSec + 15 : 180;
+      _videoWatchdogTimer = Timer(Duration(seconds: timeoutSec), () {
+        debugPrint('[IdleScreenManager] Safety watchdog fired for video ($timeoutSec s), transitioning to main.');
+        _handleVideoCompletion(jumbotronItems);
+      });
+    } else {
+      // Masjid image slide
+      _isVideoPlaying = false;
+      setState(() {});
+
+      final durationSec = (item['duration'] as int?) ?? 20;
+      _videoPhaseTimer = Timer(Duration(seconds: durationSec), () {
+        if (!mounted) return;
+        _handleImageSlideCompletion(jumbotronItems);
+      });
+    }
+  }
+
+  void _handleVideoCompletion(List<Map<String, dynamic>> jumbotronItems) {
+    if (!mounted) return;
+    _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
+
+    _jumbotronStepIndex = (_jumbotronStepIndex + 1) % jumbotronItems.length;
+    _switchToMain(jumbotronItems);
+  }
+
+  void _handleImageSlideCompletion(List<Map<String, dynamic>> jumbotronItems) {
+    if (!mounted) return;
+    _videoPhaseTimer?.cancel();
+    _videoPhaseTimer = null;
+
+    _jumbotronStepIndex = (_jumbotronStepIndex + 1) % jumbotronItems.length;
+    _switchToMain(jumbotronItems);
+  }
+
+  void _switchToMain(List<Map<String, dynamic>> jumbotronItems) {
+    _videoPhaseTimer?.cancel();
+    _videoWatchdogTimer?.cancel();
+
+    _isInMainPhase = true;
+    _isVideoPlaying = false;
+    _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+
+    setState(() {});
+
+    _videoPhaseTimer = Timer(Duration(seconds: _currentMainDuration), () {
+      if (!mounted) return;
+      _switchToJumbotron(jumbotronItems);
     });
   }
 
@@ -52,13 +131,12 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     }
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
-    final detectedDurations = ref.watch(detectedVideoDurationProvider);
+    final detectedDurations = ref.read(detectedVideoDurationProvider);
 
     // Dengarkan perubahan jaringan secara diam-diam.
     // Jika awalnya putus (false) lalu tersambung lagi (true), otomatis refresh data utama jika sedang error.
     ref.listen<AsyncValue<bool>>(isConnectedProvider, (previous, next) {
       if (previous?.value == false && next.value == true) {
-        // Hapus pengecekan hasError agar selalu refresh data saat internet kembali
         ref.invalidate(myMasjidProvider(profil.id));
       }
     });
@@ -124,10 +202,14 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             : [];
 
         int mainDuration = mainSlides.isNotEmpty ? mainSlides.length * 20 : 30;
-        List<Map<String, dynamic>> blocks = [];
-        blocks.add({'type': 'main', 'duration': mainDuration});
+        _currentMainDuration = mainDuration;
+
+        Widget currentWidget;
 
         if (isPemkoVideo) {
+          // Bersihkan timer static image jika sebelumnya berjalan
+          _staticTimer?.cancel();
+
           final videoUrl = data.jumbotronPemko!.videoFile;
           int videoDuration = data.jumbotronPemko!.videoDuration;
           if (videoDuration <= 0 && videoUrl != null && detectedDurations.containsKey(videoUrl)) {
@@ -136,23 +218,78 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
           if (videoDuration <= 0) {
             videoDuration = 30;
           }
-          blocks.add({
-            'type': 'pemko_video',
-            'videoUrl': videoUrl,
-            'hasAudio': data.jumbotronPemko!.hasAudio,
-            'duration': videoDuration,
-          });
-          blocks.add({'type': 'main', 'duration': mainDuration});
+
+          List<Map<String, dynamic>> jumbotronItems = [];
+          if (videoUrl != null && videoUrl.isNotEmpty) {
+            jumbotronItems.add({
+              'type': 'pemko_video',
+              'videoUrl': videoUrl,
+              'hasAudio': data.jumbotronPemko!.hasAudio,
+              'duration': videoDuration,
+            });
+          }
 
           for (final slide in masjidSlides) {
-            blocks.add({
+            jumbotronItems.add({
               'type': 'masjid',
               'slide': slide,
               'duration': 20,
             });
-            blocks.add({'type': 'main', 'duration': mainDuration});
+          }
+
+          if (jumbotronItems.isEmpty) {
+            currentWidget = const MainContentWidget();
+          } else {
+            // Inisialisasi awal saat pertama kali mount
+            if (_activeBlockStartMs == 0) {
+              _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+            }
+            if (_videoPhaseTimer == null && !_isVideoPlaying && _isInMainPhase) {
+              _videoPhaseTimer = Timer(Duration(seconds: mainDuration), () {
+                if (mounted) _switchToJumbotron(jumbotronItems);
+              });
+            }
+
+            if (_isInMainPhase) {
+              currentWidget = ProviderScope(
+                key: const ValueKey('main'),
+                overrides: [
+                  slideStartTimeProvider.overrideWithValue(_activeBlockStartMs),
+                ],
+                child: const MainContentWidget(),
+              );
+            } else {
+              final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+              if (item['type'] == 'pemko_video') {
+                currentWidget = JumbotronPemkoScreen(
+                  key: ValueKey('pemko_video_${item['videoUrl']}_$_activeBlockStartMs'),
+                  videoUrl: item['videoUrl'],
+                  hasAudio: item['hasAudio'] ?? false,
+                  onFinished: () {
+                    _handleVideoCompletion(jumbotronItems);
+                  },
+                );
+              } else {
+                currentWidget = JumbotronMasjidScreen(
+                  key: ValueKey('masjid_${item['slide']}_$_activeBlockStartMs'),
+                  imageUrl: item['slide'],
+                );
+              }
+            }
           }
         } else {
+          // BUKAN VIDEO: Gunakan rotasi sinkronisasi jam absolut untuk gambar statis
+          _videoPhaseTimer?.cancel();
+          _videoPhaseTimer = null;
+          _videoWatchdogTimer?.cancel();
+          _videoWatchdogTimer = null;
+          _isVideoPlaying = false;
+          _isInMainPhase = true;
+          _activeBlockStartMs = 0;
+
+          List<Map<String, dynamic>> blocks = [];
+          blocks.add({'type': 'main', 'duration': mainDuration});
+
           int maxJumbo = pemkoSlides.length > masjidSlides.length
               ? pemkoSlides.length
               : masjidSlides.length;
@@ -175,74 +312,42 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
               blocks.add({'type': 'main', 'duration': mainDuration});
             }
           }
-        }
 
-        if (blocks.length > 1 && blocks.last['type'] == 'main') {
-          blocks.removeLast();
-        }
-
-        int totalDuration = blocks.fold(
-          0,
-          (sum, b) => sum + (b['duration'] as int),
-        );
-
-        if (totalDuration == 0) totalDuration = 1;
-
-        final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
-        final totalDurationMs = totalDuration * 1000;
-        final currentPosMs = nowMs % totalDurationMs;
-
-        int accumulatedMs = 0;
-        Map<String, dynamic>? activeBlock;
-        int msUntilNextBlock = 1000; // fallback
-
-        for (final b in blocks) {
-          int durationMs = (b['duration'] as int) * 1000;
-          if (currentPosMs >= accumulatedMs && currentPosMs < accumulatedMs + durationMs) {
-            activeBlock = b;
-            msUntilNextBlock = (accumulatedMs + durationMs) - currentPosMs;
-            break;
+          if (blocks.length > 1 && blocks.last['type'] == 'main') {
+            blocks.removeLast();
           }
-          accumulatedMs += durationMs;
-        }
-        activeBlock ??= blocks.first;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _scheduleNextUpdate(msUntilNextBlock);
-          }
-        });
+          int totalDuration = blocks.fold(
+            0,
+            (sum, b) => sum + (b['duration'] as int),
+          );
 
-        Widget currentWidget;
-        if (activeBlock['type'] == 'pemko_video') {
-          final videoKey = 'pemko_video_${activeBlock['videoUrl']}';
-          if (_completedVideoBlockKey == videoKey) {
-            final loopStartMs = nowMs - currentPosMs;
-            final activeBlockStartMs = loopStartMs + accumulatedMs;
-            currentWidget = ProviderScope(
-              key: const ValueKey('main'),
-              overrides: [
-                slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
-              ],
-              child: const MainContentWidget(),
-            );
-          } else {
-            currentWidget = JumbotronPemkoScreen(
-              key: ValueKey(videoKey),
-              videoUrl: activeBlock['videoUrl'],
-              hasAudio: activeBlock['hasAudio'] ?? false,
-              onFinished: () {
-                if (mounted && _completedVideoBlockKey != videoKey) {
-                  setState(() {
-                    _completedVideoBlockKey = videoKey;
-                  });
-                }
-              },
-            );
+          if (totalDuration == 0) totalDuration = 1;
+
+          final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+          final totalDurationMs = totalDuration * 1000;
+          final currentPosMs = nowMs % totalDurationMs;
+
+          int accumulatedMs = 0;
+          Map<String, dynamic>? activeBlock;
+          int msUntilNextBlock = 1000; // fallback
+
+          for (final b in blocks) {
+            int durationMs = (b['duration'] as int) * 1000;
+            if (currentPosMs >= accumulatedMs && currentPosMs < accumulatedMs + durationMs) {
+              activeBlock = b;
+              msUntilNextBlock = (accumulatedMs + durationMs) - currentPosMs;
+              break;
+            }
+            accumulatedMs += durationMs;
           }
-        } else {
-          // Reset tanda video selesai jika siklus sudah beralih ke slide atau tampilan lain
-          _completedVideoBlockKey = null;
+          activeBlock ??= blocks.first;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _scheduleStaticUpdate(msUntilNextBlock);
+            }
+          });
 
           if (activeBlock['type'] == 'pemko') {
             currentWidget = JumbotronPemkoScreen(
@@ -255,11 +360,9 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
               imageUrl: activeBlock['slide'],
             );
           } else {
-            // loopStartMs adalah waktu absolut saat siklus ini dimulai (diulang setiap totalDuration)
             final loopStartMs = nowMs - currentPosMs;
-            // activeBlockStartMs adalah waktu absolut saat MainContent ini seharusnya mulai muncul
             final activeBlockStartMs = loopStartMs + accumulatedMs;
-            
+
             currentWidget = ProviderScope(
               key: const ValueKey('main'),
               overrides: [
@@ -282,4 +385,3 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     );
   }
 }
-
