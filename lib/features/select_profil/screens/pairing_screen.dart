@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,11 +24,18 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   String? _pairingCode;
   bool _isLoading = true;
   String? _error;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _initPairing();
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _initPairing() async {
@@ -38,11 +46,12 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       // Jika sudah tertaut sebelumnya, langsung muat profil masjid
       await _loadAndSaveProfil(response['masjid_id']);
     } else if (response['status'] == 'pending') {
-      // Jika masih pending, tampilkan kode dan tunggu websocket
+      // Jika masih pending, tampilkan kode dan tunggu websocket + polling fallback
       setState(() {
         _pairingCode = response['pairing_code'];
         _isLoading = false;
       });
+      _startPollingCheck();
       _listenToWebSocket(await deviceService.getDeviceId());
     } else {
       setState(() {
@@ -52,23 +61,38 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     }
   }
 
+  void _startPollingCheck() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      if (!mounted) return;
+      final deviceService = ref.read(deviceServiceProvider);
+      final response = await deviceService.requestPairingCode();
+      if (response['status'] == 'linked' && response['masjid_id'] != null) {
+        timer.cancel();
+        await _loadAndSaveProfil(response['masjid_id']);
+      }
+    });
+  }
+
   void _listenToWebSocket(String deviceId) {
     final wsService = ref.read(deviceWebSocketServiceProvider);
     // Reconnect (putus koneksi lama jika ada, lalu connect ulang dengan callback baru)
     wsService.reconnect(
       deviceId: deviceId,
       onPairingReceived: (masjidId) {
+        _pollingTimer?.cancel();
         _loadAndSaveProfil(masjidId);
       },
     );
   }
 
-  Future<void> _loadAndSaveProfil(int masjidId) async {
+  Future<void> _loadAndSaveProfil(dynamic masjidId) async {
+    _pollingTimer?.cancel();
     try {
       final dio = Dio();
-      // Fetch profil using API (this might need adjusting if your API expects slug instead of id, but assuming we can get profil by ID or just use my-masjid endpoint)
+      final id = int.tryParse(masjidId.toString()) ?? masjidId;
       final res = await dio.get(
-        '${ApiConstant.baseUrl}api/v2/my-masjid?id=$masjidId',
+        '${ApiConstant.baseUrl}api/v2/my-masjid?id=$id',
       );
       if (res.statusCode == 200 && res.data['success'] == true) {
         final profilModel = ProfilMasjidModel.fromJson(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/widgets/app_masjid_title.dart';
@@ -8,27 +9,149 @@ import '../../../core/widgets/app_live_clock.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/widgets/app_next_prayer_bar.dart';
 import '../providers/my_masjid_provider.dart';
+import '../providers/video_playback_provider.dart';
 
-class JumbotronPemkoScreen extends ConsumerWidget {
-  final String imageUrl;
+class JumbotronPemkoScreen extends ConsumerStatefulWidget {
+  final String? imageUrl;
+  final String? videoUrl;
+  final bool hasAudio;
+  final VoidCallback? onFinished;
 
-  const JumbotronPemkoScreen({super.key, required this.imageUrl});
+  const JumbotronPemkoScreen({
+    super.key,
+    this.imageUrl,
+    this.videoUrl,
+    this.hasAudio = false,
+    this.onFinished,
+  });
+
+  @override
+  ConsumerState<JumbotronPemkoScreen> createState() => _JumbotronPemkoScreenState();
+}
+
+class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
+  VideoPlayerController? _videoController;
+  bool _isInitialized = false;
+  bool _hasError = false;
+  bool _isCompleted = false;
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
 
     final baseUrl = ApiConstant.baseUrl;
     final cleanBase = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
+
+    // Jika path berupa full URL yang merujuk ke localhost atau 127.0.0.1,
+    // sesuaikan host dan port mengikuti baseUrl (misal 10.0.2.2 untuk emulator)
+    if (path.startsWith('http://localhost') || path.startsWith('http://127.0.0.1')) {
+      try {
+        final uri = Uri.parse(path);
+        final baseUri = Uri.parse(cleanBase);
+        return uri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        ).toString();
+      } catch (_) {}
+    }
+
+    if (path.startsWith('http')) return path;
+
     final cleanPath = path.startsWith('/') ? path : '/$path';
 
     return '$cleanBase$cleanPath';
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
+      _initVideoPlayer();
+    }
+  }
+
+  void _videoListener() {
+    if (_isCompleted || _videoController == null || !_videoController!.value.isInitialized) {
+      return;
+    }
+    final value = _videoController!.value;
+    final pos = value.position;
+    final dur = value.duration;
+
+    if (dur > Duration.zero) {
+      // Jika video sudah berada di akhir durasi (toleransi 300ms) atau berhenti di detik terakhir
+      final reachedEnd = pos >= dur - const Duration(milliseconds: 300) ||
+          (!value.isPlaying && pos >= dur - const Duration(seconds: 1));
+
+      if (reachedEnd) {
+        _isCompleted = true;
+        widget.onFinished?.call();
+      }
+    }
+  }
+
+  Future<void> _initVideoPlayer() async {
+    final fullUrl = _getFullUrl(widget.videoUrl);
+    if (fullUrl.isEmpty) return;
+
+    try {
+      final controller = VideoPlayerController.networkUrl(Uri.parse(fullUrl));
+      _videoController = controller;
+
+      await controller.initialize();
+      if (!mounted) return;
+
+      final durationSec = controller.value.duration.inSeconds;
+      if (durationSec > 0 && widget.videoUrl != null) {
+        ref.read(detectedVideoDurationProvider.notifier).setDuration(widget.videoUrl!, durationSec);
+      }
+
+      controller.addListener(_videoListener);
+
+      if (widget.hasAudio) {
+        ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(true);
+        await controller.setVolume(1.0);
+      } else {
+        await controller.setVolume(0.0);
+      }
+
+      await controller.setLooping(false);
+      await controller.play();
+
+      setState(() {
+        _isInitialized = true;
+      });
+    } catch (e) {
+      debugPrint('Error saat memutar video jumbotron di Flutter: $e');
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && !_isCompleted) {
+            _isCompleted = true;
+            widget.onFinished?.call();
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.hasAudio) {
+      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+    }
+    _videoController?.removeListener(_videoListener);
+    _videoController?.pause();
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final initialProfil = ref.watch(selectedProfilProvider);
     final liveData = initialProfil != null
         ? ref.watch(myMasjidProvider(initialProfil.id)).value
@@ -38,25 +161,52 @@ class JumbotronPemkoScreen extends ConsumerWidget {
         liveData?.profil.logoPemerintah ?? initialProfil?.logoPemerintah;
     final logoMasjid = liveData?.profil.logoMasjid ?? initialProfil?.logoMasjid;
 
+    final isVideo = widget.videoUrl != null && widget.videoUrl!.isNotEmpty;
+
     return TvScaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Gambar Full Layar (Ditarik/Gepeng tidak masalah)
+          // Media Latar Belakang: Video Player atau Gambar
           Positioned.fill(
-            child: CachedNetworkImage(
-              imageUrl: _getFullUrl(imageUrl),
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.fill,
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(
-                  Icons.broken_image,
-                  size: 100,
-                  color: Colors.white54,
-                ),
-              ),
-            ),
+            child: isVideo
+                ? (_isInitialized && _videoController != null
+                    ? SizedBox.expand(
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: SizedBox(
+                            width: _videoController!.value.size.width,
+                            height: _videoController!.value.size.height,
+                            child: VideoPlayer(_videoController!),
+                          ),
+                        ),
+                      )
+                    : (_hasError
+                        ? const Center(
+                            child: Icon(
+                              Icons.error_outline,
+                              size: 100,
+                              color: Colors.white54,
+                            ),
+                          )
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white70,
+                            ),
+                          )))
+                : CachedNetworkImage(
+                    imageUrl: _getFullUrl(widget.imageUrl),
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.fill,
+                    errorWidget: (context, url, error) => const Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 100,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ),
           ),
 
           // Pojok Kiri Atas: Logo Pemko dan Masjid

@@ -9,6 +9,7 @@ import '../../../core/providers/connectivity_provider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
+import '../providers/video_playback_provider.dart';
 import '../../../core/widgets/tv/tv_button.dart';
 import '../screens/jumbotron_masjid_screen.dart';
 import '../screens/jumbotron_pemko_screen.dart';
@@ -25,6 +26,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   Timer? _timer;
   final FocusNode _retryFocusNode = FocusNode();
   bool _hasRequestedFocusForRetry = false;
+  String? _completedVideoBlockKey;
 
   @override
   void dispose() {
@@ -50,6 +52,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     }
 
     final myMasjidAsync = ref.watch(myMasjidProvider(profil.id));
+    final detectedDurations = ref.watch(detectedVideoDurationProvider);
 
     // Dengarkan perubahan jaringan secara diam-diam.
     // Jika awalnya putus (false) lalu tersambung lagi (true), otomatis refresh data utama jika sedang error.
@@ -111,7 +114,9 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       },
       data: (data) {
         final mainSlides = data.slides?.validSlides ?? [];
-        final pemkoSlides = data.jumbotronPemko?.isActive == true
+        final isPemkoActive = data.jumbotronPemko?.isActive == true;
+        final isPemkoVideo = isPemkoActive && (data.jumbotronPemko?.isVideo ?? false);
+        final pemkoSlides = (isPemkoActive && !isPemkoVideo)
             ? (data.jumbotronPemko?.validSlides ?? [])
             : [];
         final masjidSlides = data.jumbotronMasjid?.isActive == true
@@ -122,26 +127,53 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         List<Map<String, dynamic>> blocks = [];
         blocks.add({'type': 'main', 'duration': mainDuration});
 
-        int maxJumbo = pemkoSlides.length > masjidSlides.length
-            ? pemkoSlides.length
-            : masjidSlides.length;
+        if (isPemkoVideo) {
+          final videoUrl = data.jumbotronPemko!.videoFile;
+          int videoDuration = data.jumbotronPemko!.videoDuration;
+          if (videoDuration <= 0 && videoUrl != null && detectedDurations.containsKey(videoUrl)) {
+            videoDuration = detectedDurations[videoUrl]!;
+          }
+          if (videoDuration <= 0) {
+            videoDuration = 30;
+          }
+          blocks.add({
+            'type': 'pemko_video',
+            'videoUrl': videoUrl,
+            'hasAudio': data.jumbotronPemko!.hasAudio,
+            'duration': videoDuration,
+          });
+          blocks.add({'type': 'main', 'duration': mainDuration});
 
-        for (int i = 0; i < maxJumbo; i++) {
-          if (i < pemkoSlides.length) {
+          for (final slide in masjidSlides) {
             blocks.add({
-              'type': 'pemko',
-              'slide': pemkoSlides[i],
+              'type': 'masjid',
+              'slide': slide,
               'duration': 20,
             });
             blocks.add({'type': 'main', 'duration': mainDuration});
           }
-          if (i < masjidSlides.length) {
-            blocks.add({
-              'type': 'masjid',
-              'slide': masjidSlides[i],
-              'duration': 20,
-            });
-            blocks.add({'type': 'main', 'duration': mainDuration});
+        } else {
+          int maxJumbo = pemkoSlides.length > masjidSlides.length
+              ? pemkoSlides.length
+              : masjidSlides.length;
+
+          for (int i = 0; i < maxJumbo; i++) {
+            if (i < pemkoSlides.length) {
+              blocks.add({
+                'type': 'pemko',
+                'slide': pemkoSlides[i],
+                'duration': 20,
+              });
+              blocks.add({'type': 'main', 'duration': mainDuration});
+            }
+            if (i < masjidSlides.length) {
+              blocks.add({
+                'type': 'masjid',
+                'slide': masjidSlides[i],
+                'duration': 20,
+              });
+              blocks.add({'type': 'main', 'duration': mainDuration});
+            }
           }
         }
 
@@ -182,34 +214,65 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         });
 
         Widget currentWidget;
-        if (activeBlock['type'] == 'pemko') {
-          currentWidget = JumbotronPemkoScreen(
-            key: ValueKey('pemko_${activeBlock['slide']}'),
-            imageUrl: activeBlock['slide'],
-          );
-        } else if (activeBlock['type'] == 'masjid') {
-          currentWidget = JumbotronMasjidScreen(
-            key: ValueKey('masjid_${activeBlock['slide']}'),
-            imageUrl: activeBlock['slide'],
-          );
+        if (activeBlock['type'] == 'pemko_video') {
+          final videoKey = 'pemko_video_${activeBlock['videoUrl']}';
+          if (_completedVideoBlockKey == videoKey) {
+            final loopStartMs = nowMs - currentPosMs;
+            final activeBlockStartMs = loopStartMs + accumulatedMs;
+            currentWidget = ProviderScope(
+              key: const ValueKey('main'),
+              overrides: [
+                slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
+              ],
+              child: const MainContentWidget(),
+            );
+          } else {
+            currentWidget = JumbotronPemkoScreen(
+              key: ValueKey(videoKey),
+              videoUrl: activeBlock['videoUrl'],
+              hasAudio: activeBlock['hasAudio'] ?? false,
+              onFinished: () {
+                if (mounted && _completedVideoBlockKey != videoKey) {
+                  setState(() {
+                    _completedVideoBlockKey = videoKey;
+                  });
+                }
+              },
+            );
+          }
         } else {
-          // loopStartMs adalah waktu absolut saat siklus ini dimulai (diulang setiap totalDuration)
-          final loopStartMs = nowMs - currentPosMs;
-          // activeBlockStartMs adalah waktu absolut saat MainContent ini seharusnya mulai muncul
-          final activeBlockStartMs = loopStartMs + accumulatedMs;
-          
-          currentWidget = ProviderScope(
-            key: const ValueKey('main'),
-            overrides: [
-              slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
-            ],
-            child: const MainContentWidget(),
-          );
+          // Reset tanda video selesai jika siklus sudah beralih ke slide atau tampilan lain
+          _completedVideoBlockKey = null;
+
+          if (activeBlock['type'] == 'pemko') {
+            currentWidget = JumbotronPemkoScreen(
+              key: ValueKey('pemko_${activeBlock['slide']}'),
+              imageUrl: activeBlock['slide'],
+            );
+          } else if (activeBlock['type'] == 'masjid') {
+            currentWidget = JumbotronMasjidScreen(
+              key: ValueKey('masjid_${activeBlock['slide']}'),
+              imageUrl: activeBlock['slide'],
+            );
+          } else {
+            // loopStartMs adalah waktu absolut saat siklus ini dimulai (diulang setiap totalDuration)
+            final loopStartMs = nowMs - currentPosMs;
+            // activeBlockStartMs adalah waktu absolut saat MainContent ini seharusnya mulai muncul
+            final activeBlockStartMs = loopStartMs + accumulatedMs;
+            
+            currentWidget = ProviderScope(
+              key: const ValueKey('main'),
+              overrides: [
+                slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
+              ],
+              child: const MainContentWidget(),
+            );
+          }
         }
 
         return Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 1000),
+            duration: const Duration(milliseconds: 600),
             switchInCurve: Curves.easeInOut,
             switchOutCurve: Curves.easeInOut,
             child: currentWidget,
@@ -219,3 +282,4 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     );
   }
 }
+

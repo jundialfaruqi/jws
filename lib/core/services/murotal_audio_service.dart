@@ -7,6 +7,7 @@ import 'prayer_transition_service.dart';
 import '../providers/audio_settings_provider.dart';
 import '../providers/selected_profil_provider.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
+import '../../features/main/providers/video_playback_provider.dart';
 import '../time/time_sync_service.dart';
 import 'audio_downloader_service.dart';
 
@@ -64,6 +65,10 @@ class MurotalAudioService {
   }
 
   bool _checkShouldPlay() {
+    // 0. Cek Video Jumbotron Bersuara (Murottal wajib jeda jika video punya audio)
+    final isVideoAudioPlaying = _ref.read(isVideoPlayingWithAudioProvider);
+    if (isVideoAudioPlaying) return false;
+
     // 1. Cek Setting Mute
     final audioSettings = _ref.read(audioSettingsProvider);
     if (audioSettings.isLoading) return false;
