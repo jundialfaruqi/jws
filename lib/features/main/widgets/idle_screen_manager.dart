@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/providers/connectivity_provider.dart';
-import '../../../core/time/time_sync_service.dart';
 import '../../../core/widgets/app_loading_spinner.dart';
 import '../providers/my_masjid_provider.dart';
 import '../providers/video_playback_provider.dart';
@@ -23,14 +22,11 @@ class IdleScreenManager extends ConsumerStatefulWidget {
 }
 
 class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
-  Timer? _staticTimer;
-  Timer? _videoPhaseTimer;
+  Timer? _phaseTimer;
   Timer? _videoWatchdogTimer;
   final FocusNode _retryFocusNode = FocusNode();
   bool _hasRequestedFocusForRetry = false;
 
-  // State rotasi event-driven khusus ketika ada video jumbotron
-  bool _isVideoPlaying = false;
   bool _isInMainPhase = true;
   int _jumbotronStepIndex = 0;
   int _activeBlockStartMs = 0;
@@ -38,87 +34,89 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
   @override
   void dispose() {
-    _staticTimer?.cancel();
-    _videoPhaseTimer?.cancel();
+    _phaseTimer?.cancel();
     _videoWatchdogTimer?.cancel();
     _retryFocusNode.dispose();
     super.dispose();
   }
 
-  void _scheduleStaticUpdate(int delayMs) {
-    _staticTimer?.cancel();
-    _staticTimer = Timer(Duration(milliseconds: delayMs), () {
-      if (mounted) setState(() {});
-    });
-  }
-
   void _switchToJumbotron(List<Map<String, dynamic>> jumbotronItems) {
-    _videoPhaseTimer?.cancel();
-    _videoPhaseTimer = null;
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
     if (!mounted || jumbotronItems.isEmpty) return;
 
-    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
     _isInMainPhase = false;
-    _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
-
-    if (item['type'] == 'pemko_video') {
-      _isVideoPlaying = true;
-      setState(() {});
-
-      final durationSec = (item['duration'] as int?) ?? 30;
-      final timeoutSec = durationSec > 0 ? durationSec + 15 : 180;
-      _videoWatchdogTimer = Timer(Duration(seconds: timeoutSec), () {
-        debugPrint('[IdleScreenManager] Safety watchdog fired for video ($timeoutSec s), transitioning to main.');
-        _handleVideoCompletion(jumbotronItems);
-      });
-    } else {
-      // Masjid image slide
-      _isVideoPlaying = false;
-      setState(() {});
-
-      final durationSec = (item['duration'] as int?) ?? 20;
-      _videoPhaseTimer = Timer(Duration(seconds: durationSec), () {
-        if (!mounted) return;
-        _handleImageSlideCompletion(jumbotronItems);
-      });
-    }
+    _jumbotronStepIndex = 0;
+    _showCurrentJumbotronItem(jumbotronItems);
   }
 
-  void _handleVideoCompletion(List<Map<String, dynamic>> jumbotronItems) {
-    if (!mounted) return;
+  void _showCurrentJumbotronItem(List<Map<String, dynamic>> jumbotronItems) {
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
-    _jumbotronStepIndex = (_jumbotronStepIndex + 1) % jumbotronItems.length;
-    _switchToMain(jumbotronItems);
+    if (!mounted || jumbotronItems.isEmpty) return;
+
+    _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+
+    if (item['type'] == 'pemko_video') {
+      final durationSec = (item['duration'] as int?) ?? 30;
+      final timeoutSec = durationSec > 0 ? durationSec + 15 : 180;
+      _videoWatchdogTimer = Timer(Duration(seconds: timeoutSec), () {
+        debugPrint(
+          '[IdleScreenManager] Safety watchdog fired for video ($timeoutSec s), advancing to next jumbotron item.',
+        );
+        _advanceJumbotron(jumbotronItems);
+      });
+    } else {
+      // Gambar statis (pemko_image atau masjid_image): tampil 20 detik
+      final durationSec = (item['duration'] as int?) ?? 20;
+      _phaseTimer = Timer(Duration(seconds: durationSec), () {
+        if (mounted) _advanceJumbotron(jumbotronItems);
+      });
+    }
+
+    setState(() {});
   }
 
-  void _handleImageSlideCompletion(List<Map<String, dynamic>> jumbotronItems) {
+  void _advanceJumbotron(List<Map<String, dynamic>> jumbotronItems) {
     if (!mounted) return;
-    _videoPhaseTimer?.cancel();
-    _videoPhaseTimer = null;
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
+    _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
 
-    _jumbotronStepIndex = (_jumbotronStepIndex + 1) % jumbotronItems.length;
-    _switchToMain(jumbotronItems);
+    _jumbotronStepIndex++;
+    if (_jumbotronStepIndex >= jumbotronItems.length) {
+      // Seluruh siklus jumbotron (video -> gambar global -> gambar masjid) telah selesai!
+      // Kembali ke siklus slide utama
+      _jumbotronStepIndex = 0;
+      _switchToMain(jumbotronItems);
+    } else {
+      _showCurrentJumbotronItem(jumbotronItems);
+    }
   }
 
   void _switchToMain(List<Map<String, dynamic>> jumbotronItems) {
-    _videoPhaseTimer?.cancel();
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
 
     _isInMainPhase = true;
-    _isVideoPlaying = false;
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
-
     setState(() {});
 
-    _videoPhaseTimer = Timer(Duration(seconds: _currentMainDuration), () {
-      if (!mounted) return;
-      _switchToJumbotron(jumbotronItems);
-    });
+    if (jumbotronItems.isNotEmpty) {
+      _phaseTimer = Timer(Duration(seconds: _currentMainDuration), () {
+        if (mounted) _switchToJumbotron(jumbotronItems);
+      });
+    }
   }
 
   @override
@@ -192,183 +190,141 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       },
       data: (data) {
         final mainSlides = data.slides?.validSlides ?? [];
-        final isPemkoActive = data.jumbotronPemko?.isActive == true;
-        final isPemkoVideo = isPemkoActive && (data.jumbotronPemko?.isVideo ?? false);
-        final pemkoSlides = (isPemkoActive && !isPemkoVideo)
-            ? (data.jumbotronPemko?.validSlides ?? [])
-            : [];
-        final masjidSlides = data.jumbotronMasjid?.isActive == true
-            ? (data.jumbotronMasjid?.validSlides ?? [])
-            : [];
-
-        int mainDuration = mainSlides.isNotEmpty ? mainSlides.length * 20 : 30;
+        final int mainDuration =
+            mainSlides.isNotEmpty ? mainSlides.length * 20 : 30;
         _currentMainDuration = mainDuration;
 
-        Widget currentWidget;
+        // Kumpulkan semua item jumbotron aktif sesuai urutan siklus:
+        // 1. Jumbotron Video Global (semua video aktif)
+        // 2. Jumbotron Gambar Global (semua gambar global aktif)
+        // 3. Jumbotron Gambar Masjid (semua gambar masjid aktif)
+        final List<Map<String, dynamic>> jumbotronItems = [];
 
-        if (isPemkoVideo) {
-          // Bersihkan timer static image jika sebelumnya berjalan
-          _staticTimer?.cancel();
-
-          final videoUrl = data.jumbotronPemko!.videoFile;
-          int videoDuration = data.jumbotronPemko!.videoDuration;
-          if (videoDuration <= 0 && videoUrl != null && detectedDurations.containsKey(videoUrl)) {
-            videoDuration = detectedDurations[videoUrl]!;
-          }
-          if (videoDuration <= 0) {
-            videoDuration = 30;
-          }
-
-          List<Map<String, dynamic>> jumbotronItems = [];
-          if (videoUrl != null && videoUrl.isNotEmpty) {
+        // 1. Jumbotron Video Global
+        if (data.jumbotronPemko?.isActive == true) {
+          final videos = data.jumbotronPemko!.videos;
+          if (videos.isNotEmpty) {
+            for (final v in videos) {
+              int videoDuration = v.duration;
+              if (videoDuration <= 0 &&
+                  detectedDurations.containsKey(v.videoUrl)) {
+                videoDuration = detectedDurations[v.videoUrl]!;
+              }
+              if (videoDuration <= 0) {
+                videoDuration = 30;
+              }
+              jumbotronItems.add({
+                'type': 'pemko_video',
+                'videoUrl': v.videoUrl,
+                'hasAudio': v.hasAudio,
+                'duration': videoDuration,
+                'id': v.id,
+              });
+            }
+          } else if (data.jumbotronPemko!.isVideo &&
+              data.jumbotronPemko!.videoFile != null &&
+              data.jumbotronPemko!.videoFile!.isNotEmpty) {
+            final vUrl = data.jumbotronPemko!.videoFile!;
+            int videoDuration = data.jumbotronPemko!.videoDuration;
+            if (videoDuration <= 0 && detectedDurations.containsKey(vUrl)) {
+              videoDuration = detectedDurations[vUrl]!;
+            }
+            if (videoDuration <= 0) {
+              videoDuration = 30;
+            }
             jumbotronItems.add({
               'type': 'pemko_video',
-              'videoUrl': videoUrl,
+              'videoUrl': vUrl,
               'hasAudio': data.jumbotronPemko!.hasAudio,
               'duration': videoDuration,
+              'id': data.jumbotronPemko!.id,
             });
           }
 
-          for (final slide in masjidSlides) {
+          // 2. Jumbotron Gambar Global
+          final pemkoImages = data.jumbotronPemko!.validSlides;
+          for (final img in pemkoImages) {
             jumbotronItems.add({
-              'type': 'masjid',
-              'slide': slide,
+              'type': 'pemko_image',
+              'slide': img,
               'duration': 20,
             });
           }
+        }
 
-          if (jumbotronItems.isEmpty) {
-            currentWidget = const MainContentWidget();
-          } else {
-            // Inisialisasi awal saat pertama kali mount
-            if (_activeBlockStartMs == 0) {
-              _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
-            }
-            if (_videoPhaseTimer == null && !_isVideoPlaying && _isInMainPhase) {
-              _videoPhaseTimer = Timer(Duration(seconds: mainDuration), () {
-                if (mounted) _switchToJumbotron(jumbotronItems);
-              });
-            }
-
-            if (_isInMainPhase) {
-              currentWidget = ProviderScope(
-                key: const ValueKey('main'),
-                overrides: [
-                  slideStartTimeProvider.overrideWithValue(_activeBlockStartMs),
-                ],
-                child: const MainContentWidget(),
-              );
-            } else {
-              final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
-              if (item['type'] == 'pemko_video') {
-                currentWidget = JumbotronPemkoScreen(
-                  key: ValueKey('pemko_video_${item['videoUrl']}_$_activeBlockStartMs'),
-                  videoUrl: item['videoUrl'],
-                  hasAudio: item['hasAudio'] ?? false,
-                  onFinished: () {
-                    _handleVideoCompletion(jumbotronItems);
-                  },
-                );
-              } else {
-                currentWidget = JumbotronMasjidScreen(
-                  key: ValueKey('masjid_${item['slide']}_$_activeBlockStartMs'),
-                  imageUrl: item['slide'],
-                );
-              }
-            }
+        // 3. Jumbotron Gambar Masjid
+        if (data.jumbotronMasjid?.isActive == true) {
+          final masjidImages = data.jumbotronMasjid!.validSlides;
+          for (final img in masjidImages) {
+            jumbotronItems.add({
+              'type': 'masjid_image',
+              'slide': img,
+              'duration': 20,
+            });
           }
-        } else {
-          // BUKAN VIDEO: Gunakan rotasi sinkronisasi jam absolut untuk gambar statis
-          _videoPhaseTimer?.cancel();
-          _videoPhaseTimer = null;
-          _videoWatchdogTimer?.cancel();
-          _videoWatchdogTimer = null;
-          _isVideoPlaying = false;
-          _isInMainPhase = true;
-          _activeBlockStartMs = 0;
+        }
 
-          List<Map<String, dynamic>> blocks = [];
-          blocks.add({'type': 'main', 'duration': mainDuration});
-
-          int maxJumbo = pemkoSlides.length > masjidSlides.length
-              ? pemkoSlides.length
-              : masjidSlides.length;
-
-          for (int i = 0; i < maxJumbo; i++) {
-            if (i < pemkoSlides.length) {
-              blocks.add({
-                'type': 'pemko',
-                'slide': pemkoSlides[i],
-                'duration': 20,
-              });
-              blocks.add({'type': 'main', 'duration': mainDuration});
-            }
-            if (i < masjidSlides.length) {
-              blocks.add({
-                'type': 'masjid',
-                'slide': masjidSlides[i],
-                'duration': 20,
-              });
-              blocks.add({'type': 'main', 'duration': mainDuration});
-            }
+        if (jumbotronItems.isEmpty) {
+          if (!_isInMainPhase) {
+            _phaseTimer?.cancel();
+            _phaseTimer = null;
+            _videoWatchdogTimer?.cancel();
+            _videoWatchdogTimer = null;
+            _isInMainPhase = true;
+            _jumbotronStepIndex = 0;
           }
+        }
 
-          if (blocks.length > 1 && blocks.last['type'] == 'main') {
-            blocks.removeLast();
-          }
+        // Inisialisasi awal saat pertama kali mount
+        if (_activeBlockStartMs == 0) {
+          _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+        }
 
-          int totalDuration = blocks.fold(
-            0,
-            (sum, b) => sum + (b['duration'] as int),
-          );
-
-          if (totalDuration == 0) totalDuration = 1;
-
-          final nowMs = ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
-          final totalDurationMs = totalDuration * 1000;
-          final currentPosMs = nowMs % totalDurationMs;
-
-          int accumulatedMs = 0;
-          Map<String, dynamic>? activeBlock;
-          int msUntilNextBlock = 1000; // fallback
-
-          for (final b in blocks) {
-            int durationMs = (b['duration'] as int) * 1000;
-            if (currentPosMs >= accumulatedMs && currentPosMs < accumulatedMs + durationMs) {
-              activeBlock = b;
-              msUntilNextBlock = (accumulatedMs + durationMs) - currentPosMs;
-              break;
-            }
-            accumulatedMs += durationMs;
-          }
-          activeBlock ??= blocks.first;
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _scheduleStaticUpdate(msUntilNextBlock);
-            }
+        if (_isInMainPhase &&
+            _phaseTimer == null &&
+            jumbotronItems.isNotEmpty) {
+          _phaseTimer = Timer(Duration(seconds: mainDuration), () {
+            if (mounted) _switchToJumbotron(jumbotronItems);
           });
+        }
 
-          if (activeBlock['type'] == 'pemko') {
+        Widget currentWidget;
+
+        if (_isInMainPhase || jumbotronItems.isEmpty) {
+          currentWidget = ProviderScope(
+            key: ValueKey('main_$_activeBlockStartMs'),
+            overrides: [
+              slideStartTimeProvider.overrideWithValue(_activeBlockStartMs),
+            ],
+            child: const MainContentWidget(),
+          );
+        } else {
+          final item =
+              jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+          if (item['type'] == 'pemko_video') {
             currentWidget = JumbotronPemkoScreen(
-              key: ValueKey('pemko_${activeBlock['slide']}'),
-              imageUrl: activeBlock['slide'],
+              key: ValueKey(
+                'pemko_video_${item['videoUrl']}_${_jumbotronStepIndex}_$_activeBlockStartMs',
+              ),
+              videoUrl: item['videoUrl'],
+              hasAudio: item['hasAudio'] ?? false,
+              onFinished: () {
+                _advanceJumbotron(jumbotronItems);
+              },
             );
-          } else if (activeBlock['type'] == 'masjid') {
-            currentWidget = JumbotronMasjidScreen(
-              key: ValueKey('masjid_${activeBlock['slide']}'),
-              imageUrl: activeBlock['slide'],
+          } else if (item['type'] == 'pemko_image') {
+            currentWidget = JumbotronPemkoScreen(
+              key: ValueKey(
+                'pemko_image_${item['slide']}_${_jumbotronStepIndex}_$_activeBlockStartMs',
+              ),
+              imageUrl: item['slide'],
             );
           } else {
-            final loopStartMs = nowMs - currentPosMs;
-            final activeBlockStartMs = loopStartMs + accumulatedMs;
-
-            currentWidget = ProviderScope(
-              key: const ValueKey('main'),
-              overrides: [
-                slideStartTimeProvider.overrideWithValue(activeBlockStartMs),
-              ],
-              child: const MainContentWidget(),
+            currentWidget = JumbotronMasjidScreen(
+              key: ValueKey(
+                'masjid_${item['slide']}_${_jumbotronStepIndex}_$_activeBlockStartMs',
+              ),
+              imageUrl: item['slide'],
             );
           }
         }
