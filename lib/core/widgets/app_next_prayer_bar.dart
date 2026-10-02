@@ -14,6 +14,9 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
   final bool dateOnly;
   final double fontSize;
   final double? iconSize;
+  final Color? countdownCardColor;
+  final Color? countdownTextColor;
+  final Color? countdownBorderColor;
 
   const AppNextPrayerBar({
     super.key,
@@ -23,6 +26,9 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
     this.dateOnly = false,
     this.fontSize = 28.0,
     this.iconSize,
+    this.countdownCardColor,
+    this.countdownTextColor,
+    this.countdownBorderColor,
   });
 
   @override
@@ -144,11 +150,15 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
 
         final isWarning = countdown.inSeconds > 0 && countdown.inSeconds <= 600;
         final blinkOn = now.second % 2 == 0;
-        final cardColor = isWarning && blinkOn ? Colors.red : AppColors.textYellow;
-        final borderColor = Colors.transparent;
+        final cardColor = isWarning && blinkOn
+            ? Colors.red
+            : (widget.countdownCardColor ?? AppColors.textYellow);
+        final borderColor = isWarning && blinkOn
+            ? Colors.red
+            : (widget.countdownBorderColor ?? Colors.transparent);
         final textColor = isWarning && blinkOn
             ? Colors.white
-            : AppColors.bgDark;
+            : (widget.countdownTextColor ?? AppColors.bgDark);
 
         // Tanggal masehi dari jadwal
         final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026')

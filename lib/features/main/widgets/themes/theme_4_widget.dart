@@ -120,13 +120,16 @@ class Theme4Widget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.black54, // hitam transparan
+              color: Colors.black.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(24),
             ),
             child: AppNextPrayerBar(
               jadwalSholatList: data.jadwalSholat,
               countdownOnly: true,
               fontSize: 32,
+              countdownCardColor: AppColors.textYellow.withValues(alpha: 0.05),
+              countdownBorderColor: Colors.transparent,
+              countdownTextColor: AppColors.textYellow,
             ),
           ),
         ),
