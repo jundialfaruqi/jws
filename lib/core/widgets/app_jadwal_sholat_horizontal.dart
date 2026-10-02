@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -191,6 +192,49 @@ class _AppJadwalSholatHorizontalState
     );
   }
 
+  Widget _buildFlipTransition(Widget child, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      child: child,
+      builder: (context, childWidget) {
+        final isIncoming = animation.status != AnimationStatus.reverse;
+        final value = animation.value;
+
+        if (isIncoming) {
+          if (value < 0.5) {
+            return const SizedBox.shrink();
+          }
+          final rawProgress = (value - 0.5) * 2.0;
+          final progress = Curves.easeOutCubic.transform(rawProgress);
+          final angle = -math.pi / 2 * (1.0 - progress);
+
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateX(angle),
+            child: childWidget,
+          );
+        } else {
+          if (value < 0.5) {
+            return const SizedBox.shrink();
+          }
+          final rawProgress = (1.0 - value) * 2.0;
+          final progress = Curves.easeInCubic.transform(rawProgress);
+          final angle = math.pi / 2 * progress;
+
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateX(angle),
+            child: childWidget,
+          );
+        }
+      },
+    );
+  }
+
   Widget _buildPrayerItem({
     required String label,
     required String time,
@@ -218,31 +262,30 @@ class _AppJadwalSholatHorizontalState
     final textColor = getTextColor();
 
     return Expanded(
-      child: Container(
-        // Margin horizontal digunakan untuk mengatur jarak renggang antar kotak jadwal
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        // Padding digunakan untuk mengatur spasi ke dalam (menjauhkan teks & icon dari tepi kotak)
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 800),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            final offsetAnimation = Tween<Offset>(
-              begin: const Offset(-0.3, 0.0),
-              end: Offset.zero,
-            ).animate(animation);
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(position: offsetAnimation, child: child),
-            );
-          },
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 700),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              ...previousChildren,
+              if (currentChild != null) currentChild,
+            ],
+          );
+        },
+        transitionBuilder: _buildFlipTransition,
+        child: Container(
+          key: ValueKey(label),
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Row(
-            key: ValueKey(label),
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Icon(iconData, color: textColor, size: 48),
