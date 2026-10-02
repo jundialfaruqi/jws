@@ -10,6 +10,7 @@ class AppAnalogClock extends ConsumerStatefulWidget {
   final double? digitalFontSize;
   final double borderWidth;
   final Color animationColor;
+  final double? logoWidth;
 
   const AppAnalogClock({
     super.key,
@@ -18,6 +19,7 @@ class AppAnalogClock extends ConsumerStatefulWidget {
     this.digitalFontSize,
     this.borderWidth = 12.0,
     this.animationColor = Colors.white,
+    this.logoWidth,
   });
 
   @override
@@ -58,6 +60,12 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
     final double outerSize = widget.size + (borderWidth * 2) + 16;
     final double progress = (_now.millisecondsSinceEpoch % 6000) / 6000.0;
 
+    // Perhitungan simetris presisi terhadap titik tengah jam
+    final double yCenter = widget.size / 2;
+    final double logoWidth = widget.logoWidth ?? (widget.size * 0.44);
+    final double logoHeight = logoWidth / 5.0; // Rasio 1581:316 = 5:1
+    final double gapFromCenter = widget.size * 0.085;
+
     return SizedBox(
       width: outerSize,
       height: outerSize,
@@ -83,19 +91,24 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Logo statis Diskominfotiksan di bagian tengah atas (dirender di belakang jarum)
+                // Logo statis Diskominfotiksan di bagian tengah atas
+                // Jarak dari titik tengah ke tepi bawah logo = gapFromCenter
                 Positioned(
-                  top: widget.size * 0.30,
-                  child: Image.asset(
-                    'assets/logo/diskominfotiksan-logo.png',
-                    width: widget.size * 0.38,
-                    fit: BoxFit.contain,
+                  top: yCenter - gapFromCenter - logoHeight,
+                  child: SizedBox(
+                    width: logoWidth,
+                    height: logoHeight,
+                    child: Image.asset(
+                      'assets/logo/diskominfotiksan-logo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
-                // Jam digital di bagian tengah bawah (dirender lebih dulu agar berada di belakang)
+                // Jam digital di bagian tengah bawah
+                // Jarak dari titik tengah ke tepi atas jam digital = gapFromCenter (SAMA PERSIS DENGAN LOGO)
                 Positioned(
-                  bottom: widget.size * 0.28,
+                  top: yCenter + gapFromCenter,
                   child: Text(
                     formattedTime,
                     style: TextStyle(
@@ -103,6 +116,7 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
                       fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
                       fontWeight: FontWeight.bold,
                       fontFamily: 'JetBrainsMono',
+                      height: 1.0,
                       shadows: [
                         Shadow(
                           blurRadius: 4,
