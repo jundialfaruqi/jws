@@ -131,12 +131,9 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
         ref.read(detectedVideoDurationProvider.notifier).setDuration(rawUrl, durationSec);
       }
 
-      if (widget.hasAudio) {
-        ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(true);
-        await controller.setVolume(1.0);
-      } else {
-        await controller.setVolume(0.0);
-      }
+      // Volume dikontrol dari sini, state audio (isVideoPlayingWithAudioProvider)
+      // hanya diubah oleh IdleScreenManager._updateVideoAudioState() agar tidak race condition
+      await controller.setVolume(widget.hasAudio ? 1.0 : 0.0);
 
       await controller.setLooping(false);
       await controller.play();
@@ -173,6 +170,14 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
     } catch (_) {}
     _videoController?.dispose();
     _videoController = null;
+    // Pastikan state audio direset saat widget ini di-dispose
+    // agar murottal tidak tetap ter-pause selamanya jika video di-unmount tiba-tiba.
+    // IdleScreenManager akan mengeset ulang state yang benar setelahnya.
+    if (widget.hasAudio) {
+      try {
+        ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      } catch (_) {}
+    }
     super.dispose();
   }
 

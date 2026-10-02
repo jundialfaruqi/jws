@@ -32,6 +32,8 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   int _activeBlockStartMs = 0;
   int _currentMainDuration = 30;
   List<Map<String, dynamic>> _jumbotronItems = [];
+  bool _pendingItemsUpdate = false;
+  List<Map<String, dynamic>>? _pendingItems;
 
   @override
   void dispose() {
@@ -67,12 +69,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _showCurrentJumbotronItem();
   }
 
-  void _showCurrentJumbotronItem() {
-    _phaseTimer?.cancel();
-    _phaseTimer = null;
-    _videoWatchdogTimer?.cancel();
-    _videoWatchdogTimer = null;
-
+  void _setTimerForCurrentItem() {
     if (!mounted || _jumbotronItems.isEmpty) return;
 
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
@@ -95,7 +92,17 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         if (mounted) _advanceJumbotron(fromStepIndex: currentStep);
       });
     }
+  }
 
+  void _showCurrentJumbotronItem() {
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
+    _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
+
+    if (!mounted || _jumbotronItems.isEmpty) return;
+
+    _setTimerForCurrentItem();
     setState(() {});
   }
 
@@ -265,23 +272,35 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
            (it['slide'] != null && it['slide'] == currentOldItem['slide'])));
 
       if (newIndex != -1) {
-        // Item masih ada! Pertahankan playback item saat ini, hanya sesuaikan step index
+        // Item masih ada di list baru. Pertahankan item yang sedang tayang.
+        // Jika posisi index bergeser (misal video baru ditambahkan di depan list),
+        // kita harus restart timer dengan fromStepIndex yang baru agar
+        // _advanceJumbotron tidak mengabaikan callback dari timer lama.
+        final oldIndex = _jumbotronStepIndex;
         _jumbotronStepIndex = newIndex;
         _updateVideoAudioState();
+
+        if (newIndex != oldIndex) {
+          // Index bergeser: cancel timer lama, set timer baru untuk item yang sama.
+          // Widget yang ditampilkan TIDAK diganti (tidak ada setState untuk widget switch).
+          _phaseTimer?.cancel();
+          _phaseTimer = null;
+          _videoWatchdogTimer?.cancel();
+          _videoWatchdogTimer = null;
+          _setTimerForCurrentItem();
+        }
         return;
       }
     }
 
-    // Jika item lama sudah tidak ada (misal diganti / dihapus),
-    // batalkan timer lama dan jalankan item baru dengan timer segar
+    // Item yang saat ini ditampilkan sudah tidak ada di list baru
+    // (misal item dihapus/dinonaktifkan). Restart dari awal list baru.
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
-    if (_jumbotronStepIndex >= newItems.length) {
-      _jumbotronStepIndex = 0;
-    }
+    _jumbotronStepIndex = 0;
     _updateVideoAudioState();
     _showCurrentJumbotronItem();
   }
@@ -363,7 +382,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
         final newItems = _buildJumbotronItems(data, detectedDurations);
         if (_itemsChanged(_jumbotronItems, newItems)) {
-          _handleItemsUpdated(newItems);
+          _pendingItems = newItems;
+          if (!_pendingItemsUpdate) {
+            _pendingItemsUpdate = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _pendingItems != null) {
+                final items = _pendingItems!;
+                _pendingItems = null;
+                _pendingItemsUpdate = false;
+                _handleItemsUpdated(items);
+              } else {
+                _pendingItemsUpdate = false;
+              }
+            });
+          }
         }
 
         // Inisialisasi awal saat pertama kali mount
