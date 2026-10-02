@@ -74,10 +74,10 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
         children: [
           // Logo statis Diskominfotiksan di bagian tengah atas (dirender di belakang jarum)
           Positioned(
-            top: widget.size * 0.27,
+            top: widget.size * 0.30,
             child: Image.asset(
               'assets/logo/diskominfotiksan-logo.png',
-              width: widget.size * 0.32,
+              width: widget.size * 0.38,
               fit: BoxFit.contain,
             ),
           ),
