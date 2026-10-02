@@ -68,12 +68,29 @@ class VideoDownloaderNotifier extends Notifier<VideoDownloadState> {
 
   /// Menghasilkan URL lengkap ke server jika path berupa path relatif
   String _getFullUrl(String path) {
-    if (path.startsWith('http')) return path;
+    if (path.isEmpty) return '';
 
     final baseUrl = ApiConstant.baseUrl;
     final cleanBase = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
+
+    // Jika path berupa full URL yang merujuk ke localhost atau 127.0.0.1,
+    // sesuaikan host dan port mengikuti baseUrl (misal 10.0.2.2 untuk emulator)
+    if (path.startsWith('http://localhost') || path.startsWith('http://127.0.0.1')) {
+      try {
+        final uri = Uri.parse(path);
+        final baseUri = Uri.parse(cleanBase);
+        return uri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        ).toString();
+      } catch (_) {}
+    }
+
+    if (path.startsWith('http')) return path;
+
     final cleanPath = path.startsWith('/') ? path : '/$path';
 
     return '$cleanBase$cleanPath';

@@ -35,7 +35,6 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   bool _isInitialized = false;
   bool _hasError = false;
   bool _isCompleted = false;
-  VideoPlaybackNotifier? _audioNotifier;
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -69,9 +68,6 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.hasAudio) {
-      _audioNotifier = ref.read(isVideoPlayingWithAudioProvider.notifier);
-    }
     if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
       _initVideoPlayer();
     }
@@ -87,8 +83,10 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
 
     if (dur > Duration.zero) {
       // Jika video sudah berada di akhir durasi (toleransi 300ms) atau berhenti di detik terakhir
-      final reachedEnd = pos >= dur - const Duration(milliseconds: 300) ||
-          (!value.isPlaying && pos >= dur - const Duration(seconds: 1));
+      final reachedEnd = value.isCompleted ||
+          pos >= dur ||
+          (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 300)) ||
+          (!value.isPlaying && dur > Duration.zero && pos >= dur - const Duration(seconds: 1));
 
       if (reachedEnd) {
         _isCompleted = true;
@@ -96,9 +94,8 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
           _videoController?.setVolume(0.0);
           _videoController?.pause();
         } catch (_) {}
-        if (widget.hasAudio) {
-          ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
-        }
+        // Status audio video diorkestrasi oleh IdleScreenManager agar transisi antar-video
+        // tidak membocorkan audio murottal secara tidak sengaja.
         widget.onFinished?.call();
       }
     }
@@ -169,11 +166,6 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
 
   @override
   void dispose() {
-    if (widget.hasAudio) {
-      Future.microtask(() {
-        _audioNotifier?.setPlaying(false);
-      });
-    }
     _videoController?.removeListener(_videoListener);
     try {
       _videoController?.setVolume(0.0);

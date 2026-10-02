@@ -21,6 +21,7 @@ class MurotalAudioService {
   final Ref _ref;
   final AudioPlayer _audioPlayer = AudioPlayer();
   Timer? _timer;
+  ProviderSubscription<bool>? _videoAudioSubscription;
   
   int _currentSlot = 1;
   bool _isPlaying = false;
@@ -30,6 +31,24 @@ class MurotalAudioService {
 
   MurotalAudioService(this._ref) {
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+
+    // Dengarkan perubahan status audio video jumbotron secara instan (reaktif)
+    // agar murottal langsung berhenti tanpa menunggu jeda timer 1 detik.
+    _videoAudioSubscription = _ref.listen<bool>(
+      isVideoPlayingWithAudioProvider,
+      (previous, isVideoPlaying) {
+        if (isVideoPlaying) {
+          debugPrint("🔇 [Murotal] Video jumbotron dengan audio aktif, segera pause murottal");
+          _pause();
+        } else {
+          final shouldPlay = _checkShouldPlay();
+          if (shouldPlay && !_isPlaying) {
+            debugPrint("🔊 [Murotal] Video jumbotron selesai/tanpa audio, resume murottal");
+            _startOrResume();
+          }
+        }
+      },
+    );
     
     _audioPlayer.onPlayerComplete.listen((_) async {
       _isPlaying = false;
@@ -51,6 +70,7 @@ class MurotalAudioService {
 
   void dispose() {
     _timer?.cancel();
+    _videoAudioSubscription?.close();
     _audioPlayer.dispose();
   }
 
@@ -173,8 +193,13 @@ class MurotalAudioService {
       debugPrint("🎵 [Murotal] Memutar dari memori lokal: $localPath");
 
       if (_currentUrl == trackId) {
-        // Resume if it's the same track
-        await _audioPlayer.resume().timeout(const Duration(seconds: 5));
+        // Coba resume track yang sama
+        try {
+          await _audioPlayer.resume().timeout(const Duration(seconds: 5));
+        } catch (e) {
+          debugPrint("⚠️ [Murotal] Resume gagal ($e), memutar ulang dari file lokal");
+          await _audioPlayer.play(source).timeout(const Duration(seconds: 5));
+        }
       } else {
         // Play new track
         _currentUrl = trackId;
@@ -194,9 +219,9 @@ class MurotalAudioService {
 
   void _pause() async {
     if (!_isPlaying) return;
+    _isPlaying = false;
     try {
       await _audioPlayer.pause().timeout(const Duration(seconds: 3));
-      _isPlaying = false;
     } catch (e) {
       debugPrint("Gagal pause murotal: $e");
     }

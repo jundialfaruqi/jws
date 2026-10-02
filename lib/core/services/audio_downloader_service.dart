@@ -129,8 +129,26 @@ class AudioDownloaderNotifier extends Notifier<AudioDownloadState> {
         final localFile = File('${audioDir.path}/$filename');
 
         if (!await localFile.exists()) {
-          final fullUrl = serverPath.startsWith('http') ? serverPath : '$cleanBase$serverPath';
-          debugPrint("⬇️ [AudioDownloader] Mengunduh file baru: $filename");
+          String fullUrl;
+          if (serverPath.startsWith('http://localhost') || serverPath.startsWith('http://127.0.0.1')) {
+            try {
+              final uri = Uri.parse(serverPath);
+              final baseUri = Uri.parse(cleanBase);
+              fullUrl = uri.replace(
+                scheme: baseUri.scheme,
+                host: baseUri.host,
+                port: baseUri.hasPort ? baseUri.port : null,
+              ).toString();
+            } catch (_) {
+              fullUrl = serverPath;
+            }
+          } else if (serverPath.startsWith('http')) {
+            fullUrl = serverPath;
+          } else {
+            final cleanPath = serverPath.startsWith('/') ? serverPath : '/$serverPath';
+            fullUrl = '$cleanBase$cleanPath';
+          }
+          debugPrint("⬇️ [AudioDownloader] Mengunduh file baru: $filename ($fullUrl)");
           try {
             await _dio.download(fullUrl, localFile.path);
             debugPrint("✅ [AudioDownloader] Sukses mengunduh: $filename");

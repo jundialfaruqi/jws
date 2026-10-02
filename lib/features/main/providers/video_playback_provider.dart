@@ -5,7 +5,9 @@ class VideoPlaybackNotifier extends Notifier<bool> {
   bool build() => false;
 
   void setPlaying(bool value) {
-    state = value;
+    if (state != value) {
+      state = value;
+    }
   }
 }
 

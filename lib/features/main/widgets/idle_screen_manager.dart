@@ -37,7 +37,19 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _phaseTimer?.cancel();
     _videoWatchdogTimer?.cancel();
     _retryFocusNode.dispose();
+    ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
     super.dispose();
+  }
+
+  void _updateVideoAudioState(List<Map<String, dynamic>> jumbotronItems) {
+    if (!mounted) return;
+    if (_isInMainPhase || jumbotronItems.isEmpty) {
+      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      return;
+    }
+    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+    final isVideoWithAudio = item['type'] == 'pemko_video' && (item['hasAudio'] == true);
+    ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(isVideoWithAudio);
   }
 
   void _switchToJumbotron(List<Map<String, dynamic>> jumbotronItems) {
@@ -50,6 +62,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
     _isInMainPhase = false;
     _jumbotronStepIndex = 0;
+    _updateVideoAudioState(jumbotronItems);
     _showCurrentJumbotronItem(jumbotronItems);
   }
 
@@ -62,6 +75,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     if (!mounted || jumbotronItems.isEmpty) return;
 
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+    final currentStep = _jumbotronStepIndex;
     final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
 
     if (item['type'] == 'pemko_video') {
@@ -71,21 +85,28 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         debugPrint(
           '[IdleScreenManager] Safety watchdog fired for video ($timeoutSec s), advancing to next jumbotron item.',
         );
-        _advanceJumbotron(jumbotronItems);
+        _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
       });
     } else {
       // Gambar statis (pemko_image atau masjid_image): tampil 20 detik
       final durationSec = (item['duration'] as int?) ?? 20;
       _phaseTimer = Timer(Duration(seconds: durationSec), () {
-        if (mounted) _advanceJumbotron(jumbotronItems);
+        if (mounted) _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
       });
     }
 
     setState(() {});
   }
 
-  void _advanceJumbotron(List<Map<String, dynamic>> jumbotronItems) {
+  void _advanceJumbotron(List<Map<String, dynamic>> jumbotronItems, {int? fromStepIndex}) {
     if (!mounted) return;
+    if (fromStepIndex != null && fromStepIndex != _jumbotronStepIndex) {
+      debugPrint(
+        '[IdleScreenManager] Ignoring stale advance from step $fromStepIndex (current is $_jumbotronStepIndex)',
+      );
+      return;
+    }
+
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
@@ -98,6 +119,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
       _jumbotronStepIndex = 0;
       _switchToMain(jumbotronItems);
     } else {
+      _updateVideoAudioState(jumbotronItems);
       _showCurrentJumbotronItem(jumbotronItems);
     }
   }
@@ -110,6 +132,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
     _isInMainPhase = true;
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
+    _updateVideoAudioState(jumbotronItems);
     setState(() {});
 
     if (jumbotronItems.isNotEmpty) {
@@ -272,7 +295,11 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             _videoWatchdogTimer = null;
             _isInMainPhase = true;
             _jumbotronStepIndex = 0;
+            _updateVideoAudioState(jumbotronItems);
           }
+        } else if (!_isInMainPhase && _jumbotronStepIndex >= jumbotronItems.length) {
+          _jumbotronStepIndex = 0;
+          _switchToMain(jumbotronItems);
         }
 
         // Inisialisasi awal saat pertama kali mount
@@ -299,6 +326,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             child: const MainContentWidget(),
           );
         } else {
+          final currentStep = _jumbotronStepIndex;
           final item =
               jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
           if (item['type'] == 'pemko_video') {
@@ -309,7 +337,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
               videoUrl: item['videoUrl'],
               hasAudio: item['hasAudio'] ?? false,
               onFinished: () {
-                _advanceJumbotron(jumbotronItems);
+                _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
               },
             );
           } else if (item['type'] == 'pemko_image') {

@@ -15,12 +15,26 @@ class JumbotronMasjidScreen extends ConsumerWidget {
 
   String _getFullUrl(String? path) {
     if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
 
     final baseUrl = ApiConstant.baseUrl;
     final cleanBase = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
+
+    if (path.startsWith('http://localhost') || path.startsWith('http://127.0.0.1')) {
+      try {
+        final uri = Uri.parse(path);
+        final baseUri = Uri.parse(cleanBase);
+        return uri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        ).toString();
+      } catch (_) {}
+    }
+
+    if (path.startsWith('http')) return path;
+
     final cleanPath = path.startsWith('/') ? path : '/$path';
 
     return '$cleanBase$cleanPath';
