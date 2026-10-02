@@ -8,12 +8,16 @@ class AppAnalogClock extends ConsumerStatefulWidget {
   final double size;
   final double? numberFontSize;
   final double? digitalFontSize;
+  final double borderWidth;
+  final Color animationColor;
 
   const AppAnalogClock({
     super.key,
     this.size = 350,
     this.numberFontSize,
     this.digitalFontSize,
+    this.borderWidth = 12.0,
+    this.animationColor = Colors.white,
   });
 
   @override
@@ -50,68 +54,89 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
     final String formattedTime =
         "${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')}";
 
-    return Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: BoxDecoration(
-        color: const Color(0xFF003366), // Warna bgNavy agar senada
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 24,
-            spreadRadius: 4,
-            offset: const Offset(8, 8),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
-          width: 2,
-        ),
-      ),
+    final double borderWidth = widget.borderWidth;
+    final double outerSize = widget.size + (borderWidth * 2) + 16;
+    final double progress = (_now.millisecondsSinceEpoch % 6000) / 6000.0;
+
+    return SizedBox(
+      width: outerSize,
+      height: outerSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Logo statis Diskominfotiksan di bagian tengah atas (dirender di belakang jarum)
-          Positioned(
-            top: widget.size * 0.30,
-            child: Image.asset(
-              'assets/logo/diskominfotiksan-logo.png',
-              width: widget.size * 0.39,
-              fit: BoxFit.contain,
+          // Komponen jam utama (ukuran dial tetap tepat widget.size tanpa terpengaruh border)
+          Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: const Color(0xFF003366), // Warna bgNavy agar senada
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 24,
+                  spreadRadius: 4,
+                  offset: const Offset(8, 8),
+                ),
+              ],
             ),
-          ),
-
-          // Jam digital di bagian tengah bawah (dirender lebih dulu agar berada di belakang)
-          Positioned(
-            bottom: widget.size * 0.28,
-            child: Text(
-              formattedTime,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
-                fontWeight: FontWeight.bold,
-                fontFamily: 'JetBrainsMono',
-                shadows: [
-                  Shadow(
-                    blurRadius: 4,
-                    color: Colors.black.withValues(alpha: 0.6),
-                    offset: const Offset(1, 2),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Logo statis Diskominfotiksan di bagian tengah atas (dirender di belakang jarum)
+                Positioned(
+                  top: widget.size * 0.30,
+                  child: Image.asset(
+                    'assets/logo/diskominfotiksan-logo.png',
+                    width: widget.size * 0.38,
+                    fit: BoxFit.contain,
                   ),
-                ],
-              ),
+                ),
+
+                // Jam digital di bagian tengah bawah (dirender lebih dulu agar berada di belakang)
+                Positioned(
+                  bottom: widget.size * 0.28,
+                  child: Text(
+                    formattedTime,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'JetBrainsMono',
+                      shadows: [
+                        Shadow(
+                          blurRadius: 4,
+                          color: Colors.black.withValues(alpha: 0.6),
+                          offset: const Offset(1, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Canvas jam analog (dirender terakhir agar jarum berada di depan)
+                CustomPaint(
+                  size: Size(widget.size, widget.size),
+                  painter: AnalogClockPainter(
+                    dateTime: _now,
+                    handColor: Colors.white,
+                    secondHandColor: Colors.red,
+                    tickColor: Colors.white,
+                    numberFontSize: widget.numberFontSize,
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Canvas jam analog (dirender terakhir agar jarum berada di depan)
+          // Border animasi berputar di lingkar luar jam (satu warna)
           CustomPaint(
-            size: Size(widget.size, widget.size),
-            painter: AnalogClockPainter(
-              dateTime: _now,
-              handColor: Colors.white,
-              secondHandColor: Colors.red,
-              tickColor: Colors.white,
-              numberFontSize: widget.numberFontSize,
+            size: Size(outerSize, outerSize),
+            painter: _AnimatedClockBorderPainter(
+              progress: progress,
+              borderWidth: borderWidth,
+              clockSize: widget.size,
+              animationColor: widget.animationColor,
             ),
           ),
         ],
@@ -288,3 +313,74 @@ class AnalogClockPainter extends CustomPainter {
     return oldDelegate.dateTime != dateTime;
   }
 }
+
+class _AnimatedClockBorderPainter extends CustomPainter {
+  final double progress;
+  final double borderWidth;
+  final double clockSize;
+  final Color animationColor;
+
+  _AnimatedClockBorderPainter({
+    required this.progress,
+    required this.borderWidth,
+    required this.clockSize,
+    this.animationColor = Colors.white,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    // Stroke radius berada tepat mengelilingi tepi luar jam
+    final radius = (clockSize + borderWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    // 1. Base translucent ring (lingkar dasar statis satu warna yang halus)
+    final basePaint = Paint()
+      ..color = animationColor.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth;
+    canvas.drawCircle(center, radius, basePaint);
+
+    // 2. Animated rotating sweep gradient - SATU WARNA SAJA (variasi intensitas opasitas)
+    final sweepGradient = SweepGradient(
+      startAngle: 0.0,
+      endAngle: 2 * pi,
+      transform: GradientRotation(progress * 2 * pi),
+      colors: [
+        Colors.transparent,
+        animationColor.withValues(alpha: 0.08),
+        animationColor.withValues(alpha: 0.35),
+        animationColor.withValues(alpha: 0.95), // Puncak cahaya terang
+        animationColor.withValues(alpha: 0.35),
+        animationColor.withValues(alpha: 0.08),
+        Colors.transparent,
+      ],
+      stops: const [0.0, 0.65, 0.78, 0.88, 0.94, 0.98, 1.0],
+    );
+
+    // Outer subtle glow satu warna
+    final glowPaint = Paint()
+      ..shader = sweepGradient.createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth + 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    canvas.drawCircle(center, radius, glowPaint);
+
+    // Crisp sweep stroke satu warna
+    final sweepPaint = Paint()
+      ..shader = sweepGradient.createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, sweepPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnimatedClockBorderPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.borderWidth != borderWidth ||
+        oldDelegate.clockSize != clockSize ||
+        oldDelegate.animationColor != animationColor;
+  }
+}
+

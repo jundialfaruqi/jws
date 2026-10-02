@@ -102,7 +102,7 @@ class Theme7Widget extends StatelessWidget {
         // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
         Positioned(
           left:
-              370, // Digeser lebih jauh ke kiri (merasuk lebih dalam ke card jadwal sholat)
+              350, // Digeser lebih jauh ke kiri (merasuk lebih dalam ke card jadwal sholat)
           top: 0,
           bottom: 0,
           child: const Center(

@@ -107,7 +107,7 @@ class Theme4Widget extends StatelessWidget {
 
         // Jam Analog Melayang Tepat di Tengah Lengkungan (Peak Kurva)
         Positioned(
-          left: 370,
+          left: 350,
           top: 0,
           bottom: 0,
           child: const Center(
