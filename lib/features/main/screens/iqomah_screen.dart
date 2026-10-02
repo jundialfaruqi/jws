@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
@@ -20,19 +18,6 @@ class IqomahScreen extends ConsumerWidget {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  String _getFullUrl(String? path) {
-    if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
-
-    final baseUrl = ApiConstant.baseUrl;
-    final cleanBase = baseUrl.endsWith('/')
-        ? baseUrl.substring(0, baseUrl.length - 1)
-        : baseUrl;
-    final cleanPath = path.startsWith('/') ? path : '/$path';
-
-    return '$cleanBase$cleanPath';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
@@ -42,10 +27,6 @@ class IqomahScreen extends ConsumerWidget {
         ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
 
-    final String logo1 = _getFullUrl(myMasjidData?.profil.logoMasjid ?? profil?.logoMasjid);
-    final String logo2 = _getFullUrl(myMasjidData?.profil.logoPemerintah ?? profil?.logoPemerintah);
-    final bool hasLogo1 = logo1.isNotEmpty;
-    final bool hasLogo2 = logo2.isNotEmpty;
     List<String> slideIqomahs = [];
     if (myMasjidData != null && myMasjidData.slideIqomah != null) {
       final s = myMasjidData.slideIqomah!;
@@ -62,54 +43,6 @@ class IqomahScreen extends ConsumerWidget {
       slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-1.jpg');
       slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-2.jpg');
       slideIqomahs.add('assets/iqomah-screen/slide-iqomah-default-3.jpg');
-    }
-
-    List<Widget> logoWidgets = [];
-    final double logoSize = 150.0;
-
-    if (!hasLogo1 && !hasLogo2) {
-      logoWidgets.add(
-        Image.asset(
-          'assets/logo/logo-masjid-default.png',
-          height: logoSize,
-          fit: BoxFit.contain,
-        ),
-      );
-      logoWidgets.add(const SizedBox(width: 24));
-      logoWidgets.add(
-        Image.asset(
-          'assets/logo/logo-pemko-default.png',
-          height: logoSize,
-          fit: BoxFit.contain,
-        ),
-      );
-    } else {
-      if (hasLogo1) {
-        logoWidgets.add(
-          CachedNetworkImage(
-            imageUrl: logo1,
-            height: logoSize,
-            fit: BoxFit.contain,
-            errorWidget: (c, url, e) =>
-                Icon(Icons.mosque, size: logoSize, color: Colors.white),
-          ),
-        );
-      }
-      if (hasLogo2) {
-        if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
-        logoWidgets.add(
-          CachedNetworkImage(
-            imageUrl: logo2,
-            height: logoSize,
-            fit: BoxFit.contain,
-            errorWidget: (c, url, e) => Icon(
-              Icons.account_balance,
-              size: logoSize,
-              color: Colors.white,
-            ),
-          ),
-        );
-      }
     }
 
     final now = ref.watch(timeSyncServiceProvider).now();
@@ -146,11 +79,12 @@ class IqomahScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: logoWidgets,
+                        Image.asset(
+                          'assets/logo/diskominfotiksan-logo.png',
+                          height: 80.0,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 36),
                         const Text(
                           'MENUJU IQOMAH',
                           style: TextStyle(
