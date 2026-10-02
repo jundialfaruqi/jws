@@ -110,7 +110,13 @@ class Theme4Widget extends StatelessWidget {
           left: 370,
           top: 0,
           bottom: 0,
-          child: const Center(child: AppAnalogClock(size: 380)),
+          child: const Center(
+            child: AppAnalogClock(
+              size: 380,
+              numberFontSize: 38,
+              digitalFontSize: 28,
+            ),
+          ),
         ),
 
         // Teks menuju waktu sholat berikutnya beserta countdown melayang di kanan layar atas marquee

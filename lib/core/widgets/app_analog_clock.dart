@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../time/time_sync_service.dart';
-import '../constants/app_colors.dart';
 
 class AppAnalogClock extends ConsumerStatefulWidget {
   final double size;
+  final double? numberFontSize;
+  final double? digitalFontSize;
 
-  const AppAnalogClock({super.key, this.size = 350});
+  const AppAnalogClock({
+    super.key,
+    this.size = 350,
+    this.numberFontSize,
+    this.digitalFontSize,
+  });
 
   @override
   ConsumerState<AppAnalogClock> createState() => _AppAnalogClockState();
@@ -68,25 +74,21 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
         children: [
           // Jam digital di bagian tengah bawah (dirender lebih dulu agar berada di belakang)
           Positioned(
-            bottom: widget.size * 0.29, // Dinaikkan sedikit lebih ke atas lagi
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.size * 0.04,
-                vertical: widget.size * 0.01,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.bgPrimary,
-                borderRadius: BorderRadius.circular(widget.size * 0.04),
-              ),
-              child: Text(
-                formattedTime,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: widget.size * 0.09,
-                  fontWeight:
-                      FontWeight.w900, // Dibuat lebih tebal dari sekadar bold
-                  fontFamily: 'JetBrainsMono',
-                ),
+            bottom: widget.size * 0.28,
+            child: Text(
+              formattedTime,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
+                fontWeight: FontWeight.bold,
+                fontFamily: 'JetBrainsMono',
+                shadows: [
+                  Shadow(
+                    blurRadius: 4,
+                    color: Colors.black.withValues(alpha: 0.6),
+                    offset: const Offset(1, 2),
+                  ),
+                ],
               ),
             ),
           ),
@@ -99,6 +101,7 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
               handColor: Colors.white,
               secondHandColor: Colors.red,
               tickColor: Colors.white,
+              numberFontSize: widget.numberFontSize,
             ),
           ),
         ],
@@ -112,12 +115,14 @@ class AnalogClockPainter extends CustomPainter {
   final Color handColor;
   final Color secondHandColor;
   final Color tickColor;
+  final double? numberFontSize;
 
   AnalogClockPainter({
     required this.dateTime,
     required this.handColor,
     required this.secondHandColor,
     required this.tickColor,
+    this.numberFontSize,
   });
 
   @override
@@ -164,7 +169,7 @@ class AnalogClockPainter extends CustomPainter {
         text: i.toString(),
         style: TextStyle(
           color: i == currentHour12 ? Colors.red : Colors.white,
-          fontSize: radius * 0.25, // Diperkecil agar lebih rapi
+          fontSize: numberFontSize ?? (radius * 0.25),
           fontWeight: FontWeight.bold,
           fontFamily: 'Poppins',
           shadows: [

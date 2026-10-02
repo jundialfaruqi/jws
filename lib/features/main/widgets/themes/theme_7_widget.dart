@@ -105,7 +105,13 @@ class Theme7Widget extends StatelessWidget {
               370, // Digeser lebih jauh ke kiri (merasuk lebih dalam ke card jadwal sholat)
           top: 0,
           bottom: 0,
-          child: const Center(child: AppAnalogClock(size: 380)),
+          child: const Center(
+            child: AppAnalogClock(
+              size: 380,
+              numberFontSize: 38,
+              digitalFontSize: 28,
+            ),
+          ),
         ),
 
         // Widget Agenda (Kanan Bawah di atas Marquee)
