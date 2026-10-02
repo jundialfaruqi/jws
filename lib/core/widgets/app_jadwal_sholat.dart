@@ -19,6 +19,7 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
   final Color? cardColor;
   final Color? nextTextColor;
   final Color? nextCardColor;
+  final bool highlightFadingGradient;
 
   const AppJadwalSholat({
     super.key,
@@ -35,6 +36,7 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
     this.cardColor,
     this.nextTextColor,
     this.nextCardColor,
+    this.highlightFadingGradient = false,
   });
 
   @override
@@ -253,35 +255,58 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
             padding: widget.useCardVariant
                 ? EdgeInsets.only(bottom: isLast ? 0 : 16)
                 : EdgeInsets.only(bottom: isLast ? 0 : 8),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                vertical: widget.useCardVariant ? 19 : 20,
-                horizontal: 24,
-              ),
-              decoration: widget.useCardVariant
-                  ? BoxDecoration(
-                      color: itemBgColor,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
+            child: Builder(
+              builder: (context) {
+                final bool isHighlight = widget.highlightFadingGradient &&
+                    (item['nama'] == activePrayer || item['nama'] == nextPrayer);
+
+                BoxDecoration decoration;
+                if (widget.useCardVariant) {
+                  decoration = BoxDecoration(
+                    color: itemBgColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  );
+                } else if (isHighlight) {
+                  decoration = BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.20),
+                        Colors.white.withValues(alpha: 0.0),
                       ],
-                    )
-                  : BoxDecoration(
-                      color: widget.backgroundColor,
-                      border: isLast
-                          ? null
-                          : Border(
-                              bottom: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                width: 1.0,
-                              ),
-                            ),
+                      stops: const [0.0, 1.0],
                     ),
-              child: AnimatedSwitcher(
+                    borderRadius: BorderRadius.circular(16),
+                  );
+                } else {
+                  decoration = BoxDecoration(
+                    color: widget.backgroundColor,
+                    border: isLast
+                        ? null
+                        : Border(
+                            bottom: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              width: 1.0,
+                            ),
+                          ),
+                  );
+                }
+
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: widget.useCardVariant ? 19 : 20,
+                    horizontal: 24,
+                  ),
+                  decoration: decoration,
+                  child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 800),
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
@@ -353,9 +378,11 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   ],
                 ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          },
+        ),
+      );
+    }).toList(),
       ),
     );
   }

@@ -101,6 +101,7 @@ class Theme4Widget extends StatelessWidget {
               textColor: AppColors.textYellow,
               iconColor: AppColors.textYellow,
               jadwalSholatList: data.jadwalSholat,
+              highlightFadingGradient: true,
             ),
           ),
         ),

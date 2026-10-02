@@ -95,6 +95,7 @@ class Theme7Widget extends StatelessWidget {
               textColor: AppColors.textYellow,
               iconColor: AppColors.textYellow,
               jadwalSholatList: data.jadwalSholat,
+              highlightFadingGradient: true,
             ),
           ),
         ),
