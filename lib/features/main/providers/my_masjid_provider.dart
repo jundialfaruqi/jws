@@ -4,6 +4,7 @@ import '../services/my_masjid_service.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/services/audio_downloader_service.dart';
 import '../../../core/services/image_downloader_service.dart';
+import '../../../core/services/video_downloader_service.dart';
 
 import 'dart:async';
 
@@ -28,6 +29,9 @@ final myMasjidProvider = FutureProvider.family<MyMasjidModel, int>((ref, id) asy
   
   // Sinkronisasi gambar secara background (Pre-cache semua gambar Iqomah, Jumat, Slide)
   ref.read(imageDownloaderProvider).preCacheAllImages(result.data);
+
+  // Sinkronisasi video jumbotron secara background (unduh ke internal & hapus cache lama jika diganti)
+  ref.read(videoDownloaderProvider.notifier).syncVideo(result.data);
   
   return result.data;
 });

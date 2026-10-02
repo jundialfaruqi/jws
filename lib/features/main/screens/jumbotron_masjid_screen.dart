@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
-import '../../../core/widgets/app_masjid_title.dart';
 import '../../../core/widgets/app_live_clock.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/widgets/app_next_prayer_bar.dart';
@@ -34,101 +33,98 @@ class JumbotronMasjidScreen extends ConsumerWidget {
         ? ref.watch(myMasjidProvider(initialProfil.id)).value
         : null;
 
-    final logoPemerintah =
-        liveData?.profil.logoPemerintah ?? initialProfil?.logoPemerintah;
-    final logoMasjid = liveData?.profil.logoMasjid ?? initialProfil?.logoMasjid;
-
     return TvScaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Gambar Full Layar (Ditarik/Gepeng tidak masalah)
-          Positioned.fill(
-            child: CachedNetworkImage(
-              imageUrl: _getFullUrl(imageUrl),
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.fill,
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(
-                  Icons.broken_image,
-                  size: 100,
-                  color: Colors.white54,
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            children: [
+              // Gambar Full Layar (Contain agar potret tetap utuh)
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: _getFullUrl(imageUrl),
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.contain,
+                  errorWidget: (context, url, error) => const Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 100,
+                      color: Colors.white54,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // Pojok Kiri Atas: Logo Pemko dan Masjid
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Container(
-              padding: const EdgeInsets.only(
-                top: 24,
-                left: 24,
-                right: 32,
-                bottom: 24,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: const BorderRadius.only(
-                  bottomRight: Radius.circular(32),
+              // Pojok Kiri Atas: Logo Statis DiskominfoTiksan
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Image.asset(
+                    'assets/logo/diskominfotiksan-logo.png',
+                    height: 52,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-              child: AppMasjidTitle(
-                title: '',
-                logoPemerintah: logoPemerintah,
-                logoMasjid: logoMasjid,
-                showText: false,
-                customLogoSize: 70.0,
-              ),
-            ),
-          ),
 
-          // Pojok Kiri Bawah: Jam Digital Melayang
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(32),
+              // Pojok Kiri Bawah: Jam Digital Melayang
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(32),
+                    ),
+                  ),
+                  child: const AppLiveClock(
+                    textStyle: TextStyle(
+                      fontSize: 48,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-              child: const AppLiveClock(
-                textStyle: TextStyle(
-                  fontSize: 48,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
 
-          // Pojok Kanan Bawah: Countdown Next Prayer Melayang
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
+              // Pojok Kanan Bawah: Countdown Next Prayer Melayang
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                    ),
+                  ),
+                  child: AppNextPrayerBar(
+                    countdownOnly: true,
+                    fontSize: 48,
+                    iconSize: 48,
+                    jadwalSholatList: liveData?.jadwalSholat ?? [],
+                  ),
                 ),
               ),
-              child: AppNextPrayerBar(
-                countdownOnly: true,
-                fontSize: 48,
-                iconSize: 48,
-                jadwalSholatList: liveData?.jadwalSholat ?? [],
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

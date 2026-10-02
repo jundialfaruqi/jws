@@ -1,13 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
-import '../../../core/widgets/app_masjid_title.dart';
 import '../../../core/widgets/app_live_clock.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/widgets/app_next_prayer_bar.dart';
+import '../../../core/services/video_downloader_service.dart';
 import '../providers/my_masjid_provider.dart';
 import '../providers/video_playback_provider.dart';
 
@@ -104,11 +105,22 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
   }
 
   Future<void> _initVideoPlayer() async {
-    final fullUrl = _getFullUrl(widget.videoUrl);
-    if (fullUrl.isEmpty) return;
+    final rawUrl = widget.videoUrl;
+    if (rawUrl == null || rawUrl.isEmpty) return;
 
     try {
-      final controller = VideoPlayerController.networkUrl(Uri.parse(fullUrl));
+      final localPath = await ref.read(videoDownloaderProvider.notifier).getLocalVideoPath(rawUrl);
+      final VideoPlayerController controller;
+
+      if (localPath != null && File(localPath).existsSync()) {
+        debugPrint('🎬 [JumbotronVideo] Memutar dari penyimpanan internal: $localPath');
+        controller = VideoPlayerController.file(File(localPath));
+      } else {
+        final fullUrl = _getFullUrl(rawUrl);
+        debugPrint('🌐 [JumbotronVideo] Berkas lokal belum tersedia, streaming jaringan: $fullUrl');
+        controller = VideoPlayerController.networkUrl(Uri.parse(fullUrl));
+      }
+
       _videoController = controller;
 
       await controller.initialize();
@@ -118,8 +130,8 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
       }
 
       final durationSec = controller.value.duration.inSeconds;
-      if (durationSec > 0 && widget.videoUrl != null) {
-        ref.read(detectedVideoDurationProvider.notifier).setDuration(widget.videoUrl!, durationSec);
+      if (durationSec > 0) {
+        ref.read(detectedVideoDurationProvider.notifier).setDuration(rawUrl, durationSec);
       }
 
       controller.addListener(_videoListener);
@@ -179,128 +191,125 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
         ? ref.watch(myMasjidProvider(initialProfil.id)).value
         : null;
 
-    final logoPemerintah =
-        liveData?.profil.logoPemerintah ?? initialProfil?.logoPemerintah;
-    final logoMasjid = liveData?.profil.logoMasjid ?? initialProfil?.logoMasjid;
-
     final isVideo = widget.videoUrl != null && widget.videoUrl!.isNotEmpty;
 
     return TvScaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Media Latar Belakang: Video Player atau Gambar
-          Positioned.fill(
-            child: isVideo
-                ? (_isInitialized && _videoController != null
-                    ? SizedBox.expand(
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            width: _videoController!.value.size.width,
-                            height: _videoController!.value.size.height,
-                            child: VideoPlayer(_videoController!),
-                          ),
-                        ),
-                      )
-                    : (_hasError
-                        ? const Center(
-                            child: Icon(
-                              Icons.error_outline,
-                              size: 100,
-                              color: Colors.white54,
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            children: [
+              // Media Latar Belakang: Video Player atau Gambar
+              Positioned.fill(
+                child: isVideo
+                    ? (_isInitialized && _videoController != null
+                        ? SizedBox.expand(
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: SizedBox(
+                                width: _videoController!.value.size.width,
+                                height: _videoController!.value.size.height,
+                                child: VideoPlayer(_videoController!),
+                              ),
                             ),
                           )
-                        : const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white70,
-                            ),
-                          )))
-                : CachedNetworkImage(
-                    imageUrl: _getFullUrl(widget.imageUrl),
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.fill,
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        size: 100,
-                        color: Colors.white54,
+                        : (_hasError
+                            ? const Center(
+                                child: Icon(
+                                  Icons.error_outline,
+                                  size: 100,
+                                  color: Colors.white54,
+                                ),
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white70,
+                                ),
+                              )))
+                    : CachedNetworkImage(
+                        imageUrl: _getFullUrl(widget.imageUrl),
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 100,
+                            color: Colors.white54,
+                          ),
+                        ),
                       ),
+              ),
+
+              // Pojok Kiri Atas: Logo Statis DiskominfoTiksan
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(24),
                     ),
                   ),
-          ),
+                  child: Image.asset(
+                    'assets/logo/diskominfotiksan-logo.png',
+                    height: 52,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
 
-          // Pojok Kiri Atas: Logo Pemko dan Masjid
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Container(
-              padding: const EdgeInsets.only(
-                top: 24,
-                left: 24,
-                right: 32,
-                bottom: 24,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: const BorderRadius.only(
-                  bottomRight: Radius.circular(32),
+              // Pojok Kiri Bawah: Jam Digital Melayang
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(32),
+                    ),
+                  ),
+                  child: const AppLiveClock(
+                    textStyle: TextStyle(
+                      fontSize: 48,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-              child: AppMasjidTitle(
-                title: '',
-                logoPemerintah: logoPemerintah,
-                logoMasjid: logoMasjid,
-                showText: false,
-                customLogoSize: 70.0,
-              ),
-            ),
-          ),
 
-          // Pojok Kiri Bawah: Jam Digital Melayang
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(32),
+              // Pojok Kanan Bawah: Countdown Next Prayer Melayang
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                    ),
+                  ),
+                  child: AppNextPrayerBar(
+                    countdownOnly: true,
+                    fontSize: 48,
+                    iconSize: 48,
+                    jadwalSholatList: liveData?.jadwalSholat ?? [],
+                  ),
                 ),
               ),
-              child: const AppLiveClock(
-                textStyle: TextStyle(
-                  fontSize: 48,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            ],
           ),
-
-          // Pojok Kanan Bawah: Countdown Next Prayer Melayang
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                ),
-              ),
-              child: AppNextPrayerBar(
-                countdownOnly: true,
-                fontSize: 48,
-                iconSize: 48,
-                jadwalSholatList: liveData?.jadwalSholat ?? [],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

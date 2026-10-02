@@ -217,17 +217,28 @@ class Theme12Widget extends StatelessWidget {
                               ),
                             ),
                             // Pembatas Horisontal Dihapus
-                            // 7. App Next Prayer (Countdown)
+                            // 7. App Next Prayer (Countdown) & Logo Diskominfo
                             Container(
                               color: AppColors.bgNavy,
-                              alignment: Alignment.centerLeft,
                               padding: const EdgeInsets.symmetric(
-                                vertical: 24,
+                                vertical: 18,
                                 horizontal: 32,
                               ),
-                              child: AppNextPrayerBar(
-                                jadwalSholatList: data.jadwalSholat,
-                                countdownOnly: true,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AppNextPrayerBar(
+                                    jadwalSholatList: data.jadwalSholat,
+                                    countdownOnly: true,
+                                  ),
+                                  Image.asset(
+                                    'assets/logo/diskominfotiksan-logo.png',
+                                    height: 48,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
