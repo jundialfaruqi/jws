@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:hijri/hijri_calendar.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/api_constant.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 
 import '../models/petugas_model.dart';
@@ -19,19 +17,6 @@ import '../../../core/widgets/app_live_clock.dart';
 class JumatScreen extends ConsumerWidget {
   const JumatScreen({super.key});
 
-  String _getFullUrl(String? path) {
-    if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
-
-    final baseUrl = ApiConstant.baseUrl;
-    final cleanBase = baseUrl.endsWith('/')
-        ? baseUrl.substring(0, baseUrl.length - 1)
-        : baseUrl;
-    final cleanPath = path.startsWith('/') ? path : '/$path';
-
-    return '$cleanBase$cleanPath';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
@@ -40,10 +25,6 @@ class JumatScreen extends ConsumerWidget {
         ? ref.watch(myMasjidProvider(profil.id)).value
         : null;
 
-    final String logo1 = _getFullUrl(myMasjidData?.profil.logoMasjid ?? profil?.logoMasjid);
-    final String logo2 = _getFullUrl(myMasjidData?.profil.logoPemerintah ?? profil?.logoPemerintah);
-    final bool hasLogo1 = logo1.isNotEmpty;
-    final bool hasLogo2 = logo2.isNotEmpty;
     List<String> slideJumats = [];
     if (myMasjidData != null && myMasjidData.slideJumat != null) {
       final s = myMasjidData.slideJumat!;
@@ -61,54 +42,6 @@ class JumatScreen extends ConsumerWidget {
       slideJumats.add('assets/jumat-screen/slide-jumat-default-2.jpg');
       slideJumats.add('assets/jumat-screen/slide-jumat-default-3.jpg');
       slideJumats.add('assets/jumat-screen/slide-jumat-default-4.jpg');
-    }
-
-    List<Widget> logoWidgets = [];
-    final double logoSize = 100.0; // Diperkecil lagi sesuai permintaan
-
-    if (!hasLogo1 && !hasLogo2) {
-      logoWidgets.add(
-        Image.asset(
-          'assets/logo/logo-masjid-default.png',
-          height: logoSize,
-          fit: BoxFit.contain,
-        ),
-      );
-      logoWidgets.add(const SizedBox(width: 18));
-      logoWidgets.add(
-        Image.asset(
-          'assets/logo/logo-pemko-default.png',
-          height: logoSize,
-          fit: BoxFit.contain,
-        ),
-      );
-    } else {
-      if (hasLogo1) {
-        logoWidgets.add(
-          CachedNetworkImage(
-            imageUrl: logo1,
-            height: logoSize,
-            fit: BoxFit.contain,
-            errorWidget: (c, url, e) =>
-                Icon(Icons.mosque, size: logoSize, color: Colors.white),
-          ),
-        );
-      }
-      if (hasLogo2) {
-        if (hasLogo1) logoWidgets.add(const SizedBox(width: 24));
-        logoWidgets.add(
-          CachedNetworkImage(
-            imageUrl: logo2,
-            height: logoSize,
-            fit: BoxFit.contain,
-            errorWidget: (c, url, e) => Icon(
-              Icons.account_balance,
-              size: logoSize,
-              color: Colors.white,
-            ),
-          ),
-        );
-      }
     }
 
     final now = ref.watch(timeSyncServiceProvider).now();
@@ -206,9 +139,10 @@ class JumatScreen extends ConsumerWidget {
                       // Kelompok Atas: Logo dan Tanggal
                       Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: logoWidgets,
+                          Image.asset(
+                            'assets/logo/diskominfotiksan-logo.png',
+                            height: 75.0,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 24),
                           Row(

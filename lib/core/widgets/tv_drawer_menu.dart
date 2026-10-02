@@ -151,8 +151,8 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                     const SizedBox(height: 64),
                     Center(
                       child: Image.asset(
-                        'assets/logo/logo-pemko-kominfo.webp',
-                        width: 250,
+                        'assets/logo/diskominfotiksan-logo.png',
+                        width: 320,
                         fit: BoxFit.contain,
                       ),
                     ),
