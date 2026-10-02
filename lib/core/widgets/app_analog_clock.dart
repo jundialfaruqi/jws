@@ -48,7 +48,7 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
   @override
   Widget build(BuildContext context) {
     final String formattedTime =
-        "${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}";
+        "${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')}";
 
     return Container(
       width: widget.size,
@@ -77,7 +77,7 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
             top: widget.size * 0.30,
             child: Image.asset(
               'assets/logo/diskominfotiksan-logo.png',
-              width: widget.size * 0.38,
+              width: widget.size * 0.39,
               fit: BoxFit.contain,
             ),
           ),
