@@ -82,14 +82,14 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
     final dur = value.duration;
 
     if (dur > Duration.zero) {
-      // Jika video sudah berada di akhir durasi (toleransi 300ms) atau berhenti di detik terakhir
+      // Jika video sudah berada di akhir durasi (toleransi 300ms) atau event isCompleted terpicu
       final reachedEnd = value.isCompleted ||
           pos >= dur ||
-          (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 300)) ||
-          (!value.isPlaying && dur > Duration.zero && pos >= dur - const Duration(seconds: 1));
+          (pos >= dur - const Duration(milliseconds: 300));
 
       if (reachedEnd) {
         _isCompleted = true;
+        debugPrint('🎬 [JumbotronVideo] Video selesai (pos: ${pos.inSeconds}s / dur: ${dur.inSeconds}s)');
         try {
           _videoController?.setVolume(0.0);
           _videoController?.pause();
@@ -131,8 +131,6 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
         ref.read(detectedVideoDurationProvider.notifier).setDuration(rawUrl, durationSec);
       }
 
-      controller.addListener(_videoListener);
-
       if (widget.hasAudio) {
         ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(true);
         await controller.setVolume(1.0);
@@ -142,6 +140,8 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
 
       await controller.setLooping(false);
       await controller.play();
+
+      controller.addListener(_videoListener);
 
       if (mounted) {
         setState(() {

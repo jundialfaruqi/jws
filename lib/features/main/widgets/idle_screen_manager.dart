@@ -31,6 +31,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   int _jumbotronStepIndex = 0;
   int _activeBlockStartMs = 0;
   int _currentMainDuration = 30;
+  List<Map<String, dynamic>> _jumbotronItems = [];
 
   @override
   void dispose() {
@@ -41,42 +42,42 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     super.dispose();
   }
 
-  void _updateVideoAudioState(List<Map<String, dynamic>> jumbotronItems) {
+  void _updateVideoAudioState() {
     if (!mounted) return;
-    if (_isInMainPhase || jumbotronItems.isEmpty) {
+    if (_isInMainPhase || _jumbotronItems.isEmpty) {
       ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
       return;
     }
-    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+    final item = _jumbotronItems[_jumbotronStepIndex % _jumbotronItems.length];
     final isVideoWithAudio = item['type'] == 'pemko_video' && (item['hasAudio'] == true);
     ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(isVideoWithAudio);
   }
 
-  void _switchToJumbotron(List<Map<String, dynamic>> jumbotronItems) {
+  void _switchToJumbotron() {
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
-    if (!mounted || jumbotronItems.isEmpty) return;
+    if (!mounted || _jumbotronItems.isEmpty) return;
 
     _isInMainPhase = false;
     _jumbotronStepIndex = 0;
-    _updateVideoAudioState(jumbotronItems);
-    _showCurrentJumbotronItem(jumbotronItems);
+    _updateVideoAudioState();
+    _showCurrentJumbotronItem();
   }
 
-  void _showCurrentJumbotronItem(List<Map<String, dynamic>> jumbotronItems) {
+  void _showCurrentJumbotronItem() {
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
-    if (!mounted || jumbotronItems.isEmpty) return;
+    if (!mounted || _jumbotronItems.isEmpty) return;
 
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
     final currentStep = _jumbotronStepIndex;
-    final item = jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+    final item = _jumbotronItems[_jumbotronStepIndex % _jumbotronItems.length];
 
     if (item['type'] == 'pemko_video') {
       final durationSec = (item['duration'] as int?) ?? 30;
@@ -85,20 +86,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         debugPrint(
           '[IdleScreenManager] Safety watchdog fired for video ($timeoutSec s), advancing to next jumbotron item.',
         );
-        _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
+        _advanceJumbotron(fromStepIndex: currentStep);
       });
     } else {
       // Gambar statis (pemko_image atau masjid_image): tampil 20 detik
       final durationSec = (item['duration'] as int?) ?? 20;
       _phaseTimer = Timer(Duration(seconds: durationSec), () {
-        if (mounted) _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
+        if (mounted) _advanceJumbotron(fromStepIndex: currentStep);
       });
     }
 
     setState(() {});
   }
 
-  void _advanceJumbotron(List<Map<String, dynamic>> jumbotronItems, {int? fromStepIndex}) {
+  void _advanceJumbotron({int? fromStepIndex}) {
     if (!mounted) return;
     if (fromStepIndex != null && fromStepIndex != _jumbotronStepIndex) {
       debugPrint(
@@ -112,19 +113,24 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
+    if (_jumbotronItems.isEmpty) {
+      _switchToMain();
+      return;
+    }
+
     _jumbotronStepIndex++;
-    if (_jumbotronStepIndex >= jumbotronItems.length) {
+    if (_jumbotronStepIndex >= _jumbotronItems.length) {
       // Seluruh siklus jumbotron (video -> gambar global -> gambar masjid) telah selesai!
       // Kembali ke siklus slide utama
       _jumbotronStepIndex = 0;
-      _switchToMain(jumbotronItems);
+      _switchToMain();
     } else {
-      _updateVideoAudioState(jumbotronItems);
-      _showCurrentJumbotronItem(jumbotronItems);
+      _updateVideoAudioState();
+      _showCurrentJumbotronItem();
     }
   }
 
-  void _switchToMain(List<Map<String, dynamic>> jumbotronItems) {
+  void _switchToMain() {
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
@@ -132,14 +138,152 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
     _isInMainPhase = true;
     _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
-    _updateVideoAudioState(jumbotronItems);
+    _updateVideoAudioState();
     setState(() {});
 
-    if (jumbotronItems.isNotEmpty) {
+    if (_jumbotronItems.isNotEmpty) {
       _phaseTimer = Timer(Duration(seconds: _currentMainDuration), () {
-        if (mounted) _switchToJumbotron(jumbotronItems);
+        if (mounted) _switchToJumbotron();
       });
     }
+  }
+
+  List<Map<String, dynamic>> _buildJumbotronItems(
+    dynamic data,
+    Map<String, int> detectedDurations,
+  ) {
+    final List<Map<String, dynamic>> items = [];
+
+    // 1. Jumbotron Video Global
+    if (data.jumbotronPemko?.isActive == true) {
+      final videos = data.jumbotronPemko!.videos;
+      if (videos.isNotEmpty) {
+        for (final v in videos) {
+          int videoDuration = v.duration;
+          if (videoDuration <= 0 && detectedDurations.containsKey(v.videoUrl)) {
+            videoDuration = detectedDurations[v.videoUrl]!;
+          }
+          if (videoDuration <= 0) {
+            videoDuration = 30;
+          }
+          items.add({
+            'type': 'pemko_video',
+            'videoUrl': v.videoUrl,
+            'hasAudio': v.hasAudio,
+            'duration': videoDuration,
+            'id': v.id,
+          });
+        }
+      } else if (data.jumbotronPemko!.isVideo &&
+          data.jumbotronPemko!.videoFile != null &&
+          data.jumbotronPemko!.videoFile!.isNotEmpty) {
+        final vUrl = data.jumbotronPemko!.videoFile!;
+        int videoDuration = data.jumbotronPemko!.videoDuration;
+        if (videoDuration <= 0 && detectedDurations.containsKey(vUrl)) {
+          videoDuration = detectedDurations[vUrl]!;
+        }
+        if (videoDuration <= 0) {
+          videoDuration = 30;
+        }
+        items.add({
+          'type': 'pemko_video',
+          'videoUrl': vUrl,
+          'hasAudio': data.jumbotronPemko!.hasAudio,
+          'duration': videoDuration,
+          'id': data.jumbotronPemko!.id,
+        });
+      }
+
+      // 2. Jumbotron Gambar Global
+      final pemkoImages = data.jumbotronPemko!.validSlides;
+      for (final img in pemkoImages) {
+        items.add({
+          'type': 'pemko_image',
+          'slide': img,
+          'duration': 20,
+        });
+      }
+    }
+
+    // 3. Jumbotron Gambar Masjid
+    if (data.jumbotronMasjid?.isActive == true) {
+      final masjidImages = data.jumbotronMasjid!.validSlides;
+      for (final img in masjidImages) {
+        items.add({
+          'type': 'masjid_image',
+          'slide': img,
+          'duration': 20,
+        });
+      }
+    }
+
+    return items;
+  }
+
+  bool _itemsChanged(
+    List<Map<String, dynamic>> a,
+    List<Map<String, dynamic>> b,
+  ) {
+    if (a.length != b.length) return true;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i]['type'] != b[i]['type']) return true;
+      if (a[i]['videoUrl'] != b[i]['videoUrl']) return true;
+      if (a[i]['slide'] != b[i]['slide']) return true;
+      if (a[i]['hasAudio'] != b[i]['hasAudio']) return true;
+      if (a[i]['duration'] != b[i]['duration']) return true;
+    }
+    return false;
+  }
+
+  void _handleItemsUpdated(List<Map<String, dynamic>> newItems) {
+    final oldItems = _jumbotronItems;
+    _jumbotronItems = newItems;
+
+    if (newItems.isEmpty) {
+      if (!_isInMainPhase) {
+        _phaseTimer?.cancel();
+        _phaseTimer = null;
+        _videoWatchdogTimer?.cancel();
+        _videoWatchdogTimer = null;
+        _switchToMain();
+      }
+      return;
+    }
+
+    if (_isInMainPhase) {
+      _updateVideoAudioState();
+      return;
+    }
+
+    // Sedang berada di fase Jumbotron:
+    // Cek apakah item yang saat ini sedang tayang masih ada dalam list baru
+    if (oldItems.isNotEmpty && _jumbotronStepIndex < oldItems.length) {
+      final currentOldItem = oldItems[_jumbotronStepIndex];
+      final newIndex = newItems.indexWhere((it) =>
+          it['type'] == currentOldItem['type'] &&
+          ((it['videoUrl'] != null && it['videoUrl'] == currentOldItem['videoUrl']) ||
+           (it['slide'] != null && it['slide'] == currentOldItem['slide'])));
+
+      if (newIndex != -1) {
+        // Item masih ada! Pertahankan playback item saat ini, hanya sesuaikan step index
+        _jumbotronStepIndex = newIndex;
+        _updateVideoAudioState();
+        return;
+      }
+    }
+
+    // Jika item lama sudah tidak ada (misal diganti / dihapus),
+    // batalkan timer lama dan jalankan item baru dengan timer segar
+    _phaseTimer?.cancel();
+    _phaseTimer = null;
+    _videoWatchdogTimer?.cancel();
+    _videoWatchdogTimer = null;
+
+    if (_jumbotronStepIndex >= newItems.length) {
+      _jumbotronStepIndex = 0;
+    }
+    _updateVideoAudioState();
+    _showCurrentJumbotronItem();
   }
 
   @override
@@ -217,89 +361,9 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
             mainSlides.isNotEmpty ? mainSlides.length * 20 : 30;
         _currentMainDuration = mainDuration;
 
-        // Kumpulkan semua item jumbotron aktif sesuai urutan siklus:
-        // 1. Jumbotron Video Global (semua video aktif)
-        // 2. Jumbotron Gambar Global (semua gambar global aktif)
-        // 3. Jumbotron Gambar Masjid (semua gambar masjid aktif)
-        final List<Map<String, dynamic>> jumbotronItems = [];
-
-        // 1. Jumbotron Video Global
-        if (data.jumbotronPemko?.isActive == true) {
-          final videos = data.jumbotronPemko!.videos;
-          if (videos.isNotEmpty) {
-            for (final v in videos) {
-              int videoDuration = v.duration;
-              if (videoDuration <= 0 &&
-                  detectedDurations.containsKey(v.videoUrl)) {
-                videoDuration = detectedDurations[v.videoUrl]!;
-              }
-              if (videoDuration <= 0) {
-                videoDuration = 30;
-              }
-              jumbotronItems.add({
-                'type': 'pemko_video',
-                'videoUrl': v.videoUrl,
-                'hasAudio': v.hasAudio,
-                'duration': videoDuration,
-                'id': v.id,
-              });
-            }
-          } else if (data.jumbotronPemko!.isVideo &&
-              data.jumbotronPemko!.videoFile != null &&
-              data.jumbotronPemko!.videoFile!.isNotEmpty) {
-            final vUrl = data.jumbotronPemko!.videoFile!;
-            int videoDuration = data.jumbotronPemko!.videoDuration;
-            if (videoDuration <= 0 && detectedDurations.containsKey(vUrl)) {
-              videoDuration = detectedDurations[vUrl]!;
-            }
-            if (videoDuration <= 0) {
-              videoDuration = 30;
-            }
-            jumbotronItems.add({
-              'type': 'pemko_video',
-              'videoUrl': vUrl,
-              'hasAudio': data.jumbotronPemko!.hasAudio,
-              'duration': videoDuration,
-              'id': data.jumbotronPemko!.id,
-            });
-          }
-
-          // 2. Jumbotron Gambar Global
-          final pemkoImages = data.jumbotronPemko!.validSlides;
-          for (final img in pemkoImages) {
-            jumbotronItems.add({
-              'type': 'pemko_image',
-              'slide': img,
-              'duration': 20,
-            });
-          }
-        }
-
-        // 3. Jumbotron Gambar Masjid
-        if (data.jumbotronMasjid?.isActive == true) {
-          final masjidImages = data.jumbotronMasjid!.validSlides;
-          for (final img in masjidImages) {
-            jumbotronItems.add({
-              'type': 'masjid_image',
-              'slide': img,
-              'duration': 20,
-            });
-          }
-        }
-
-        if (jumbotronItems.isEmpty) {
-          if (!_isInMainPhase) {
-            _phaseTimer?.cancel();
-            _phaseTimer = null;
-            _videoWatchdogTimer?.cancel();
-            _videoWatchdogTimer = null;
-            _isInMainPhase = true;
-            _jumbotronStepIndex = 0;
-            _updateVideoAudioState(jumbotronItems);
-          }
-        } else if (!_isInMainPhase && _jumbotronStepIndex >= jumbotronItems.length) {
-          _jumbotronStepIndex = 0;
-          _switchToMain(jumbotronItems);
+        final newItems = _buildJumbotronItems(data, detectedDurations);
+        if (_itemsChanged(_jumbotronItems, newItems)) {
+          _handleItemsUpdated(newItems);
         }
 
         // Inisialisasi awal saat pertama kali mount
@@ -309,15 +373,15 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
         if (_isInMainPhase &&
             _phaseTimer == null &&
-            jumbotronItems.isNotEmpty) {
+            _jumbotronItems.isNotEmpty) {
           _phaseTimer = Timer(Duration(seconds: mainDuration), () {
-            if (mounted) _switchToJumbotron(jumbotronItems);
+            if (mounted) _switchToJumbotron();
           });
         }
 
         Widget currentWidget;
 
-        if (_isInMainPhase || jumbotronItems.isEmpty) {
+        if (_isInMainPhase || _jumbotronItems.isEmpty) {
           currentWidget = ProviderScope(
             key: ValueKey('main_$_activeBlockStartMs'),
             overrides: [
@@ -328,7 +392,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         } else {
           final currentStep = _jumbotronStepIndex;
           final item =
-              jumbotronItems[_jumbotronStepIndex % jumbotronItems.length];
+              _jumbotronItems[_jumbotronStepIndex % _jumbotronItems.length];
           if (item['type'] == 'pemko_video') {
             currentWidget = JumbotronPemkoScreen(
               key: ValueKey(
@@ -337,7 +401,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
               videoUrl: item['videoUrl'],
               hasAudio: item['hasAudio'] ?? false,
               onFinished: () {
-                _advanceJumbotron(jumbotronItems, fromStepIndex: currentStep);
+                _advanceJumbotron(fromStepIndex: currentStep);
               },
             );
           } else if (item['type'] == 'pemko_image') {
