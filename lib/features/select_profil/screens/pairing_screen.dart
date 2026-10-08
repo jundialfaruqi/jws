@@ -63,8 +63,13 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
   void _startPollingCheck() {
     _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       if (!mounted) return;
+      final wsService = ref.read(deviceWebSocketServiceProvider);
+      // Jika websocket aktif terhubung, serahkan penerimaan event ke websocket
+      // agar tidak membanjiri endpoint request-code
+      if (wsService.isConnected) return;
+
       final deviceService = ref.read(deviceServiceProvider);
       final response = await deviceService.requestPairingCode();
       if (response['status'] == 'linked' && response['masjid_id'] != null) {
@@ -141,7 +146,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'Buka aplikasi Web Admin Masjid, lalu masukkan kode berikut:',
+                'Scan QR Code dengan HP Anda atau masukkan kode 6 digit di Web Admin:',
                 style: TextStyle(color: Colors.white70, fontSize: 24),
               ),
               const SizedBox(height: 48),
@@ -164,7 +169,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: QrImageView(
-                        data: _pairingCode!,
+                        data: '${ApiConstant.baseUrl}tv-pairing?code=$_pairingCode',
                         version: QrVersions.auto,
                         size: 200.0,
                         backgroundColor: Colors.white,
