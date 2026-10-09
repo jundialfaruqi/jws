@@ -18,12 +18,14 @@ class TvScaffold extends StatelessWidget {
       body: Center(
         child: FittedBox(
           fit: BoxFit.contain,
+          clipBehavior: Clip.hardEdge,
           child: SizedBox(
             width: 1920, // Resolusi standar Full HD TV
             height: 1080,
             child: Scaffold(
               backgroundColor: backgroundColor,
               body: Stack(
+                clipBehavior: Clip.hardEdge,
                 children: [
                   body,
                   const AudioDownloadOverlay(),

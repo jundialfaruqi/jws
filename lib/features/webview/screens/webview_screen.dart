@@ -83,7 +83,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
       child: TvScaffold(
         backgroundColor: Colors.black,
         body: Stack(
-            children: [
+          clipBehavior: Clip.hardEdge,
+          children: [
               WebViewWidget(controller: _controller),
               if (_isLoading)
                 const Center(

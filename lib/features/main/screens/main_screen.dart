@@ -87,6 +87,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         },
         child: TvScaffold(
           body: Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
               Column(
                 children: const [

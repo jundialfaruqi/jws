@@ -102,17 +102,22 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _offsetAnimation,
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return ExcludeFocus(
-            excluding: _animationController.isDismissed,
-            child: child!,
-          );
-        },
-        child: Focus(
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        final isClosed = _animationController.isDismissed;
+        return Offstage(
+          offstage: isClosed,
+          child: ExcludeFocus(
+            excluding: isClosed,
+            child: SlideTransition(
+              position: _offsetAnimation,
+              child: child!,
+            ),
+          ),
+        );
+      },
+      child: Focus(
           focusNode: _drawerWrapperFocusNode,
           onKeyEvent: (node, event) {
             // Tangkap D-Pad Kiri untuk menutup drawer
@@ -182,8 +187,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
