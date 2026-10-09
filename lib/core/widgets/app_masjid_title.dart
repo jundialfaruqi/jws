@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
+import '../constants/app_colors.dart';
 
 class AppMasjidTitle extends StatelessWidget {
   final String title;
@@ -8,6 +9,7 @@ class AppMasjidTitle extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final Color? addressColor;
+  final List<Shadow>? shadows;
   final String? logoMasjid;
   final String? logoPemerintah;
   final bool isRightAligned;
@@ -20,8 +22,15 @@ class AppMasjidTitle extends StatelessWidget {
     required this.title,
     this.address,
     this.backgroundColor = Colors.transparent,
-    this.textColor = Colors.white,
+    this.textColor = AppColors.textYellow,
     this.addressColor,
+    this.shadows = const [
+      Shadow(
+        offset: Offset(2.0, 2.0),
+        blurRadius: 4.0,
+        color: Color(0x80000000),
+      ),
+    ],
     this.logoMasjid,
     this.logoPemerintah,
     this.isRightAligned = false,
@@ -122,6 +131,7 @@ class AppMasjidTitle extends StatelessWidget {
               fontFamily: 'Poppins',
               letterSpacing: 1.5,
               height: 1.0,
+              shadows: shadows,
             ),
             textAlign: textAlign,
             maxLines: 1,

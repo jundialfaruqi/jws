@@ -159,7 +159,7 @@ class Theme10Widget extends StatelessWidget {
             logoPemerintah: data.profil.logoPemerintah,
             backgroundColor: AppColors
                 .bgNavy, // Transparansi gradient sudah diatur di dalam widget AppMasjidTitleTheme10
-            textColor: AppColors.textInverse,
+            textColor: AppColors.textYellow,
             addressColor: AppColors.textInverse,
             isLeftAligned: true,
           ),

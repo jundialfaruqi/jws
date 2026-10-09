@@ -40,7 +40,7 @@ class Theme4Widget extends StatelessWidget {
               logoMasjid: data.profil.logoMasjid,
               logoPemerintah: data.profil.logoPemerintah,
               backgroundColor: AppColors.bgBlue,
-              textColor: AppColors.textInverse,
+              textColor: AppColors.textYellow,
               addressColor: AppColors.textInverse,
               isRightAligned: true,
             ),
