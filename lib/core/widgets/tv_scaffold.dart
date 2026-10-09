@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'audio_download_overlay.dart';
+import 'app_toast_overlay.dart';
 
 class TvScaffold extends StatelessWidget {
   final Widget body;
@@ -29,6 +30,7 @@ class TvScaffold extends StatelessWidget {
                 children: [
                   body,
                   const AudioDownloadOverlay(),
+                  const AppToastOverlay(),
                 ],
               ),
             ),

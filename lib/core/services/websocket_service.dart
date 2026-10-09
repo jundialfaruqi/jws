@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import '../../features/main/providers/my_masjid_provider.dart';
+import '../providers/toast_notification_provider.dart';
 
 final webSocketServiceProvider = Provider.family<WebSocketService, int>((ref, id) {
   final service = WebSocketService(ref: ref, id: id);
@@ -111,21 +112,53 @@ class WebSocketService {
           final channel = _pusherClient!.publicChannel('masjid-$id');
           channel.subscribe();
 
-          channel.bind('App\\Events\\ContentUpdatedEvent').listen((event) {
+          void handleContentUpdate(dynamic event) {
             debugPrint("WebSocket Event Received: ContentUpdatedEvent");
             debugPrint("Triggering Data Refresh...");
             ref.invalidate(myMasjidProvider(id));
-          });
+
+            String? type;
+            if (event.data != null) {
+              try {
+                final map = event.data is String ? jsonDecode(event.data) : event.data;
+                if (map is Map && map['type'] != null) {
+                  type = map['type'].toString();
+                }
+              } catch (e) {
+                debugPrint("Error parsing ContentUpdatedEvent payload: $e");
+              }
+            }
+            ref.read(toastNotificationProvider.notifier).showContentUpdateToast(type);
+          }
+
+          channel.bind('App\\Events\\ContentUpdatedEvent').listen(handleContentUpdate);
+          channel.bind('ContentUpdatedEvent').listen(handleContentUpdate);
 
           // Channel Global (Jumbotron Pemko, Marquee Global, dll)
           final globalChannel = _pusherClient!.publicChannel('global-masjid');
           globalChannel.subscribe();
 
-          globalChannel.bind('App\\Events\\GlobalUpdatedEvent').listen((event) {
+          void handleGlobalUpdate(dynamic event) {
             debugPrint("WebSocket Event Received: GlobalUpdatedEvent");
             debugPrint("Triggering Data Refresh...");
             ref.invalidate(myMasjidProvider(id));
-          });
+
+            String? type;
+            if (event.data != null) {
+              try {
+                final map = event.data is String ? jsonDecode(event.data) : event.data;
+                if (map is Map && map['type'] != null) {
+                  type = map['type'].toString();
+                }
+              } catch (e) {
+                debugPrint("Error parsing GlobalUpdatedEvent payload: $e");
+              }
+            }
+            ref.read(toastNotificationProvider.notifier).showGlobalUpdateToast(type);
+          }
+
+          globalChannel.bind('App\\Events\\GlobalUpdatedEvent').listen(handleGlobalUpdate);
+          globalChannel.bind('GlobalUpdatedEvent').listen(handleGlobalUpdate);
         }
       });
 

@@ -28,7 +28,8 @@ class AdzanScreen extends ConsumerWidget {
     }
 
     double progress = transitionState.totalSeconds > 0
-        ? (transitionState.remainingSeconds / transitionState.totalSeconds)
+        ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
+            transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD)
@@ -86,10 +87,10 @@ class AdzanScreen extends ConsumerWidget {
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(
                           begin: transitionState.totalSeconds == 0
-                              ? 1.0
+                              ? 0.0
                               : progress,
                           end: transitionState.totalSeconds == 0
-                              ? 0.0
+                              ? 1.0
                               : progress,
                         ),
                         duration: transitionState.totalSeconds == 0
@@ -99,16 +100,17 @@ class AdzanScreen extends ConsumerWidget {
                             : const Duration(seconds: 1),
                         curve: Curves.linear,
                         builder: (context, value, child) {
-                          final floatSeconds = transitionState.totalSeconds == 0
-                              ? value * 90
-                              : value * transitionState.totalSeconds;
+                          final remainingFloatSeconds =
+                              transitionState.totalSeconds == 0
+                              ? (1.0 - value) * 90
+                              : (1.0 - value) * transitionState.totalSeconds;
 
-                          final currentSeconds = floatSeconds.ceil();
+                          final currentSeconds = remainingFloatSeconds.ceil();
 
                           final isBlinking =
                               currentSeconds <= 10 && currentSeconds > 0;
                           final barColor = isBlinking
-                              ? ((floatSeconds * 2).floor() % 2 == 0
+                              ? ((remainingFloatSeconds * 2).floor() % 2 == 0
                                     ? Colors.red
                                     : AppColors.textYellow)
                               : AppColors.textYellow;
