@@ -92,6 +92,8 @@ class Theme10Widget extends StatelessWidget {
                     top: 0,
                     right: 0,
                     child: AppNextPrayerBarTheme10(
+                      dateCardWidth: 880,
+                      countdownCardWidth: 560,
                       jadwalSholatList: data.jadwalSholat,
                     ),
                   ),
@@ -153,6 +155,7 @@ class Theme10Widget extends StatelessWidget {
           top: 0,
           left: 0,
           child: AppMasjidTitleTheme10(
+            width: 1000,
             title: data.profil.name,
             address: data.profil.address,
             logoMasjid: data.profil.logoMasjid,

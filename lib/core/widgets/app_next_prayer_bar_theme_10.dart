@@ -14,6 +14,8 @@ class AppNextPrayerBarTheme10 extends ConsumerStatefulWidget {
   final bool dateOnly;
   final double fontSize;
   final double? iconSize;
+  final double? dateCardWidth;
+  final double? countdownCardWidth;
 
   const AppNextPrayerBarTheme10({
     super.key,
@@ -23,6 +25,8 @@ class AppNextPrayerBarTheme10 extends ConsumerStatefulWidget {
     this.dateOnly = false,
     this.fontSize = 28.0,
     this.iconSize,
+    this.dateCardWidth = 880.0,
+    this.countdownCardWidth = 560.0,
   });
 
   @override
@@ -225,6 +229,7 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
         }
 
         final countdownWidget = Container(
+          width: widget.countdownCardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
           decoration: BoxDecoration(
             color: AppColors.bgDark.withValues(alpha: 0.5),
@@ -233,47 +238,51 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
               bottomLeft: Radius.circular(60),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _RingingBellIcon(
-                icon: TablerIcons.bell_ringing,
-                color: Colors.white,
-                size: widget.iconSize ?? 36,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'MENUJU $nextPrayer',
-                style: TextStyle(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _RingingBellIcon(
+                  icon: TablerIcons.bell_ringing,
                   color: Colors.white,
-                  fontSize: widget.fontSize,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                  letterSpacing: 2.0,
+                  size: widget.iconSize ?? 36,
                 ),
-              ),
-              const SizedBox(width: 24),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Text(
-                  countdownStr,
+                const SizedBox(width: 16),
+                Text(
+                  'MENUJU $nextPrayer',
                   style: TextStyle(
-                    color: textColor,
+                    color: Colors.white,
                     fontSize: widget.fontSize,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'JetBrainsMono',
+                    fontFamily: 'Poppins',
+                    letterSpacing: 2.0,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Text(
+                    countdownStr,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: widget.fontSize,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'JetBrainsMono',
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
 
@@ -282,6 +291,7 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
         }
 
         final dateWidget = Container(
+          width: widget.dateCardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
           decoration: BoxDecoration(
             color: AppColors.bgDark.withValues(alpha: 0.6),
@@ -290,39 +300,43 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
               bottomLeft: Radius.circular(24),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                TablerIcons.calendar_event,
-                color: Colors.white,
-                size: 36,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                tanggalMasehi,
-                style: TextStyle(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  TablerIcons.calendar_event,
                   color: Colors.white,
-                  fontSize: widget.fontSize,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
+                  size: 36,
                 ),
-              ),
-              const SizedBox(width: 24),
-              Container(width: 2, height: 28, color: Colors.white54),
-              const SizedBox(width: 24),
-              const Icon(TablerIcons.moon_stars, color: Colors.white, size: 36),
-              const SizedBox(width: 12),
-              Text(
-                tanggalHijriah,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: widget.fontSize,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
+                const SizedBox(width: 12),
+                Text(
+                  tanggalMasehi,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: widget.fontSize,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 24),
+                Container(width: 2, height: 28, color: Colors.white54),
+                const SizedBox(width: 24),
+                const Icon(TablerIcons.moon_stars, color: Colors.white, size: 36),
+                const SizedBox(width: 12),
+                Text(
+                  tanggalHijriah,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: widget.fontSize,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
           ),
         );
 
