@@ -17,6 +17,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
   final bool isLeftAligned;
   final bool showText;
   final double? width;
+  final EdgeInsetsGeometry? padding;
 
   const AppMasjidTitleTheme10({
     super.key,
@@ -38,6 +39,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
     this.isLeftAligned = false,
     this.showText = true,
     this.width = 1000.0,
+    this.padding,
   });
 
   String _getFullUrl(String? path) {
@@ -190,7 +192,8 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
 
     return Container(
       width: width ?? 1000.0,
-      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 100),
+      padding: padding ??
+          const EdgeInsets.only(top: 24, bottom: 24, left: 20, right: 80),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
