@@ -257,9 +257,6 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                 : EdgeInsets.only(bottom: isLast ? 0 : 8),
             child: Builder(
               builder: (context) {
-                final bool isHighlight = widget.highlightFadingGradient &&
-                    (item['nama'] == activePrayer || item['nama'] == nextPrayer);
-
                 BoxDecoration decoration;
                 if (widget.useCardVariant) {
                   decoration = BoxDecoration(
@@ -273,13 +270,22 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                       ),
                     ],
                   );
-                } else if (isHighlight) {
+                } else if (widget.highlightFadingGradient) {
+                  final double startAlpha;
+                  if (item['nama'] == activePrayer) {
+                    startAlpha = 0.28; // Solat aktif: lebih tebal
+                  } else if (item['nama'] == nextPrayer) {
+                    startAlpha = 0.18; // Akan masuk: agak kurang tebal
+                  } else {
+                    startAlpha = 0.07; // Lainnya: lebih tipis lagi
+                  }
+
                   decoration = BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        Colors.white.withValues(alpha: 0.20),
+                        Colors.white.withValues(alpha: startAlpha),
                         Colors.white.withValues(alpha: 0.0),
                       ],
                       stops: const [0.0, 1.0],
