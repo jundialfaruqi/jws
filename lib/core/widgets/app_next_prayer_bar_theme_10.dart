@@ -101,14 +101,6 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
     'Desember',
   ];
 
-  String _formatTanggalMasehi(DateTime dt) {
-    final dayName = (dt.weekday >= 1 && dt.weekday <= 7) ? _namaHariIndo[dt.weekday] : '';
-    final day = dt.day;
-    final monthName = (dt.month >= 1 && dt.month <= 12) ? _namaBulanIndo[dt.month] : '';
-    final year = dt.year;
-    return '$dayName, $day $monthName $year';
-  }
-
   @override
   Widget build(BuildContext context) {
     final now = ref.read(timeSyncServiceProvider).now();
@@ -196,7 +188,15 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
             masehiDate = DateTime.parse(todayJadwal.date);
           } catch (_) {}
         }
-        final tanggalMasehi = _formatTanggalMasehi(masehiDate);
+        final dayName = (masehiDate.weekday >= 1 && masehiDate.weekday <= 7)
+            ? _namaHariIndo[masehiDate.weekday]
+            : '';
+        final day = masehiDate.day;
+        final monthName = (masehiDate.month >= 1 && masehiDate.month <= 12)
+            ? _namaBulanIndo[masehiDate.month]
+            : '';
+        final year = masehiDate.year;
+        final tanggalMasehiTanpaHari = '$day $monthName $year';
 
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
@@ -312,13 +312,39 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
                   size: 36,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  tanggalMasehi,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: widget.fontSize,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      if (dayName.isNotEmpty) ...[
+                        TextSpan(
+                          text: dayName,
+                          style: TextStyle(
+                            color: AppColors.textYellow,
+                            fontSize: widget.fontSize,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        TextSpan(
+                          text: ', ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: widget.fontSize,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                      TextSpan(
+                        text: tanggalMasehiTanpaHari,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: widget.fontSize,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 24),

@@ -103,14 +103,6 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
     'Desember',
   ];
 
-  String _formatTanggalMasehi(DateTime dt) {
-    final dayName = (dt.weekday >= 1 && dt.weekday <= 7) ? _namaHariIndo[dt.weekday] : '';
-    final day = dt.day;
-    final monthName = (dt.month >= 1 && dt.month <= 12) ? _namaBulanIndo[dt.month] : '';
-    final year = dt.year;
-    return '$dayName, $day $monthName $year';
-  }
-
   @override
   Widget build(BuildContext context) {
     final now = ref.read(timeSyncServiceProvider).now();
@@ -202,7 +194,15 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
             masehiDate = DateTime.parse(todayJadwal.date);
           } catch (_) {}
         }
-        final tanggalMasehi = _formatTanggalMasehi(masehiDate);
+        final dayName = (masehiDate.weekday >= 1 && masehiDate.weekday <= 7)
+            ? _namaHariIndo[masehiDate.weekday]
+            : '';
+        final day = masehiDate.day;
+        final monthName = (masehiDate.month >= 1 && masehiDate.month <= 12)
+            ? _namaBulanIndo[masehiDate.month]
+            : '';
+        final year = masehiDate.year;
+        final tanggalMasehiTanpaHari = '$day $monthName $year';
 
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
@@ -278,34 +278,67 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
           return countdownWidget;
         }
 
+        final iconSize = widget.iconSize ?? 32.0;
+        final hijriFontSize = (widget.fontSize * 24 / 28).roundToDouble();
+
         final dateWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               TablerIcons.calendar_event,
               color: Colors.white,
-              size: 32,
+              size: iconSize,
             ),
             const SizedBox(width: 12),
-            Text(
-              tanggalMasehi,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
+            Text.rich(
+              TextSpan(
+                children: [
+                  if (dayName.isNotEmpty) ...[
+                    TextSpan(
+                      text: dayName,
+                      style: TextStyle(
+                        color: AppColors.textYellow,
+                        fontSize: widget.fontSize,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    TextSpan(
+                      text: ', ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: widget.fontSize,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                  TextSpan(
+                    text: tanggalMasehiTanpaHari,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: widget.fontSize,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 24),
-            Container(width: 2, height: 28, color: Colors.white54),
+            Container(width: 2, height: widget.fontSize, color: Colors.white54),
             const SizedBox(width: 24),
-            const Icon(TablerIcons.moon_stars, color: Colors.white, size: 32),
+            Icon(
+              TablerIcons.moon_stars,
+              color: Colors.white,
+              size: iconSize,
+            ),
             const SizedBox(width: 12),
             Text(
               tanggalHijriah,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: hijriFontSize,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
               ),
@@ -325,7 +358,23 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
             mainAxisAlignment: widget.dateOnly
                 ? MainAxisAlignment.end
                 : MainAxisAlignment.spaceBetween,
-            children: [if (!widget.dateOnly) countdownWidget, dateWidget],
+            children: [
+              if (!widget.dateOnly)
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: countdownWidget,
+                  ),
+                ),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: dateWidget,
+                ),
+              ),
+            ],
           ),
         );
   }

@@ -49,6 +49,8 @@ class Theme7Widget extends StatelessWidget {
             AppNextPrayerBar(
               leftMargin: 550, // Menghindari card melayang di kiri
               jadwalSholatList: data.jadwalSholat,
+              fontSize: 21.0,
+              iconSize: 26.0,
             ),
 
             // Konten Utama (Tengah) - Tema 7 (Default)
