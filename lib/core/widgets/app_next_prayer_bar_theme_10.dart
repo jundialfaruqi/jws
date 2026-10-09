@@ -70,6 +70,41 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
     );
   }
 
+  static const List<String> _namaHariIndo = [
+    '',
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Ahad',
+  ];
+
+  static const List<String> _namaBulanIndo = [
+    '',
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+
+  String _formatTanggalMasehi(DateTime dt) {
+    final dayName = (dt.weekday >= 1 && dt.weekday <= 7) ? _namaHariIndo[dt.weekday] : '';
+    final day = dt.day;
+    final monthName = (dt.month >= 1 && dt.month <= 12) ? _namaBulanIndo[dt.month] : '';
+    final year = dt.year;
+    return '$dayName, $day $monthName $year';
+  }
+
   @override
   Widget build(BuildContext context) {
     final now = ref.read(timeSyncServiceProvider).now();
@@ -150,9 +185,14 @@ class _AppNextPrayerBarTheme10State extends ConsumerState<AppNextPrayerBarTheme1
             ? Colors.white
             : AppColors.bgDark;
 
-        // Tanggal masehi dari jadwal
-        final tanggalMasehi = (todayJadwal?.tanggal ?? '26 Juli 2026')
-            .replaceAll('Minggu', 'Ahad');
+        // Tanggal masehi dari jadwal (Format: "9 Oktober 2026")
+        DateTime masehiDate = now;
+        if (todayJadwal != null && todayJadwal.date.isNotEmpty) {
+          try {
+            masehiDate = DateTime.parse(todayJadwal.date);
+          } catch (_) {}
+        }
+        final tanggalMasehi = _formatTanggalMasehi(masehiDate);
 
         // Kalkulasi Hijriah secara mandiri (ganti tanggal setelah Maghrib)
         DateTime dateToCalculate = now;
