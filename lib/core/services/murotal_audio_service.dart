@@ -30,6 +30,32 @@ class MurotalAudioService {
   DateTime? _lastPlayTime;
 
   MurotalAudioService(this._ref) {
+    // Konfigurasi audio context agar stabil di perangkat Android & iOS
+    AudioPlayer.global.setAudioContext(
+      AudioContext(
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.gain,
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: const {
+            AVAudioSessionOptions.mixWithOthers,
+          },
+        ),
+      ),
+    );
+
+    // Sinkronisasi status fisik player
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      final playing = state == PlayerState.playing;
+      _isPlaying = playing;
+      debugPrint("🎵 [Murotal] Player state fisik: $state (isPlaying: $_isPlaying)");
+    });
+
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
 
     // Dengarkan perubahan status audio video jumbotron secara instan (reaktif)
@@ -42,7 +68,8 @@ class MurotalAudioService {
           _pause();
         } else {
           final shouldPlay = _checkShouldPlay();
-          if (shouldPlay && !_isPlaying) {
+          final isActuallyPlaying = _audioPlayer.state == PlayerState.playing;
+          if (shouldPlay && !isActuallyPlaying) {
             debugPrint("🔊 [Murotal] Video jumbotron selesai/tanpa audio, resume murottal");
             _startOrResume();
           }
@@ -76,10 +103,11 @@ class MurotalAudioService {
 
   void _tick(Timer timer) {
     final shouldPlay = _checkShouldPlay();
+    final isActuallyPlaying = _audioPlayer.state == PlayerState.playing;
     
-    if (shouldPlay && !_isPlaying) {
+    if (shouldPlay && !isActuallyPlaying) {
       _startOrResume();
-    } else if (!shouldPlay && _isPlaying) {
+    } else if (!shouldPlay && isActuallyPlaying) {
       _pause();
     }
   }
@@ -218,7 +246,6 @@ class MurotalAudioService {
   }
 
   void _pause() async {
-    if (!_isPlaying) return;
     _isPlaying = false;
     try {
       await _audioPlayer.pause().timeout(const Duration(seconds: 3));

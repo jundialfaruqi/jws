@@ -11,11 +11,22 @@ class JumbotronVideoItem {
     this.duration = 0,
   });
 
+  static bool _parseBool(dynamic val) {
+    if (val == null) return false;
+    if (val is bool) return val;
+    if (val is num) return val == 1;
+    if (val is String) {
+      final s = val.toLowerCase().trim();
+      return s == '1' || s == 'true';
+    }
+    return false;
+  }
+
   factory JumbotronVideoItem.fromJson(Map<String, dynamic> json) {
     return JumbotronVideoItem(
       id: json['id'] ?? 0,
       videoUrl: json['video_file'] ?? '',
-      hasAudio: json['has_audio'] ?? false,
+      hasAudio: _parseBool(json['has_audio']),
       duration: json['video_duration'] ?? 0,
     );
   }
@@ -66,7 +77,7 @@ class SlideModel {
         JumbotronVideoItem(
           id: json['id'] ?? 0,
           videoUrl: json['video_file'],
-          hasAudio: json['has_audio'] ?? false,
+          hasAudio: JumbotronVideoItem._parseBool(json['has_audio']),
           duration: json['video_duration'] ?? 0,
         ),
       ];
@@ -95,7 +106,7 @@ class SlideModel {
       isActive: json['is_active'] ?? true,
       mediaType: json['media_type'] ?? 'image',
       videoFile: json['video_file'],
-      hasAudio: json['has_audio'] ?? false,
+      hasAudio: JumbotronVideoItem._parseBool(json['has_audio']),
       videoDuration: json['video_duration'] ?? 0,
       slide1: json['slide1'],
       slide2: json['slide2'],

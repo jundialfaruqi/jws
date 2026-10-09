@@ -111,11 +111,17 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
 
       if (localPath != null && File(localPath).existsSync()) {
         debugPrint('🎬 [JumbotronVideo] Memutar dari penyimpanan internal: $localPath');
-        controller = VideoPlayerController.file(File(localPath));
+        controller = VideoPlayerController.file(
+          File(localPath),
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
       } else {
         final fullUrl = _getFullUrl(rawUrl);
         debugPrint('🌐 [JumbotronVideo] Berkas lokal belum tersedia, streaming jaringan: $fullUrl');
-        controller = VideoPlayerController.networkUrl(Uri.parse(fullUrl));
+        controller = VideoPlayerController.networkUrl(
+          Uri.parse(fullUrl),
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
       }
 
       _videoController = controller;
@@ -172,12 +178,9 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
     _videoController = null;
     // Pastikan state audio direset saat widget ini di-dispose
     // agar murottal tidak tetap ter-pause selamanya jika video di-unmount tiba-tiba.
-    // IdleScreenManager akan mengeset ulang state yang benar setelahnya.
-    if (widget.hasAudio) {
-      try {
-        ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
-      } catch (_) {}
-    }
+    try {
+      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+    } catch (_) {}
     super.dispose();
   }
 
