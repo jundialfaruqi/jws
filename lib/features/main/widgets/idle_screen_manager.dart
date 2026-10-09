@@ -28,6 +28,7 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   bool _hasRequestedFocusForRetry = false;
 
   bool _isInMainPhase = true;
+  // Index item jumbotron yang akan ditampilkan BERIKUTNYA (saat masuk dari main).
   int _jumbotronStepIndex = 0;
   int _activeBlockStartMs = 0;
   int _currentMainDuration = 30;
@@ -55,16 +56,21 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(isVideoWithAudio);
   }
 
+  /// Masuk ke fase jumbotron untuk menampilkan item di [_jumbotronStepIndex].
+  /// Hanya menampilkan SATU item, setelah selesai kembali ke main.
   void _switchToJumbotron() {
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
-    if (!mounted || _jumbotronItems.isEmpty) return;
+    if (!mounted || _jumbotronItems.isEmpty) {
+      _jumbotronStepIndex = 0;
+      return;
+    }
 
     _isInMainPhase = false;
-    _jumbotronStepIndex = 0;
+    _activeBlockStartMs = DateTime.now().millisecondsSinceEpoch;
     _updateVideoAudioState();
     _showCurrentJumbotronItem();
   }
@@ -106,6 +112,9 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     setState(() {});
   }
 
+  /// Dipanggil saat item jumbotron saat ini selesai ditampilkan.
+  /// Increment index ke item berikutnya, lalu kembali ke fase main.
+  /// Fase main yang akan memanggil [_switchToJumbotron] kembali setelah durasinya habis.
   void _advanceJumbotron({int? fromStepIndex}) {
     if (!mounted) return;
     if (fromStepIndex != null && fromStepIndex != _jumbotronStepIndex) {
@@ -121,20 +130,16 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _videoWatchdogTimer = null;
 
     if (_jumbotronItems.isEmpty) {
+      _jumbotronStepIndex = 0;
       _switchToMain();
       return;
     }
 
-    _jumbotronStepIndex++;
-    if (_jumbotronStepIndex >= _jumbotronItems.length) {
-      // Seluruh siklus jumbotron (video -> gambar global -> gambar masjid) telah selesai!
-      // Kembali ke siklus slide utama
-      _jumbotronStepIndex = 0;
-      _switchToMain();
-    } else {
-      _updateVideoAudioState();
-      _showCurrentJumbotronItem();
-    }
+    // Maju ke item berikutnya. Jika sudah habis, wrap ke awal.
+    _jumbotronStepIndex = (_jumbotronStepIndex + 1) % _jumbotronItems.length;
+
+    // Setiap item jumbotron SELALU diselingi fase main.
+    _switchToMain();
   }
 
   void _switchToMain() {
@@ -149,8 +154,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     setState(() {});
 
     if (_jumbotronItems.isNotEmpty) {
+      // Simpan step yang akan ditampilkan agar timer tidak stale.
+      final nextStep = _jumbotronStepIndex;
       _phaseTimer = Timer(Duration(seconds: _currentMainDuration), () {
-        if (mounted) _switchToJumbotron();
+        if (mounted && _jumbotronStepIndex == nextStep) {
+          _switchToJumbotron();
+        } else if (mounted && _jumbotronStepIndex != nextStep) {
+          // Step berubah karena update data; tetap jalankan switchToJumbotron
+          // dengan step terkini yang sudah di-update oleh _handleItemsUpdated.
+          debugPrint(
+            '[IdleScreenManager] Main timer fired but step changed '
+            '($nextStep -> $_jumbotronStepIndex), still switching to jumbotron.',
+          );
+          _switchToJumbotron();
+        }
       });
     }
   }
@@ -247,23 +264,30 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _jumbotronItems = newItems;
 
     if (newItems.isEmpty) {
+      // Batalkan timer phase saat ini dan kembali ke main.
+      _phaseTimer?.cancel();
+      _phaseTimer = null;
+      _videoWatchdogTimer?.cancel();
+      _videoWatchdogTimer = null;
+      _jumbotronStepIndex = 0;
       if (!_isInMainPhase) {
-        _phaseTimer?.cancel();
-        _phaseTimer = null;
-        _videoWatchdogTimer?.cancel();
-        _videoWatchdogTimer = null;
         _switchToMain();
       }
       return;
     }
 
     if (_isInMainPhase) {
+      // Di fase main, _jumbotronStepIndex adalah "next item" yang akan ditampilkan.
+      // Pastikan index masih valid dengan list baru. Jika tidak, wrap ke 0.
+      if (_jumbotronStepIndex >= newItems.length) {
+        _jumbotronStepIndex = 0;
+      }
       _updateVideoAudioState();
       return;
     }
 
-    // Sedang berada di fase Jumbotron:
-    // Cek apakah item yang saat ini sedang tayang masih ada dalam list baru
+    // Sedang berada di fase Jumbotron (menampilkan satu item):
+    // Cek apakah item yang saat ini sedang tayang masih ada dalam list baru.
     if (oldItems.isNotEmpty && _jumbotronStepIndex < oldItems.length) {
       final currentOldItem = oldItems[_jumbotronStepIndex];
       final newIndex = newItems.indexWhere((it) =>
@@ -273,16 +297,13 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
 
       if (newIndex != -1) {
         // Item masih ada di list baru. Pertahankan item yang sedang tayang.
-        // Jika posisi index bergeser (misal video baru ditambahkan di depan list),
-        // kita harus restart timer dengan fromStepIndex yang baru agar
-        // _advanceJumbotron tidak mengabaikan callback dari timer lama.
+        // Jika posisi index bergeser (misal item baru ditambahkan di depan list),
+        // restart timer agar _advanceJumbotron tidak mengabaikan callback stale.
         final oldIndex = _jumbotronStepIndex;
         _jumbotronStepIndex = newIndex;
         _updateVideoAudioState();
 
         if (newIndex != oldIndex) {
-          // Index bergeser: cancel timer lama, set timer baru untuk item yang sama.
-          // Widget yang ditampilkan TIDAK diganti (tidak ada setState untuk widget switch).
           _phaseTimer?.cancel();
           _phaseTimer = null;
           _videoWatchdogTimer?.cancel();
@@ -294,15 +315,15 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     }
 
     // Item yang saat ini ditampilkan sudah tidak ada di list baru
-    // (misal item dihapus/dinonaktifkan). Restart dari awal list baru.
+    // (misal item dihapus/dinonaktifkan). Hentikan jumbotron, kembali ke main
+    // dengan item pertama dari list baru.
     _phaseTimer?.cancel();
     _phaseTimer = null;
     _videoWatchdogTimer?.cancel();
     _videoWatchdogTimer = null;
 
     _jumbotronStepIndex = 0;
-    _updateVideoAudioState();
-    _showCurrentJumbotronItem();
+    _switchToMain();
   }
 
   @override
