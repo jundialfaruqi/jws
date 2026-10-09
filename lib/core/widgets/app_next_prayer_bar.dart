@@ -13,6 +13,10 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
   final bool countdownOnly;
   final bool dateOnly;
   final double fontSize;
+  final double? countdownFontSize;
+  final double? nextPrayerFontSize;
+  final double? dateFontSize;
+  final double? hijriFontSize;
   final double? iconSize;
   final Color? countdownCardColor;
   final Color? countdownTextColor;
@@ -25,6 +29,10 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
     this.countdownOnly = false,
     this.dateOnly = false,
     this.fontSize = 28.0,
+    this.countdownFontSize,
+    this.nextPrayerFontSize,
+    this.dateFontSize,
+    this.hijriFontSize,
     this.iconSize,
     this.countdownCardColor,
     this.countdownTextColor,
@@ -234,20 +242,30 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
               "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";
         }
 
+        final double effCountdownFontSize =
+            widget.countdownFontSize ?? widget.fontSize;
+        final double effNextPrayerFontSize =
+            widget.nextPrayerFontSize ?? widget.fontSize;
+        final double effDateFontSize = widget.dateFontSize ?? widget.fontSize;
+        final double effHijriFontSize = widget.hijriFontSize ??
+            (effDateFontSize * 24 / 28).roundToDouble();
+        final double effIconSize = widget.iconSize ?? 32.0;
+        final double effBellIconSize = widget.iconSize ?? 36.0;
+
         final countdownWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _RingingBellIcon(
               icon: TablerIcons.bell_ringing,
               color: Colors.white,
-              size: widget.iconSize ?? 36,
+              size: effBellIconSize,
             ),
             const SizedBox(width: 16),
             Text(
               'MENUJU $nextPrayer',
               style: TextStyle(
                 color: Colors.white,
-                  fontSize: widget.fontSize,
+                fontSize: effNextPrayerFontSize,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
                 letterSpacing: 2.0,
@@ -265,7 +283,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                 countdownStr,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: widget.fontSize,
+                  fontSize: effCountdownFontSize,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'JetBrainsMono',
                 ),
@@ -278,16 +296,13 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
           return countdownWidget;
         }
 
-        final iconSize = widget.iconSize ?? 32.0;
-        final hijriFontSize = (widget.fontSize * 24 / 28).roundToDouble();
-
         final dateWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               TablerIcons.calendar_event,
               color: Colors.white,
-              size: iconSize,
+              size: effIconSize,
             ),
             const SizedBox(width: 12),
             Text.rich(
@@ -298,7 +313,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                       text: dayName,
                       style: TextStyle(
                         color: AppColors.textYellow,
-                        fontSize: widget.fontSize,
+                        fontSize: effDateFontSize,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
                       ),
@@ -307,7 +322,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                       text: ', ',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: widget.fontSize,
+                        fontSize: effDateFontSize,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
                       ),
@@ -317,7 +332,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                     text: tanggalMasehiTanpaHari,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: widget.fontSize,
+                      fontSize: effDateFontSize,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
                     ),
@@ -326,19 +341,19 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
               ),
             ),
             const SizedBox(width: 24),
-            Container(width: 2, height: widget.fontSize, color: Colors.white54),
+            Container(width: 2, height: effDateFontSize, color: Colors.white54),
             const SizedBox(width: 24),
             Icon(
               TablerIcons.moon_stars,
               color: Colors.white,
-              size: iconSize,
+              size: effIconSize,
             ),
             const SizedBox(width: 12),
             Text(
               tanggalHijriah,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: hijriFontSize,
+                fontSize: effHijriFontSize,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
               ),
