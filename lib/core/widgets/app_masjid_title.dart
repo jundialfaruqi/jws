@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/api_constant.dart';
 import '../constants/app_colors.dart';
+import 'app_sync_marquee_text.dart';
 
 class AppMasjidTitle extends StatelessWidget {
   final String title;
@@ -126,8 +127,8 @@ class AppMasjidTitle extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: alignment,
         children: [
-          Text(
-            title,
+          AppSyncMarqueeText(
+            text: title,
             style: TextStyle(
               fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
@@ -138,21 +139,21 @@ class AppMasjidTitle extends StatelessWidget {
               shadows: shadows,
             ),
             textAlign: textAlign,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            velocity: 60.0,
+            blankSpace: 80.0,
           ),
           if (address != null && address!.isNotEmpty) ...[
             const SizedBox(height: 2),
-            Text(
-              address!,
+            AppSyncMarqueeText(
+              text: address!,
               style: TextStyle(
                 fontSize: addressFontSize,
                 color: addressColor ?? textColor.withValues(alpha: 0.8),
                 fontFamily: 'Poppins',
               ),
               textAlign: textAlign,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              velocity: 50.0,
+              blankSpace: 60.0,
             ),
           ],
         ],
