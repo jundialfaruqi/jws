@@ -54,6 +54,7 @@ flutter:
     - assets/jumat-screen/
     - assets/final-screen/
     - assets/slide-default/
+    - assets/jam-analog/
   fonts:
     - family: Arial
       fonts:

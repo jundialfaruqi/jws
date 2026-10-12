@@ -11,6 +11,8 @@ class AppAnalogClock extends ConsumerStatefulWidget {
   final double borderWidth;
   final Color animationColor;
   final double? logoWidth;
+  final bool showBubble;
+  final String bubbleAsset;
 
   const AppAnalogClock({
     super.key,
@@ -20,6 +22,8 @@ class AppAnalogClock extends ConsumerStatefulWidget {
     this.borderWidth = 12.0,
     this.animationColor = Colors.white,
     this.logoWidth,
+    this.showBubble = true,
+    this.bubbleAsset = 'assets/jam-analog/bubble.png',
   });
 
   @override
@@ -139,6 +143,19 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
                     numberFontSize: widget.numberFontSize,
                   ),
                 ),
+
+                // Efek bubble / kaca melayang tepat di atas dial jam bulat (sebesar jam, tidak sampai border)
+                if (widget.showBubble)
+                  IgnorePointer(
+                    child: ClipOval(
+                      child: Image.asset(
+                        widget.bubbleAsset,
+                        width: widget.size,
+                        height: widget.size,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
