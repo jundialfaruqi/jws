@@ -88,7 +88,7 @@ class Theme7Widget extends StatelessWidget {
           bottom: 0,
           child: CustomPaint(
             foregroundPainter: const JadwalCurveBorderPainter(
-              color: Colors.grey,
+              color: Color(0xFF707070),
               width: 6.0,
             ),
             child: PhysicalShape(
@@ -162,7 +162,7 @@ class JadwalCurveBorderPainter extends CustomPainter {
   final double width;
 
   const JadwalCurveBorderPainter({
-    this.color = Colors.grey,
+    this.color = const Color(0xFF707070),
     this.width = 6.0,
   });
 
