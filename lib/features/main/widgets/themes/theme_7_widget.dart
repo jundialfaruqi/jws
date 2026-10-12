@@ -86,18 +86,24 @@ class Theme7Widget extends StatelessWidget {
           left: 0,
           top: 0,
           bottom: 0,
-          child: PhysicalShape(
-            clipper: JadwalCurveClipper(),
-            color: AppColors.bgNavy,
-            elevation: 16.0,
-            shadowColor: Colors.black,
-            clipBehavior: Clip.antiAlias,
-            child: AppJadwalSholat(
-              backgroundColor: AppColors.bgNavy,
-              textColor: AppColors.textYellow,
-              iconColor: AppColors.textYellow,
-              jadwalSholatList: data.jadwalSholat,
-              highlightFadingGradient: true,
+          child: CustomPaint(
+            foregroundPainter: const JadwalCurveBorderPainter(
+              color: Colors.grey,
+              width: 6.0,
+            ),
+            child: PhysicalShape(
+              clipper: JadwalCurveClipper(),
+              color: AppColors.bgNavy,
+              elevation: 16.0,
+              shadowColor: Colors.black,
+              clipBehavior: Clip.antiAlias,
+              child: AppJadwalSholat(
+                backgroundColor: AppColors.bgNavy,
+                textColor: AppColors.textYellow,
+                iconColor: AppColors.textYellow,
+                jadwalSholatList: data.jadwalSholat,
+                highlightFadingGradient: true,
+              ),
             ),
           ),
         ),
@@ -149,4 +155,38 @@ class JadwalCurveClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class JadwalCurveBorderPainter extends CustomPainter {
+  final Color color;
+  final double width;
+
+  const JadwalCurveBorderPainter({
+    this.color = Colors.grey,
+    this.width = 6.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    path.moveTo(size.width - 230, 0);
+    path.quadraticBezierTo(
+      size.width,
+      size.height / 2,
+      size.width - 230,
+      size.height,
+    );
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant JadwalCurveBorderPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.width != width;
 }
