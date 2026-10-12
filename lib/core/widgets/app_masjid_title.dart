@@ -16,6 +16,8 @@ class AppMasjidTitle extends StatelessWidget {
   final bool isLeftAligned;
   final bool showText;
   final double? customLogoSize;
+  final double titleFontSize;
+  final double addressFontSize;
 
   const AppMasjidTitle({
     super.key,
@@ -37,6 +39,8 @@ class AppMasjidTitle extends StatelessWidget {
     this.isLeftAligned = false,
     this.showText = true,
     this.customLogoSize,
+    this.titleFontSize = 64.0,
+    this.addressFontSize = 28.0,
   });
 
   String _getFullUrl(String? path) {
@@ -125,7 +129,7 @@ class AppMasjidTitle extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 50,
+              fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
               color: textColor,
               fontFamily: 'Poppins',
@@ -142,7 +146,7 @@ class AppMasjidTitle extends StatelessWidget {
             Text(
               address!,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: addressFontSize,
                 color: addressColor ?? textColor.withValues(alpha: 0.8),
                 fontFamily: 'Poppins',
               ),
