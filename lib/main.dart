@@ -25,6 +25,11 @@ class MyHttpOverrides extends HttpOverrides {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Optimasi Image Cache di RAM untuk Android TV (RAM 1 GB)
+  // Membatasi akumulasi bitmap uncompressed agar tidak memicu LowMemoryKiller (LMK)
+  PaintingBinding.instance.imageCache.maximumSize = 25;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 40 * 1024 * 1024; // 40 MB
+  
   // Mengaktifkan Fullscreen (Menyembunyikan Status Bar & Nav Bar)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   

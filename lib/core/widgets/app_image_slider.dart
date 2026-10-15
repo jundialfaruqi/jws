@@ -189,6 +189,10 @@ class _KeepAliveImageState extends State<_KeepAliveImage>
     return CachedNetworkImage(
       imageUrl: widget.url,
       fit: BoxFit.fill,
+      memCacheWidth: 1920,
+      memCacheHeight: 1080,
+      fadeInDuration: const Duration(milliseconds: 250),
+      fadeOutDuration: const Duration(milliseconds: 100),
       errorWidget: (context, url, error) {
         return Container(
           color: Colors.blueGrey.shade900,

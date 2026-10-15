@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_scaffold.dart';
@@ -54,19 +53,6 @@ class SettingsScreen extends ConsumerWidget {
             ),
             onTap: () {
               ref.read(audioSettingsProvider.notifier).toggleMurotalMuted();
-            },
-          ),
-          _SettingsItemWidget(
-            icon: Icons.launch,
-            title: 'Izin Layar Mengambang (Auto-Start)',
-            subtitle: 'Wajib diaktifkan untuk Auto-Start (Khusus Android 10+)',
-            onTap: () async {
-              const platform = MethodChannel('id.go.pekanbaru.jws/settings');
-              try {
-                await platform.invokeMethod('openOverlaySettings');
-              } catch (e) {
-                debugPrint("Gagal membuka pengaturan: $e");
-              }
             },
           ),
           _SettingsItemWidget(

@@ -91,6 +91,7 @@ class AppMasjidTitle extends StatelessWidget {
             imageUrl: logo1,
             height: logoSize,
             fit: BoxFit.contain,
+            memCacheHeight: (logoSize * 2).toInt(),
             errorWidget: (context, url, error) =>
                 Icon(Icons.mosque, size: logoSize, color: Colors.white),
           ),
@@ -103,6 +104,7 @@ class AppMasjidTitle extends StatelessWidget {
             imageUrl: logo2,
             height: logoSize,
             fit: BoxFit.contain,
+            memCacheHeight: (logoSize * 2).toInt(),
             errorWidget: (context, url, error) => Icon(
               Icons.account_balance,
               size: logoSize,
