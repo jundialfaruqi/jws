@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,15 +12,6 @@ import 'core/services/murotal_audio_service.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-// Class untuk mengabaikan verifikasi SSL secara global
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-  }
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -33,7 +23,6 @@ Future<void> main() async {
   // Mengaktifkan Fullscreen (Menyembunyikan Status Bar & Nav Bar)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   
-  HttpOverrides.global = MyHttpOverrides(); // Pasang HttpOverrides di sini
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('id', null);
 
