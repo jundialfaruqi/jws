@@ -12,6 +12,8 @@ import '../../../core/constants/api_constant.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../../core/widgets/tv_scaffold.dart';
+import '../../../core/widgets/app_confirm_exit.dart';
 
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
@@ -129,10 +131,10 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: SingleChildScrollView(
+    return AppConfirmExit(
+      child: TvScaffold(
+        backgroundColor: Colors.black,
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -140,22 +142,23 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 'TAUTKAN TV MASJID',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 32,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
                 ),
               ),
               const SizedBox(height: 24),
               const Text(
                 'Scan QR Code dengan HP Anda atau masukkan kode 6 digit di Web Admin:',
-                style: TextStyle(color: Colors.white70, fontSize: 24),
+                style: TextStyle(color: Colors.white70, fontSize: 26),
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 56),
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Text(
                     _error!,
-                    style: const TextStyle(color: Colors.red, fontSize: 24),
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 24),
                   ),
                 ),
               Row(
@@ -166,31 +169,31 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: QrImageView(
                         data: '${ApiConstant.baseUrl}tv-pairing?code=$_pairingCode',
                         version: QrVersions.auto,
-                        size: 200.0,
+                        size: 220.0,
                         backgroundColor: Colors.white,
                       ),
                     ),
                   if (_pairingCode != null) const SizedBox(width: 48),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 24,
+                      horizontal: 56,
+                      vertical: 28,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withValues(alpha: 0.2),
+                      color: Colors.blueAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.blueAccent, width: 2),
+                      border: Border.all(color: Colors.blueAccent, width: 3),
                     ),
                     child: Text(
                       _isLoading ? '...' : (_pairingCode ?? '...'),
                       style: const TextStyle(
                         color: Colors.blueAccent,
-                        fontSize: 80,
+                        fontSize: 90,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 16,
                       ),
@@ -199,11 +202,11 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 ],
               ),
               const SizedBox(height: 64),
-              const CircularProgressIndicator(color: Colors.white24),
-              const SizedBox(height: 16),
+              const CircularProgressIndicator(color: Colors.white38),
+              const SizedBox(height: 20),
               Text(
                 _isLoading ? 'Memuat kode aktivasi...' : 'Menunggu aktivasi...',
-                style: const TextStyle(color: Colors.white54, fontSize: 18),
+                style: const TextStyle(color: Colors.white54, fontSize: 22),
               ),
             ],
           ),
