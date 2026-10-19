@@ -53,7 +53,7 @@ class ImageDownloaderService {
     _addSlideUrls(data.slideJumat, urls);
     _addSlideUrls(data.slideFinal, urls);
 
-    // Proses download di latar belakang
+    // Proses download di latar belakang dengan jeda throttling agar tidak membebani I/O TV RAM 1 GB
     for (var url in urls) {
       if (url.isNotEmpty) {
         try {
@@ -61,6 +61,8 @@ class ImageDownloaderService {
           // Jika sudah ada di cache, ini akan meresolve dengan cepat.
           await DefaultCacheManager().downloadFile(url);
           debugPrint("✅ [ImageCache] Berhasil pre-cache: $url");
+          // Jeda singkat antar-file agar thread I/O dan CPU TV tetap responsif
+          await Future.delayed(const Duration(milliseconds: 300));
         } catch (e) {
           debugPrint("❌ [ImageCache] Gagal pre-cache: $url | Error: $e");
         }

@@ -126,6 +126,13 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
 
   @override
   Widget build(BuildContext context) {
+    // Sinkronkan pergantian slot main phase tanpa perlu merusak widget tree
+    ref.listen<int?>(slideStartTimeProvider, (previous, next) {
+      if (previous != next) {
+        _syncAndScheduleNext(initial: true);
+      }
+    });
+
     if (widget.imageUrls.isEmpty) {
       return Container(
         color: Colors.blueGrey.shade900,
@@ -148,33 +155,25 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
         itemCount: widget.imageUrls.length,
         itemBuilder: (context, index) {
           final fullUrl = _getFullUrl(widget.imageUrls[index]);
-          return _KeepAliveImage(url: fullUrl);
+          return _SliderImageItem(url: fullUrl);
         },
       ),
     );
   }
 }
 
-class _KeepAliveImage extends StatefulWidget {
+class _SliderImageItem extends StatelessWidget {
   final String url;
-  const _KeepAliveImage({required this.url});
-
-  @override
-  State<_KeepAliveImage> createState() => _KeepAliveImageState();
-}
-
-class _KeepAliveImageState extends State<_KeepAliveImage>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
+  const _SliderImageItem({required this.url});
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Wajib dipanggil untuk AutomaticKeepAliveClientMixin
-    if (!widget.url.startsWith('http')) {
+    if (!url.startsWith('http')) {
       return Image.asset(
-        widget.url,
+        url,
         fit: BoxFit.fill,
+        cacheWidth: 1280,
+        cacheHeight: 720,
         errorBuilder: (context, error, stackTrace) {
           return Container(
             color: Colors.blueGrey.shade900,
@@ -187,10 +186,10 @@ class _KeepAliveImageState extends State<_KeepAliveImage>
     }
 
     return CachedNetworkImage(
-      imageUrl: widget.url,
+      imageUrl: url,
       fit: BoxFit.fill,
-      memCacheWidth: 1920,
-      memCacheHeight: 1080,
+      memCacheWidth: 1280,
+      memCacheHeight: 720,
       fadeInDuration: const Duration(milliseconds: 250),
       fadeOutDuration: const Duration(milliseconds: 100),
       errorWidget: (context, url, error) {

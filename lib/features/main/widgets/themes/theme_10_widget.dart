@@ -62,10 +62,12 @@ class Theme10Widget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Expanded(
-                                child: AppImageSlider(
-                                  imageUrls: slideUrls,
-                                  leftMargin:
-                                      0, // Dihapus karena sudah berada di sebelah kolom Keuangan (500px)
+                                child: RepaintBoundary(
+                                  child: AppImageSlider(
+                                    imageUrls: slideUrls,
+                                    leftMargin:
+                                        0, // Dihapus karena sudah berada di sebelah kolom Keuangan (500px)
+                                  ),
                                 ),
                               ),
                               Container(
@@ -172,25 +174,4 @@ class Theme10Widget extends StatelessWidget {
   }
 }
 
-class JadwalCurveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    // Tarik garis dari kiri atas ke kanan atas (mundur 150px untuk memberi ruang kurva)
-    path.lineTo(size.width - 230, 0);
-    // Buat kurva melengkung ke kanan tengah maksimal menyentuh batas container, lalu kembali ke kiri bawah
-    path.quadraticBezierTo(
-      size.width,
-      size.height / 2, // Titik kontrol menyentuh ujung kanan
-      size.width - 230,
-      size.height, // Titik akhir kurva di bawah
-    );
-    // Tarik garis kembali ke kiri bawah
-    path.lineTo(0, size.height);
-    path.close();
-    return path;
-  }
 
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}

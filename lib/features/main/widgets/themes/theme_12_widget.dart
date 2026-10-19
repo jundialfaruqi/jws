@@ -211,9 +211,11 @@ class Theme12Widget extends StatelessWidget {
                           children: [
                             // 5. App Slide
                             Expanded(
-                              child: AppImageSlider(
-                                imageUrls: slideUrls,
-                                leftMargin: 0,
+                              child: RepaintBoundary(
+                                child: AppImageSlider(
+                                  imageUrls: slideUrls,
+                                  leftMargin: 0,
+                                ),
                               ),
                             ),
                             // Pembatas Horisontal Dihapus

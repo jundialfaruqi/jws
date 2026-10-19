@@ -232,8 +232,8 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.contain,
-                        memCacheWidth: 1920,
-                        memCacheHeight: 1080,
+                        memCacheWidth: 1280,
+                        memCacheHeight: 720,
                         fadeInDuration: const Duration(milliseconds: 250),
                         fadeOutDuration: const Duration(milliseconds: 100),
                         errorWidget: (context, url, error) => const Center(

@@ -190,6 +190,19 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     _updateVideoAudioState();
 
     if (slotChanged || forceRebuild) {
+      final isMain = _cycleSlots.isEmpty ||
+          _currentSlotIndex < 0 ||
+          _currentSlotIndex >= _cycleSlots.length ||
+          _cycleSlots[_currentSlotIndex].isMain;
+      if (isMain) {
+        ref
+            .read(slideStartTimeProvider.notifier)
+            .setStartTime(_currentSlotAbsoluteStartMs);
+      }
+
+      // Bersihkan live image cache dari layar sebelumnya agar native RAM segera bebas
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
       setState(() {});
     }
 
@@ -428,10 +441,17 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
           });
         }
 
-        // Inisialisasi epoch start untuk main widget key saat pertama kali
+        // Inisialisasi epoch start untuk main widget saat pertama kali
         if (_currentSlotAbsoluteStartMs == 0) {
           _currentSlotAbsoluteStartMs =
               ref.read(timeSyncServiceProvider).now().millisecondsSinceEpoch;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(slideStartTimeProvider.notifier)
+                  .setStartTime(_currentSlotAbsoluteStartMs);
+            }
+          });
         }
 
         // Recovery: cycle ada tapi timer hilang (hot reload, dll)
@@ -453,33 +473,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
         Widget currentWidget;
 
         if (isMainPhase) {
-          // Bug 6 fix: key deterministik dari epoch slot start (sama di semua device)
-          currentWidget = ProviderScope(
-            key: ValueKey('main_$_currentSlotAbsoluteStartMs'),
-            overrides: [
-              slideStartTimeProvider
-                  .overrideWithValue(_currentSlotAbsoluteStartMs),
-            ],
-            child: const MainContentWidget(),
-          );
+          // Key stabil: mencegah recreate widget tree, websocket reconnect, dan leak memori
+          currentWidget = const MainContentWidget(key: ValueKey('main_content'));
         } else {
           final slot = _cycleSlots[_currentSlotIndex];
           final item = slot.item!;
 
-          // Bug 6 fix: key hanya dari data server + epoch slot start
-          // (tidak menggunakan timestamp lokal device)
           final String baseKey =
-              '${item['type']}_${item['videoUrl'] ?? item['slide']}'
-              '_$_currentSlotAbsoluteStartMs';
+              '${item['type']}_${item['id'] ?? item['videoUrl'] ?? item['slide']}';
 
           if (item['type'] == 'pemko_video') {
             currentWidget = JumbotronPemkoScreen(
               key: ValueKey('pemko_video_$baseKey'),
               videoUrl: item['videoUrl'],
               hasAudio: item['hasAudio'] ?? false,
-              // Bug 3 fix: onFinished hanya trigger recalculate.
-              // Jika epoch masih di dalam slot ini, widget tetap tampil
-              // dalam state paused hingga timer epoch meledak sendiri.
               onFinished: () {
                 if (mounted) _recalculate();
               },

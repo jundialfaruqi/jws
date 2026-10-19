@@ -56,7 +56,9 @@ class Theme4Widget extends StatelessWidget {
             Expanded(
               child: Container(
                 color: AppColors.bgNavy,
-                child: AppImageSlider(imageUrls: slideUrls, leftMargin: 500),
+                child: RepaintBoundary(
+                  child: AppImageSlider(imageUrls: slideUrls, leftMargin: 500),
+                ),
               ),
             ),
 
@@ -79,30 +81,24 @@ class Theme4Widget extends StatelessWidget {
         Positioned(
           left: 600, // Menjorok ke kanan dari card jadwal sholat
           bottom: 140, // Diberi jarak agar tidak menempel dengan marquee
-          child: AppAgendaWidget(
-            agendas: data.agenda,
-            slideLeft: true,
+          child: RepaintBoundary(
+            child: AppAgendaWidget(
+              agendas: data.agenda,
+              slideLeft: true,
+            ),
           ), // Bergeser ke/dari kiri
         ),
 
-        // Jadwal Sholat Melayang di Kiri (Akan menutupi agenda saat tersembunyi)
+        // Jadwal Sholat Melayang di Kiri (Bebas Stencil & Bebas Memory Leak)
         Positioned(
           left: 0,
           top: 0,
           bottom: 0,
-          child: CustomPaint(
-            foregroundPainter: const JadwalCurveBorderPainter(
-              color: Color(0xFF707070),
-              width: 6.0,
-            ),
-            child: PhysicalShape(
-              clipper: JadwalCurveClipper(),
-              color: AppColors.bgNavy,
-              elevation: 16.0,
-              shadowColor: Colors.black,
-              clipBehavior: Clip.antiAlias,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: const JadwalCurveBackgroundPainter(),
               child: AppJadwalSholat(
-                backgroundColor: AppColors.bgNavy,
+                backgroundColor: Colors.transparent,
                 textColor: AppColors.textYellow,
                 iconColor: AppColors.textYellow,
                 jadwalSholatList: data.jadwalSholat,
@@ -118,10 +114,12 @@ class Theme4Widget extends StatelessWidget {
           top: 0,
           bottom: 0,
           child: const Center(
-            child: AppAnalogClock(
-              size: 380,
-              numberFontSize: 38,
-              digitalFontSize: 28,
+            child: RepaintBoundary(
+              child: AppAnalogClock(
+                size: 380,
+                numberFontSize: 38,
+                digitalFontSize: 28,
+              ),
             ),
           ),
         ),
@@ -130,19 +128,21 @@ class Theme4Widget extends StatelessWidget {
         Positioned(
           right: 32,
           bottom: 140, // Diberi jarak agar tidak menempel dengan marquee
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: AppNextPrayerBar(
-              jadwalSholatList: data.jadwalSholat,
-              countdownOnly: true,
-              fontSize: 32,
-              countdownCardColor: AppColors.textYellow.withValues(alpha: 0.05),
-              countdownBorderColor: Colors.transparent,
-              countdownTextColor: AppColors.textYellow,
+          child: RepaintBoundary(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: AppNextPrayerBar(
+                jadwalSholatList: data.jadwalSholat,
+                countdownOnly: true,
+                fontSize: 32,
+                countdownCardColor: AppColors.textYellow.withValues(alpha: 0.05),
+                countdownBorderColor: Colors.transparent,
+                countdownTextColor: AppColors.textYellow,
+              ),
             ),
           ),
         ),
@@ -151,9 +151,21 @@ class Theme4Widget extends StatelessWidget {
   }
 }
 
-class JadwalCurveClipper extends CustomClipper<Path> {
+/// Painter background, bayangan, dan garis kurva menyatu tanpa membutuhkan Stencil Buffer / Skia Clip Mask.
+/// Mencegah malloc error dan thread allocation crash pada Android TV 1 GB RAM.
+class JadwalCurveBackgroundPainter extends CustomPainter {
+  final Color color;
+  final Color borderColor;
+  final double borderWidth;
+
+  const JadwalCurveBackgroundPainter({
+    this.color = AppColors.bgNavy,
+    this.borderColor = const Color(0xFF707070),
+    this.borderWidth = 6.0,
+  });
+
   @override
-  Path getClip(Size size) {
+  void paint(Canvas canvas, Size size) {
     final path = Path();
     path.lineTo(size.width - 230, 0);
     path.quadraticBezierTo(
@@ -164,43 +176,35 @@ class JadwalCurveClipper extends CustomClipper<Path> {
     );
     path.lineTo(0, size.height);
     path.close();
-    return path;
-  }
 
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
+    // 1. Gambar bayangan halus
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.5), 12.0, false);
 
-class JadwalCurveBorderPainter extends CustomPainter {
-  final Color color;
-  final double width;
-
-  const JadwalCurveBorderPainter({
-    this.color = const Color(0xFF707070),
-    this.width = 6.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    // 2. Gambar isi solid Navy
+    final fillPaint = Paint()
       ..color = color
-      ..strokeWidth = width
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, fillPaint);
+
+    // 3. Gambar garis border kurva
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..strokeWidth = borderWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final path = Path();
-    path.moveTo(size.width - 230, 0);
-    path.quadraticBezierTo(
+    final borderPath = Path();
+    borderPath.moveTo(size.width - 230, 0);
+    borderPath.quadraticBezierTo(
       size.width,
       size.height / 2,
       size.width - 230,
       size.height,
     );
 
-    canvas.drawPath(path, paint);
+    canvas.drawPath(borderPath, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant JadwalCurveBorderPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.width != width;
+  bool shouldRepaint(covariant JadwalCurveBackgroundPainter oldDelegate) => false;
 }

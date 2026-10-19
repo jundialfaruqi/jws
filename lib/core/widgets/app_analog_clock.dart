@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../time/time_sync_service.dart';
 
@@ -30,28 +30,34 @@ class AppAnalogClock extends ConsumerStatefulWidget {
   ConsumerState<AppAnalogClock> createState() => _AppAnalogClockState();
 }
 
-class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
-    with SingleTickerProviderStateMixin {
-  late Ticker _ticker;
+class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
+  Timer? _timer;
   late DateTime _now;
 
   @override
   void initState() {
     super.initState();
     _now = ref.read(timeSyncServiceProvider).now();
-    _ticker = createTicker((_) {
+    _scheduleNextTick();
+  }
+
+  void _scheduleNextTick() {
+    if (!mounted) return;
+    final now = ref.read(timeSyncServiceProvider).now();
+    final msUntilNext = 1000 - (now.millisecondsSinceEpoch % 1000);
+    _timer = Timer(Duration(milliseconds: msUntilNext), () {
       if (mounted) {
         setState(() {
           _now = ref.read(timeSyncServiceProvider).now();
         });
+        _scheduleNextTick();
       }
     });
-    _ticker.start();
   }
 
   @override
   void dispose() {
-    _ticker.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -70,107 +76,112 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock>
     final double logoHeight = logoWidth / 5.0; // Rasio 1581:316 = 5:1
     final double gapFromCenter = widget.size * 0.085;
 
-    return SizedBox(
-      width: outerSize,
-      height: outerSize,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Komponen jam utama (ukuran dial tetap tepat widget.size tanpa terpengaruh border)
-          Container(
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              color: const Color(0xFF003366), // Warna bgNavy agar senada
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  blurRadius: 24,
-                  spreadRadius: 4,
-                  offset: const Offset(8, 8),
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Logo statis Diskominfotiksan di bagian tengah atas
-                // Jarak dari titik tengah ke tepi bawah logo = gapFromCenter
-                Positioned(
-                  top: yCenter - gapFromCenter - logoHeight,
-                  child: SizedBox(
-                    width: logoWidth,
-                    height: logoHeight,
-                    child: Image.asset(
-                      'assets/logo/diskominfotiksan-logo.png',
-                      fit: BoxFit.contain,
-                    ),
+    return RepaintBoundary(
+      child: SizedBox(
+        width: outerSize,
+        height: outerSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Komponen jam utama (ukuran dial tetap tepat widget.size tanpa terpengaruh border)
+            Container(
+              width: widget.size,
+              height: widget.size,
+              decoration: BoxDecoration(
+                color: const Color(0xFF003366), // Warna bgNavy agar senada
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 24,
+                    spreadRadius: 4,
+                    offset: const Offset(8, 8),
                   ),
-                ),
-
-                // Jam digital di bagian tengah bawah
-                // Jarak dari titik tengah ke tepi atas jam digital = gapFromCenter (SAMA PERSIS DENGAN LOGO)
-                Positioned(
-                  top: yCenter + gapFromCenter,
-                  child: Text(
-                    formattedTime,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'JetBrainsMono',
-                      height: 1.0,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 4,
-                          color: Colors.black.withValues(alpha: 0.6),
-                          offset: const Offset(1, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Canvas jam analog (dirender terakhir agar jarum berada di depan)
-                CustomPaint(
-                  size: Size(widget.size, widget.size),
-                  painter: AnalogClockPainter(
-                    dateTime: _now,
-                    handColor: Colors.white,
-                    secondHandColor: Colors.red,
-                    tickColor: Colors.white,
-                    numberFontSize: widget.numberFontSize,
-                  ),
-                ),
-
-                // Efek bubble / kaca melayang tepat di atas dial jam bulat (sebesar jam, tidak sampai border)
-                if (widget.showBubble)
-                  IgnorePointer(
-                    child: ClipOval(
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Logo statis Diskominfotiksan di bagian tengah atas
+                  // Jarak dari titik tengah ke tepi bawah logo = gapFromCenter
+                  Positioned(
+                    top: yCenter - gapFromCenter - logoHeight,
+                    child: SizedBox(
+                      width: logoWidth,
+                      height: logoHeight,
                       child: Image.asset(
-                        widget.bubbleAsset,
-                        width: widget.size,
-                        height: widget.size,
-                        fit: BoxFit.cover,
+                        'assets/logo/diskominfotiksan-logo.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-              ],
-            ),
-          ),
 
-          // Border animasi berputar di lingkar luar jam (satu warna)
-          CustomPaint(
-            size: Size(outerSize, outerSize),
-            painter: _AnimatedClockBorderPainter(
-              progress: progress,
-              borderWidth: borderWidth,
-              clockSize: widget.size,
-              animationColor: widget.animationColor,
+                  // Jam digital di bagian tengah bawah
+                  // Jarak dari titik tengah ke tepi atas jam digital = gapFromCenter (SAMA PERSIS DENGAN LOGO)
+                  Positioned(
+                    top: yCenter + gapFromCenter,
+                    child: Text(
+                      formattedTime,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: widget.digitalFontSize ?? (widget.size * 0.09),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'JetBrainsMono',
+                        height: 1.0,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 4,
+                            color: Colors.black.withValues(alpha: 0.6),
+                            offset: const Offset(1, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Canvas jam analog (dirender terakhir agar jarum berada di depan)
+                  CustomPaint(
+                    size: Size(widget.size, widget.size),
+                    painter: AnalogClockPainter(
+                      dateTime: _now,
+                      handColor: Colors.white,
+                      secondHandColor: Colors.red,
+                      tickColor: Colors.white,
+                      numberFontSize: widget.numberFontSize,
+                    ),
+                  ),
+
+                  // Efek bubble / kaca melayang tepat di atas dial jam bulat (menggunakan BoxShape.circle tanpa ClipOval)
+                  if (widget.showBubble)
+                    IgnorePointer(
+                      child: Container(
+                        width: widget.size,
+                        height: widget.size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage(widget.bubbleAsset),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Border animasi berputar di lingkar luar jam (satu warna)
+            CustomPaint(
+              size: Size(outerSize, outerSize),
+              painter: _AnimatedClockBorderPainter(
+                progress: progress,
+                borderWidth: borderWidth,
+                clockSize: widget.size,
+                animationColor: widget.animationColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -257,13 +268,12 @@ class AnalogClockPainter extends CustomPainter {
       textPainter.paint(canvas, offset);
     }
 
-    // Helper function untuk menggambar jarum beserta shadow-nya
+    // Helper function untuk menggambar jarum beserta shadow-nya (hardware-accelerated tanpa CPU MaskFilter)
     void drawHandWithShadow(Offset p1, Offset p2, Paint paint) {
       final shadowPaint = Paint()
-        ..color = Colors.black.withValues(alpha: 0.4)
+        ..color = Colors.black.withValues(alpha: 0.3)
         ..strokeWidth = paint.strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+        ..strokeCap = StrokeCap.round;
 
       // Gambar shadow
       canvas.drawLine(
@@ -389,12 +399,11 @@ class _AnimatedClockBorderPainter extends CustomPainter {
       stops: const [0.0, 0.65, 0.78, 0.88, 0.94, 0.98, 1.0],
     );
 
-    // Outer subtle glow satu warna
+    // Outer subtle glow satu warna (hardware-accelerated tanpa CPU MaskFilter)
     final glowPaint = Paint()
       ..shader = sweepGradient.createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth + 4
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..strokeWidth = borderWidth + 4;
     canvas.drawCircle(center, radius, glowPaint);
 
     // Crisp sweep stroke satu warna

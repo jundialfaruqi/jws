@@ -16,9 +16,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Optimasi Image Cache di RAM untuk Android TV (RAM 1 GB)
-  // Membatasi akumulasi bitmap uncompressed agar tidak memicu LowMemoryKiller (LMK)
-  PaintingBinding.instance.imageCache.maximumSize = 25;
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 40 * 1024 * 1024; // 40 MB
+  // Membatasi akumulasi bitmap uncompressed agar tidak memicu LowMemoryKiller (LMK) / malloc bad_alloc
+  PaintingBinding.instance.imageCache.maximumSize = 8;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 15 * 1024 * 1024; // 15 MB
   
   // Mengaktifkan Fullscreen (Menyembunyikan Status Bar & Nav Bar)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -50,11 +50,36 @@ Future<void> main() async {
   ));
 }
 
-class MainApp extends ConsumerWidget {
+class MainApp extends ConsumerStatefulWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends ConsumerState<MainApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    super.didHaveMemoryPressure();
+    // Bebaskan cache native bitmap saat OS TV mengirim sinyal low memory
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Injeksi transition service agar mulai berdetak
     ref.watch(prayerTransitionProvider);
     ref.watch(murotalAudioServiceProvider);

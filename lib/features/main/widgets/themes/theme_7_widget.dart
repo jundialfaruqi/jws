@@ -58,10 +58,12 @@ class Theme7Widget extends StatelessWidget {
               child: Container(
                 color: AppColors
                     .bgNavy, // Dasar warna navy untuk mengisi kekosongan kurva
-                child: AppImageSlider(
-                  imageUrls: slideUrls,
-                  leftMargin:
-                      500, // Geser slider ke kanan agar tidak banyak tertutup
+                child: RepaintBoundary(
+                  child: AppImageSlider(
+                    imageUrls: slideUrls,
+                    leftMargin:
+                        500, // Geser slider ke kanan agar tidak banyak tertutup
+                  ),
                 ),
               ),
             ),
@@ -81,24 +83,16 @@ class Theme7Widget extends StatelessWidget {
           ],
         ),
 
-        // Jadwal Sholat Melayang di Kiri
+        // Jadwal Sholat Melayang di Kiri (Bebas Stencil & Bebas Memory Leak)
         Positioned(
           left: 0,
           top: 0,
           bottom: 0,
-          child: CustomPaint(
-            foregroundPainter: const JadwalCurveBorderPainter(
-              color: Color(0xFF707070),
-              width: 6.0,
-            ),
-            child: PhysicalShape(
-              clipper: JadwalCurveClipper(),
-              color: AppColors.bgNavy,
-              elevation: 16.0,
-              shadowColor: Colors.black,
-              clipBehavior: Clip.antiAlias,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: const JadwalCurveBackgroundPainter(),
               child: AppJadwalSholat(
-                backgroundColor: AppColors.bgNavy,
+                backgroundColor: Colors.transparent,
                 textColor: AppColors.textYellow,
                 iconColor: AppColors.textYellow,
                 jadwalSholatList: data.jadwalSholat,
@@ -115,10 +109,12 @@ class Theme7Widget extends StatelessWidget {
           top: 0,
           bottom: 0,
           child: const Center(
-            child: AppAnalogClock(
-              size: 380,
-              numberFontSize: 38,
-              digitalFontSize: 28,
+            child: RepaintBoundary(
+              child: AppAnalogClock(
+                size: 380,
+                numberFontSize: 38,
+                digitalFontSize: 28,
+              ),
             ),
           ),
         ),
@@ -127,66 +123,69 @@ class Theme7Widget extends StatelessWidget {
         Positioned(
           right: 32,
           bottom: 160, // Dinaikkan agar tidak terlalu mepet dengan marquee
-          child: AppAgendaWidget(agendas: data.agenda),
+          child: RepaintBoundary(
+            child: AppAgendaWidget(agendas: data.agenda),
+          ),
         ),
       ],
     );
   }
 }
 
-class JadwalCurveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    // Tarik garis dari kiri atas ke kanan atas (mundur 150px untuk memberi ruang kurva)
-    path.lineTo(size.width - 230, 0);
-    // Buat kurva melengkung ke kanan tengah maksimal menyentuh batas container, lalu kembali ke kiri bawah
-    path.quadraticBezierTo(
-      size.width,
-      size.height / 2, // Titik kontrol menyentuh ujung kanan
-      size.width - 230,
-      size.height, // Titik akhir kurva di bawah
-    );
-    // Tarik garis kembali ke kiri bawah
-    path.lineTo(0, size.height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
-
-class JadwalCurveBorderPainter extends CustomPainter {
+/// Painter background, bayangan, dan garis kurva menyatu tanpa membutuhkan Stencil Buffer / Skia Clip Mask.
+/// Mencegah malloc error dan thread allocation crash pada Android TV 1 GB RAM.
+class JadwalCurveBackgroundPainter extends CustomPainter {
   final Color color;
-  final double width;
+  final Color borderColor;
+  final double borderWidth;
 
-  const JadwalCurveBorderPainter({
-    this.color = const Color(0xFF707070),
-    this.width = 6.0,
+  const JadwalCurveBackgroundPainter({
+    this.color = AppColors.bgNavy,
+    this.borderColor = const Color(0xFF707070),
+    this.borderWidth = 6.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
     final path = Path();
-    path.moveTo(size.width - 230, 0);
+    path.lineTo(size.width - 230, 0);
     path.quadraticBezierTo(
       size.width,
       size.height / 2,
       size.width - 230,
       size.height,
     );
+    path.lineTo(0, size.height);
+    path.close();
 
-    canvas.drawPath(path, paint);
+    // 1. Gambar bayangan halus
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.5), 12.0, false);
+
+    // 2. Gambar isi solid Navy
+    final fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, fillPaint);
+
+    // 3. Gambar garis border kurva
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..strokeWidth = borderWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final borderPath = Path();
+    borderPath.moveTo(size.width - 230, 0);
+    borderPath.quadraticBezierTo(
+      size.width,
+      size.height / 2,
+      size.width - 230,
+      size.height,
+    );
+
+    canvas.drawPath(borderPath, borderPaint);
   }
 
   @override
-  bool shouldRepaint(covariant JadwalCurveBorderPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.width != width;
+  bool shouldRepaint(covariant JadwalCurveBackgroundPainter oldDelegate) => false;
 }

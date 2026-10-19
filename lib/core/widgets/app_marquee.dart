@@ -33,7 +33,7 @@ class AppMarquee extends ConsumerStatefulWidget {
 class _AppMarqueeState extends ConsumerState<AppMarquee> with SingleTickerProviderStateMixin {
   late Ticker _ticker;
   double _textWidth = 0.0;
-  double _offsetX = 0.0;
+  final ValueNotifier<double> _offsetNotifier = ValueNotifier<double>(0.0);
   bool _isReady = false;
 
   @override
@@ -56,10 +56,8 @@ class _AppMarqueeState extends ConsumerState<AppMarquee> with SingleTickerProvid
       // Hitung sisa jarak agar animasi berulang (looping) secara mulus
       final double position = distance % totalWidth;
 
-      // Update posisi tanpa setState agar super ringan!
-      setState(() {
-        _offsetX = -position; // Minus karena bergerak ke kiri
-      });
+      // Update posisi via ValueNotifier tanpa setState agar UI tidak rebuild
+      _offsetNotifier.value = -position;
     });
 
     _ticker.start();
@@ -89,6 +87,7 @@ class _AppMarqueeState extends ConsumerState<AppMarquee> with SingleTickerProvid
   @override
   void dispose() {
     _ticker.dispose();
+    _offsetNotifier.dispose();
     super.dispose();
   }
 
@@ -96,36 +95,45 @@ class _AppMarqueeState extends ConsumerState<AppMarquee> with SingleTickerProvid
   Widget build(BuildContext context) {
     if (!_isReady) return Container(height: widget.height, color: widget.backgroundColor);
 
-    return Container(
-      height: widget.height,
-      width: double.infinity,
-      color: widget.backgroundColor,
-      // ClipRect memastikan teks yang tergeser keluar batas layar disembunyikan
-      child: ClipRect(
-        child: Transform.translate(
-          offset: Offset(_offsetX, 0),
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              // Render 2 salinan agar saat salinan pertama menghilang, salinan kedua sudah muncul menyambung
-              children: [
-                Text(
-                  widget.text,
-                  style: widget.textStyle,
-                  maxLines: 1,
-                  softWrap: false,
-                ),
-                SizedBox(width: widget.blankSpace),
-                Text(
-                  widget.text,
-                  style: widget.textStyle,
-                  maxLines: 1,
-                  softWrap: false,
-                ),
-              ],
+    return RepaintBoundary(
+      child: Container(
+        height: widget.height,
+        width: double.infinity,
+        color: widget.backgroundColor,
+        // ClipRect memastikan teks yang tergeser keluar batas layar disembunyikan
+        child: ClipRect(
+          clipBehavior: Clip.hardEdge,
+          child: ValueListenableBuilder<double>(
+            valueListenable: _offsetNotifier,
+            builder: (context, offsetX, child) {
+              return Transform.translate(
+                offset: Offset(offsetX, 0),
+                child: child,
+              );
+            },
+            child: OverflowBox(
+              maxWidth: double.infinity,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                // Render 2 salinan agar saat salinan pertama menghilang, salinan kedua sudah muncul menyambung
+                children: [
+                  Text(
+                    widget.text,
+                    style: widget.textStyle,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
+                  SizedBox(width: widget.blankSpace),
+                  Text(
+                    widget.text,
+                    style: widget.textStyle,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
