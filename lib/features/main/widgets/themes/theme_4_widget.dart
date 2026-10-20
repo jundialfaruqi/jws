@@ -85,7 +85,11 @@ class Theme4Widget extends StatelessWidget {
           left: 600, // Menjorok ke kanan dari card jadwal sholat
           bottom: 140, // Diberi jarak agar tidak menempel dengan marquee
           child: RepaintBoundary(
-            child: AppAgendaWidget(agendas: data.agenda, slideLeft: true),
+            child: AppAgendaWidget(
+              agendas: data.agenda,
+              slideLeft: true,
+              backgroundColor: AppColors.bgBlue.withValues(alpha: 0.40),
+            ),
           ), // Bergeser ke/dari kiri
         ),
 

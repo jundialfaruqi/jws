@@ -129,7 +129,10 @@ class Theme7Widget extends StatelessWidget {
           right: 32,
           bottom: 160, // Dinaikkan agar tidak terlalu mepet dengan marquee
           child: RepaintBoundary(
-            child: AppAgendaWidget(agendas: data.agenda),
+            child: AppAgendaWidget(
+              agendas: data.agenda,
+              backgroundColor: AppColors.bgBlue.withValues(alpha: 0.40),
+            ),
           ),
         ),
       ],

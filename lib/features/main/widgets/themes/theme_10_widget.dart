@@ -149,7 +149,10 @@ class Theme10Widget extends StatelessWidget {
           right: 32,
           bottom:
               300, // BAGIAN INI: Mengatur jarak / menaikkan kotak agenda dari bawah layar
-          child: AppAgendaWidget(agendas: data.agenda),
+          child: AppAgendaWidget(
+            agendas: data.agenda,
+            backgroundColor: AppColors.bgBlue.withValues(alpha: 0.40),
+          ),
         ),
 
         // Judul Masjid (Melayang di atas)

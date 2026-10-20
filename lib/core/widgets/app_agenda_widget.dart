@@ -11,6 +11,7 @@ class AppAgendaWidget extends ConsumerStatefulWidget {
   final bool slideLeft;
   final bool continuous;
   final double borderRadius;
+  final Color? backgroundColor;
 
   const AppAgendaWidget({
     super.key,
@@ -18,6 +19,7 @@ class AppAgendaWidget extends ConsumerStatefulWidget {
     this.slideLeft = false,
     this.continuous = false,
     this.borderRadius = 24.0,
+    this.backgroundColor,
   });
 
   @override
@@ -161,7 +163,7 @@ class _AppAgendaWidgetState extends ConsumerState<AppAgendaWidget> {
         width: 440,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.bgBlue,
+          color: widget.backgroundColor ?? AppColors.bgBlue,
           borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: [
             BoxShadow(
