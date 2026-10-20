@@ -68,7 +68,6 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
 
     final double borderWidth = widget.borderWidth;
     final double outerSize = widget.size + (borderWidth * 2) + 16;
-    final double progress = (_now.millisecondsSinceEpoch % 6000) / 6000.0;
 
     // Perhitungan simetris presisi terhadap titik tengah jam
     final double yCenter = widget.size / 2;
@@ -170,14 +169,13 @@ class _AppAnalogClockState extends ConsumerState<AppAnalogClock> {
               ),
             ),
 
-            // Border animasi berputar di lingkar luar jam (satu warna)
+            // Border gradasi statis di lingkar luar jam (warna gradasi dipertahankan, tanpa rotasi animasi)
             CustomPaint(
               size: Size(outerSize, outerSize),
-              painter: _AnimatedClockBorderPainter(
-                progress: progress,
+              painter: _ClockBorderPainter(
                 borderWidth: borderWidth,
                 clockSize: widget.size,
-                animationColor: widget.animationColor,
+                borderColor: widget.animationColor,
               ),
             ),
           ],
@@ -355,17 +353,15 @@ class AnalogClockPainter extends CustomPainter {
   }
 }
 
-class _AnimatedClockBorderPainter extends CustomPainter {
-  final double progress;
+class _ClockBorderPainter extends CustomPainter {
   final double borderWidth;
   final double clockSize;
-  final Color animationColor;
+  final Color borderColor;
 
-  _AnimatedClockBorderPainter({
-    required this.progress,
+  const _ClockBorderPainter({
     required this.borderWidth,
     required this.clockSize,
-    this.animationColor = Colors.white,
+    this.borderColor = Colors.white,
   });
 
   @override
@@ -377,23 +373,22 @@ class _AnimatedClockBorderPainter extends CustomPainter {
 
     // 1. Base translucent ring (lingkar dasar statis satu warna yang halus)
     final basePaint = Paint()
-      ..color = animationColor.withValues(alpha: 0.15)
+      ..color = borderColor.withValues(alpha: 0.15)
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth;
     canvas.drawCircle(center, radius, basePaint);
 
-    // 2. Animated rotating sweep gradient - SATU WARNA SAJA (variasi intensitas opasitas)
+    // 2. Statis sweep gradient - gradasi warna tetap ada, tanpa rotasi animasi
     final sweepGradient = SweepGradient(
       startAngle: 0.0,
       endAngle: 2 * pi,
-      transform: GradientRotation(progress * 2 * pi),
       colors: [
         Colors.transparent,
-        animationColor.withValues(alpha: 0.08),
-        animationColor.withValues(alpha: 0.35),
-        animationColor.withValues(alpha: 0.95), // Puncak cahaya terang
-        animationColor.withValues(alpha: 0.35),
-        animationColor.withValues(alpha: 0.08),
+        borderColor.withValues(alpha: 0.08),
+        borderColor.withValues(alpha: 0.35),
+        borderColor.withValues(alpha: 0.95), // Puncak cahaya terang
+        borderColor.withValues(alpha: 0.35),
+        borderColor.withValues(alpha: 0.08),
         Colors.transparent,
       ],
       stops: const [0.0, 0.65, 0.78, 0.88, 0.94, 0.98, 1.0],
@@ -416,11 +411,10 @@ class _AnimatedClockBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AnimatedClockBorderPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.borderWidth != borderWidth ||
+  bool shouldRepaint(covariant _ClockBorderPainter oldDelegate) {
+    return oldDelegate.borderWidth != borderWidth ||
         oldDelegate.clockSize != clockSize ||
-        oldDelegate.animationColor != animationColor;
+        oldDelegate.borderColor != borderColor;
   }
 }
 
