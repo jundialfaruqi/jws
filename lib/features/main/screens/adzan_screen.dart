@@ -120,7 +120,7 @@ class AdzanScreen extends ConsumerWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(40),
                                 child: Container(
-                                  width: 750,
+                                  width: 850,
                                   height: 80,
                                   color: Colors.white.withValues(alpha: 0.2),
                                   child: Stack(
@@ -131,7 +131,7 @@ class AdzanScreen extends ConsumerWidget {
                                         left:
                                             -750 * (1 - value.clamp(0.0, 1.0)),
                                         child: Container(
-                                          width: 750,
+                                          width: 850,
                                           decoration: BoxDecoration(
                                             color: barColor,
                                             borderRadius: BorderRadius.circular(

@@ -35,7 +35,8 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsItemWidget(
             icon: Icons.volume_off,
             title: 'Bisukan Suara Adzan',
-            subtitle: 'Jika diaktifkan, suara Adzan tidak akan diputar saat masuk waktu sholat.',
+            subtitle:
+                'Jika diaktifkan, suara Adzan tidak akan diputar saat masuk waktu sholat.',
             trailing: Switch(
               value: audioSettings.isAdzanMuted,
               onChanged: (val) {
@@ -49,7 +50,8 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsItemWidget(
             icon: Icons.music_off,
             title: 'Bisukan Suara Murotal',
-            subtitle: 'Jika diaktifkan, suara Murotal tidak akan diputar sebagai latar belakang.',
+            subtitle:
+                'Jika diaktifkan, suara Murotal tidak akan diputar sebagai latar belakang.',
             trailing: Switch(
               value: audioSettings.isMurotalMuted,
               onChanged: (val) {
@@ -128,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SettingsItemWidget(
             icon: Icons.do_not_disturb_on,
-            title: 'Simulasi Layar Sholat (Debug)',
+            title: 'Simulasi Layar Final (Debug)',
             subtitle:
                 'Tekan untuk melihat preview layar saat sholat berlangsung',
             onTap: () {
@@ -165,7 +167,10 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showUnpairConfirmation(BuildContext context, WidgetRef ref) async {
+  Future<void> _showUnpairConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final selectedProfil = ref.read(selectedProfilProvider);
     final masjidName = selectedProfil?.name ?? 'Masjid Saat Ini';
 
@@ -191,9 +196,16 @@ class SettingsScreen extends ConsumerWidget {
         content: Text(
           'Apakah Anda yakin ingin memutuskan tautan TV ini dari "$masjidName"?\n\n'
           'Setelah diputus, TV akan kembali ke layar awal dan menampilkan kode pairing baru.',
-          style: const TextStyle(fontSize: 20, color: Colors.black87, height: 1.4),
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black87,
+            height: 1.4,
+          ),
         ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        actionsPadding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 20,
+        ),
         actions: [
           TvButton(
             label: 'Batal',
@@ -276,7 +288,8 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
   @override
   Widget build(BuildContext context) {
     final activeColor = widget.titleColor ?? AppColors.primary;
-    final activeIconColor = widget.iconColor ?? (widget.titleColor ?? AppColors.primary);
+    final activeIconColor =
+        widget.iconColor ?? (widget.titleColor ?? AppColors.primary);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -306,7 +319,9 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                 Icon(
                   widget.icon,
                   size: 40,
-                  color: _isFocused ? activeIconColor : (widget.iconColor ?? Colors.grey.shade600),
+                  color: _isFocused
+                      ? activeIconColor
+                      : (widget.iconColor ?? Colors.grey.shade600),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
@@ -318,7 +333,9 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _isFocused ? activeColor : (widget.titleColor ?? Colors.black87),
+                          color: _isFocused
+                              ? activeColor
+                              : (widget.titleColor ?? Colors.black87),
                         ),
                       ),
                       const SizedBox(height: 8),

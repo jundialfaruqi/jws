@@ -144,7 +144,8 @@ class IqomahScreen extends ConsumerWidget {
                                 final isBlinking =
                                     currentSeconds <= 10 && currentSeconds > 0;
                                 final barColor = isBlinking
-                                    ? ((remainingFloatSeconds * 2).floor() % 2 ==
+                                    ? ((remainingFloatSeconds * 2).floor() %
+                                                  2 ==
                                               0
                                           ? Colors.red
                                           : AppColors.textYellow)
@@ -155,7 +156,7 @@ class IqomahScreen extends ConsumerWidget {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(40),
                                       child: Container(
-                                        width: 700,
+                                        width: 750,
                                         height: 80,
                                         color: Colors.white.withValues(
                                           alpha: 0.2,
@@ -169,7 +170,7 @@ class IqomahScreen extends ConsumerWidget {
                                                   -700 *
                                                   (1 - value.clamp(0.0, 1.0)),
                                               child: Container(
-                                                width: 700,
+                                                width: 750,
                                                 decoration: BoxDecoration(
                                                   color: barColor,
                                                   borderRadius:
