@@ -217,30 +217,32 @@ class JumatScreen extends ConsumerWidget {
                       // Kelompok Bawah: Jam Digital
                       SizedBox(
                         width: 750,
-                        child: AppLiveClock(
-                          builder: (context, now) {
-                            final hour = now.hour.toString().padLeft(2, '0');
-                            final minute = now.minute.toString().padLeft(
-                              2,
-                              '0',
-                            );
-                            final second = now.second.toString().padLeft(
-                              2,
-                              '0',
-                            );
+                        child: Center(
+                          child: AppLiveClock(
+                            builder: (context, now) {
+                              final hour = now.hour.toString().padLeft(2, '0');
+                              final minute = now.minute.toString().padLeft(
+                                2,
+                                '0',
+                              );
+                              final second = now.second.toString().padLeft(
+                                2,
+                                '0',
+                              );
 
-                            String timeZone = 'WIB';
-                            if (now.timeZoneOffset.inHours == 8) {
-                              timeZone = 'WITA';
-                            }
-                            if (now.timeZoneOffset.inHours == 9) {
-                              timeZone = 'WIT';
-                            }
+                              String timeZone = 'WIB';
+                              if (now.timeZoneOffset.inHours == 8) {
+                                timeZone = 'WITA';
+                              }
+                              if (now.timeZoneOffset.inHours == 9) {
+                                timeZone = 'WIT';
+                              }
 
-                            return Row(
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
                                 Text(
                                   hour,
                                   style: const TextStyle(
@@ -306,6 +308,7 @@ class JumatScreen extends ConsumerWidget {
                           },
                         ),
                       ),
+                    ),
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Expanded
