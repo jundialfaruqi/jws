@@ -118,7 +118,7 @@ class Theme7Widget extends StatelessWidget {
               child: AppAnalogClock(
                 size: 380,
                 numberFontSize: 38,
-                digitalFontSize: 28,
+                digitalFontSize: 36,
               ),
             ),
           ),
