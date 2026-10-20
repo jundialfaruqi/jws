@@ -118,6 +118,21 @@ class JumatScreen extends ConsumerWidget {
       }
     }
 
+    // Fallback data simulasi/testing jika data backend belum diisi
+    final String namaKhatib =
+        (petugasHariIni != null && petugasHariIni.khatib.isNotEmpty)
+        ? petugasHariIni.khatib
+        : 'Ustad Erbi';
+    // : 'Abu Bakar Ash-Shiddiq';
+    final String namaImam =
+        (petugasHariIni != null && petugasHariIni.imam.isNotEmpty)
+        ? petugasHariIni.imam
+        : 'Umar bin Khattab';
+    final String namaMuadzin =
+        (petugasHariIni != null && petugasHariIni.muadzin.isNotEmpty)
+        ? petugasHariIni.muadzin
+        : 'Ali bin Abi Thalib';
+
     return TvScaffold(
       backgroundColor: AppColors.bgBlack,
       body: Stack(
@@ -199,18 +214,9 @@ class JumatScreen extends ConsumerWidget {
                         width: 750,
                         child: Column(
                           children: [
-                            _buildPetugasRow(
-                              'Khatib',
-                              petugasHariIni?.khatib ?? '-',
-                            ),
-                            _buildPetugasRow(
-                              'Imam',
-                              petugasHariIni?.imam ?? '-',
-                            ),
-                            _buildPetugasRow(
-                              'Muadzin',
-                              petugasHariIni?.muadzin ?? '-',
-                            ),
+                            _buildPetugasRow('Khatib', namaKhatib),
+                            _buildPetugasRow('Imam', namaImam),
+                            _buildPetugasRow('Muadzin', namaMuadzin),
                           ],
                         ),
                       ),
@@ -243,72 +249,73 @@ class JumatScreen extends ConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                Text(
-                                  hour,
-                                  style: const TextStyle(
-                                    fontSize: 120,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                    height: 1.0,
-                                  ),
-                                ),
-                                Container(
-                                  height: 80,
-                                  width: 4,
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                                Text(
-                                  minute,
-                                  style: const TextStyle(
-                                    fontSize: 120,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                    height: 1.0,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      second,
-                                      style: const TextStyle(
-                                        fontSize: 48,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textYellow,
-                                        fontFamily: 'Poppins',
-                                        height: 1.0,
-                                      ),
+                                  Text(
+                                    hour,
+                                    style: const TextStyle(
+                                      fontSize: 120,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontFamily: 'Poppins',
+                                      height: 1.0,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      timeZone,
-                                      style: const TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white70,
-                                        fontFamily: 'Poppins',
-                                        letterSpacing: 2,
-                                        height: 1.0,
-                                      ),
+                                  ),
+                                  Container(
+                                    height: 80,
+                                    width: 4,
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 20,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withValues(alpha: 0.5),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  Text(
+                                    minute,
+                                    style: const TextStyle(
+                                      fontSize: 120,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontFamily: 'Poppins',
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        second,
+                                        style: const TextStyle(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textYellow,
+                                          fontFamily: 'Poppins',
+                                          height: 1.0,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        timeZone,
+                                        style: const TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white70,
+                                          fontFamily: 'Poppins',
+                                          letterSpacing: 2,
+                                          height: 1.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
                     ], // Penutup children Column
                   ), // Penutup Column
                 ), // Penutup Expanded
@@ -380,9 +387,9 @@ class JumatScreen extends ConsumerWidget {
               value,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 50,
+                fontSize: 64,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textYellow,
                 fontFamily: 'Poppins',
                 height: 1.2,
               ),

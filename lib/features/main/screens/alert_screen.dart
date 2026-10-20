@@ -146,7 +146,7 @@ class AlertScreen extends ConsumerWidget {
                               Text(
                                 _formatCountdown(currentSeconds),
                                 style: TextStyle(
-                                  fontSize: 260,
+                                  fontSize: 300,
                                   fontWeight: FontWeight.bold,
                                   color: isBlinking ? barColor : Colors.white,
                                   fontFamily: 'JetBrainsMono',
