@@ -193,6 +193,9 @@ class Theme12Widget extends StatelessWidget {
                   child: AppNextPrayerBar(
                     jadwalSholatList: data.jadwalSholat,
                     dateOnly: true,
+                    dateFontSize: 36.0,
+                    hijriFontSize: 32.0,
+                    iconSize: 38.0,
                   ),
                 ),
 

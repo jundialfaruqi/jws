@@ -50,6 +50,9 @@ class Theme4Widget extends StatelessWidget {
               leftMargin: 600, // Menghindari card melayang di kiri
               jadwalSholatList: data.jadwalSholat,
               dateOnly: true, // Hanya tampilkan tanggal
+              dateFontSize: 36.0,
+              hijriFontSize: 32.0,
+              iconSize: 38.0,
             ),
 
             // Konten Utama (Tengah) - Tema 4
