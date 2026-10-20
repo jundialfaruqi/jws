@@ -255,8 +255,8 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
         final countdownWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _RingingBellIcon(
-              icon: TablerIcons.bell_ringing,
+            Icon(
+              TablerIcons.bell_ringing,
               color: Colors.white,
               size: effBellIconSize,
             ),
@@ -395,59 +395,3 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
   }
 }
 
-class _RingingBellIcon extends StatefulWidget {
-  final IconData icon;
-  final Color color;
-  final double size;
-
-  const _RingingBellIcon({
-    required this.icon,
-    required this.color,
-    required this.size,
-  });
-
-  @override
-  State<_RingingBellIcon> createState() => _RingingBellIconState();
-}
-
-class _RingingBellIconState extends State<_RingingBellIcon>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    // Durasi ayunan bolak-balik yang cepat agar terlihat bergetar
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..repeat(reverse: true);
-
-    // Sudut putar antara -15 derajat hingga 15 derajat (dalam radian)
-    _animation = Tween<double>(begin: -0.25, end: 0.25).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Transform.rotate(
-          angle: _animation.value,
-          alignment: Alignment.topCenter, // Poros rotasi di ujung atas lonceng
-          child: child,
-        );
-      },
-      child: Icon(widget.icon, color: widget.color, size: widget.size),
-    );
-  }
-}
