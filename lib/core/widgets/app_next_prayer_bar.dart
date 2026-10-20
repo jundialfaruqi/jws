@@ -375,13 +375,13 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                 : MainAxisAlignment.spaceBetween,
             children: [
               if (!widget.dateOnly)
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: countdownWidget,
-                  ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: countdownWidget,
                 ),
+              if (!widget.dateOnly)
+                const SizedBox(width: 24),
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
