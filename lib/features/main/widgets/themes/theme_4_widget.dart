@@ -85,10 +85,7 @@ class Theme4Widget extends StatelessWidget {
           left: 600, // Menjorok ke kanan dari card jadwal sholat
           bottom: 140, // Diberi jarak agar tidak menempel dengan marquee
           child: RepaintBoundary(
-            child: AppAgendaWidget(
-              agendas: data.agenda,
-              slideLeft: true,
-            ),
+            child: AppAgendaWidget(agendas: data.agenda, slideLeft: true),
           ), // Bergeser ke/dari kiri
         ),
 
@@ -135,15 +132,27 @@ class Theme4Widget extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.15),
+                color: Colors.black.withValues(
+                  alpha: 0.40,
+                ), // Transparansi dikurangi agar lebih solid & jelas terbaca
                 borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: AppNextPrayerBar(
                 jadwalSholatList: data.jadwalSholat,
                 countdownOnly: true,
-                fontSize: 32,
-                countdownCardColor: AppColors.textYellow.withValues(alpha: 0.05),
-                countdownBorderColor: Colors.transparent,
+                nextPrayerFontSize: 34.0,
+                countdownFontSize: 40.0,
+                iconSize: 42.0,
+                countdownCardColor: AppColors.textYellow.withValues(
+                  alpha: 0.15,
+                ),
                 countdownTextColor: AppColors.textYellow,
               ),
             ),
@@ -209,5 +218,6 @@ class JadwalCurveBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant JadwalCurveBackgroundPainter oldDelegate) => false;
+  bool shouldRepaint(covariant JadwalCurveBackgroundPainter oldDelegate) =>
+      false;
 }
