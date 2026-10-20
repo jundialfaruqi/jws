@@ -9,12 +9,17 @@ import '../../../core/providers/view_mode_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
 import '../../../core/providers/audio_settings_provider.dart';
 
+import '../../../core/services/device_service.dart';
+import '../../../core/services/secure_storage_service.dart';
+import '../../../core/widgets/tv/tv_button.dart';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audioSettings = ref.watch(audioSettingsProvider);
+    final selectedProfil = ref.watch(selectedProfilProvider);
 
     return AppScaffold(
       appBar: AppTopBar(
@@ -86,6 +91,16 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _SettingsItemWidget(
+            icon: Icons.link_off,
+            title: 'Putus Tautan TV / Pairing Ulang',
+            subtitle: selectedProfil != null
+                ? 'Terhubung ke: ${selectedProfil.name}. Putus tautan untuk memasangkan ke masjid lain.'
+                : 'Hapus tautan perangkat TV ini dan kembali ke layar kode pairing.',
+            iconColor: Colors.red.shade700,
+            titleColor: Colors.red.shade700,
+            onTap: () => _showUnpairConfirmation(context, ref),
+          ),
+          _SettingsItemWidget(
             icon: Icons.notifications_active,
             title: 'Simulasi Layar Adzan (Debug)',
             subtitle:
@@ -149,6 +164,87 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showUnpairConfirmation(BuildContext context, WidgetRef ref) async {
+    final selectedProfil = ref.read(selectedProfilProvider);
+    final masjidName = selectedProfil?.name ?? 'Masjid Saat Ini';
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.link_off, color: Colors.red, size: 36),
+            SizedBox(width: 16),
+            Text(
+              'Putus Tautan TV?',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin memutuskan tautan TV ini dari "$masjidName"?\n\n'
+          'Setelah diputus, TV akan kembali ke layar awal dan menampilkan kode pairing baru.',
+          style: const TextStyle(fontSize: 20, color: Colors.black87, height: 1.4),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        actions: [
+          TvButton(
+            label: 'Batal',
+            variant: TvButtonVariant.ghost,
+            autofocus: true,
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+          ),
+          const SizedBox(width: 16),
+          TvButton(
+            label: 'Ya, Putus Tautan',
+            variant: TvButtonVariant.danger,
+            onPressed: () async {
+              Navigator.of(dialogCtx).pop();
+
+              if (!context.mounted) return;
+
+              // Tampilkan dialog loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              );
+
+              try {
+                // 1. Beritahu backend untuk unpair device ini
+                await ref.read(deviceServiceProvider).unpairDevice();
+              } catch (_) {}
+
+              // 2. Reset device_id agar TV dipastikan mendapat kode pairing baru
+              await ref.read(deviceServiceProvider).resetDeviceId();
+
+              // 3. Hapus profil tersimpan di local storage
+              final storage = SecureStorageService();
+              await storage.delete('selected_profil');
+
+              // 4. Reset state profil di riverpod
+              ref.read(selectedProfilProvider.notifier).setProfil(null);
+
+              // 4. Arahkan kembali ke halaman pairing ('/')
+              if (context.mounted) {
+                Navigator.of(context).pop(); // Tutup loading dialog
+                context.go('/');
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SettingsItemWidget extends StatefulWidget {
@@ -157,6 +253,8 @@ class _SettingsItemWidget extends StatefulWidget {
   final String subtitle;
   final VoidCallback onTap;
   final Widget? trailing;
+  final Color? iconColor;
+  final Color? titleColor;
 
   const _SettingsItemWidget({
     required this.icon,
@@ -164,6 +262,8 @@ class _SettingsItemWidget extends StatefulWidget {
     required this.subtitle,
     required this.onTap,
     this.trailing,
+    this.iconColor,
+    this.titleColor,
   });
 
   @override
@@ -175,6 +275,9 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final activeColor = widget.titleColor ?? AppColors.primary;
+    final activeIconColor = widget.iconColor ?? (widget.titleColor ?? AppColors.primary);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Material(
@@ -193,7 +296,7 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _isFocused ? AppColors.primary : Colors.transparent,
+                color: _isFocused ? activeColor : Colors.transparent,
                 width: 3,
               ),
             ),
@@ -203,7 +306,7 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                 Icon(
                   widget.icon,
                   size: 40,
-                  color: _isFocused ? AppColors.primary : Colors.grey.shade600,
+                  color: _isFocused ? activeIconColor : (widget.iconColor ?? Colors.grey.shade600),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
@@ -215,9 +318,7 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _isFocused
-                              ? AppColors.primary
-                              : Colors.black87,
+                          color: _isFocused ? activeColor : (widget.titleColor ?? Colors.black87),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -237,7 +338,7 @@ class _SettingsItemWidgetState extends State<_SettingsItemWidget> {
                   Icon(
                     Icons.chevron_right,
                     size: 40,
-                    color: _isFocused ? AppColors.primary : Colors.grey.shade400,
+                    color: _isFocused ? activeColor : Colors.grey.shade400,
                   ),
               ],
             ),

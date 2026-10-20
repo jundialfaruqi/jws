@@ -65,4 +65,21 @@ class DeviceService {
       return {'status': 'error', 'message': e.toString()};
     }
   }
+
+  Future<bool> unpairDevice() async {
+    try {
+      final deviceId = await getDeviceId();
+      final response = await _dio.post(
+        '${ApiConstant.baseUrl}api/v2/device/unpair',
+        data: {'device_id': deviceId},
+      );
+      return response.statusCode == 200 && response.data['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> resetDeviceId() async {
+    await _storage.delete(key: 'device_id');
+  }
 }
