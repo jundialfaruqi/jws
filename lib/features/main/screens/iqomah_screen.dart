@@ -56,7 +56,7 @@ class IqomahScreen extends ConsumerWidget {
 
     double progress = transitionState.totalSeconds > 0
         ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
-            transitionState.totalSeconds)
+              transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
@@ -76,122 +76,134 @@ class IqomahScreen extends ConsumerWidget {
                 // Kolom Kiri: Informasi Iqomah
                 Expanded(
                   flex: 1,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/logo/diskominfotiksan-logo.png',
-                          height: 80.0,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 36),
-                        const Text(
-                          'MENUJU IQOMAH',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white70,
-                            letterSpacing: 8,
-                            fontFamily: 'Poppins',
+                  child: Padding(
+                    // Padding kiri & kanan untuk seluruh konten Informasi Iqomah
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/logo/diskominfotiksan-logo.png',
+                            height: 80.0,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          displayPrayerName,
-                          style: const TextStyle(
-                            fontSize: 130,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 64),
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween<double>(
-                              begin: transitionState.totalSeconds == 0
-                                  ? 0.0
-                                  : progress,
-                              end: transitionState.totalSeconds == 0
-                                  ? 1.0
-                                  : progress,
+                          const SizedBox(height: 36),
+                          const Text(
+                            'MENUJU IQOMAH',
+                            style: TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white70,
+                              letterSpacing: 8,
+                              fontFamily: 'Poppins',
                             ),
-                            duration: transitionState.totalSeconds == 0
-                                ? const Duration(
-                                    seconds: 300,
-                                  ) // Simulasi lambat 5 menit
-                                : const Duration(seconds: 1),
-                            curve: Curves.linear,
-                            builder: (context, value, child) {
-                              final remainingFloatSeconds =
-                                  transitionState.totalSeconds == 0
-                                  ? (1.0 - value) * 300
-                                  : (1.0 - value) * transitionState.totalSeconds;
+                          ),
+                          const SizedBox(height: 20),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              displayPrayerName,
+                              style: const TextStyle(
+                                fontSize: 130,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 12,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween<double>(
+                                begin: transitionState.totalSeconds == 0
+                                    ? 0.0
+                                    : progress,
+                                end: transitionState.totalSeconds == 0
+                                    ? 1.0
+                                    : progress,
+                              ),
+                              duration: transitionState.totalSeconds == 0
+                                  ? const Duration(
+                                      seconds: 300,
+                                    ) // Simulasi lambat 5 menit
+                                  : const Duration(seconds: 1),
+                              curve: Curves.linear,
+                              builder: (context, value, child) {
+                                final remainingFloatSeconds =
+                                    transitionState.totalSeconds == 0
+                                    ? (1.0 - value) * 300
+                                    : (1.0 - value) *
+                                          transitionState.totalSeconds;
 
-                              final currentSeconds =
-                                  remainingFloatSeconds.ceil();
+                                final currentSeconds = remainingFloatSeconds
+                                    .ceil();
 
-                              final isBlinking =
-                                  currentSeconds <= 10 && currentSeconds > 0;
-                              final barColor = isBlinking
-                                  ? ((remainingFloatSeconds * 2).floor() % 2 == 0
-                                        ? Colors.red
-                                        : AppColors.textYellow)
-                                  : AppColors.textYellow;
+                                final isBlinking =
+                                    currentSeconds <= 10 && currentSeconds > 0;
+                                final barColor = isBlinking
+                                    ? ((remainingFloatSeconds * 2).floor() % 2 ==
+                                              0
+                                          ? Colors.red
+                                          : AppColors.textYellow)
+                                    : AppColors.textYellow;
 
-                              return Column(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(40),
-                                    child: Container(
-                                      width: 700,
-                                      height: 80,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Positioned(
-                                            top: 0,
-                                            bottom: 0,
-                                            left:
-                                                -700 *
-                                                (1 - value.clamp(0.0, 1.0)),
-                                            child: Container(
-                                              width: 700,
-                                              decoration: BoxDecoration(
-                                                color: barColor,
-                                                borderRadius:
-                                                    BorderRadius.circular(40),
+                                return Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(40),
+                                      child: Container(
+                                        width: 700,
+                                        height: 80,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            Positioned(
+                                              top: 0,
+                                              bottom: 0,
+                                              left:
+                                                  -700 *
+                                                  (1 - value.clamp(0.0, 1.0)),
+                                              child: Container(
+                                                width: 700,
+                                                decoration: BoxDecoration(
+                                                  color: barColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(40),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    _formatCountdown(currentSeconds),
-                                    style: TextStyle(
-                                      fontSize: 240,
-                                      fontWeight: FontWeight.bold,
-                                      color: barColor,
-                                      fontFamily: 'JetBrainsMono',
-                                      height: 1.0,
+                                    const SizedBox(height: 24),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        _formatCountdown(currentSeconds),
+                                        style: TextStyle(
+                                          fontSize: 300,
+                                          fontWeight: FontWeight.bold,
+                                          color: barColor,
+                                          fontFamily: 'JetBrainsMono',
+                                          height: 1.0,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            },
+                                  ],
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ], // Penutup children Column
-                    ), // Penutup Column
-                  ), // Penutup Center
+                        ], // Penutup children Column
+                      ), // Penutup Column
+                    ), // Penutup Center
+                  ), // Penutup Padding
                 ), // Penutup Expanded
 
                 const SizedBox(

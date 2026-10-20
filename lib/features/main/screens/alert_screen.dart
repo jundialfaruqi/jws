@@ -29,7 +29,7 @@ class AlertScreen extends ConsumerWidget {
 
     double progress = transitionState.totalSeconds > 0
         ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
-            transitionState.totalSeconds)
+              transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     return TvScaffold(
@@ -39,7 +39,7 @@ class AlertScreen extends ConsumerWidget {
           // Background
           Positioned.fill(
             child: Image.asset(
-              'assets/adzan/bg-adzan-screen.png',
+              'assets/final-screen/border-final-screen.png',
               fit: BoxFit.cover,
             ),
           ),

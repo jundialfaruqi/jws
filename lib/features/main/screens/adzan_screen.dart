@@ -29,7 +29,7 @@ class AdzanScreen extends ConsumerWidget {
 
     double progress = transitionState.totalSeconds > 0
         ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
-            transitionState.totalSeconds)
+              transitionState.totalSeconds)
         : 0.5; // 50% untuk preview
 
     // ScaffoldTV akan otomatis menjaga resolusi tetap 1920x1080 (Full HD)
@@ -38,11 +38,11 @@ class AdzanScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgDark, // Menggunakan background gelap/hitam
       body: Stack(
         children: [
-          // Background
+          // Background Border
           Positioned.fill(
             child: Image.asset(
-              'assets/adzan/bg-adzan-screen.png',
-              fit: BoxFit.cover,
+              'assets/final-screen/border-final-screen.png',
+              fit: BoxFit.fill,
             ),
           ),
           // Konten Utama
@@ -148,7 +148,7 @@ class AdzanScreen extends ConsumerWidget {
                               Text(
                                 _formatCountdown(currentSeconds),
                                 style: TextStyle(
-                                  fontSize: 260,
+                                  fontSize: 300,
                                   fontWeight: FontWeight.bold,
                                   color: isBlinking ? barColor : Colors.white,
                                   fontFamily: 'JetBrainsMono',
