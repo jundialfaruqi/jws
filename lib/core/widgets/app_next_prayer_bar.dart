@@ -5,6 +5,7 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:jws/core/constants/app_colors.dart';
 import '../../features/main/models/jadwal_sholat_model.dart';
 import '../time/time_sync_service.dart';
+import '../time/hijri_localization.dart';
 import 'package:hijri/hijri_calendar.dart';
 
 class AppNextPrayerBar extends ConsumerStatefulWidget {
@@ -49,6 +50,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
   @override
   void initState() {
     super.initState();
+    initializeHijriLocale();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _syncAndScheduleNext();
     });

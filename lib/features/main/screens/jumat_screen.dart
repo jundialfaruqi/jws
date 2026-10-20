@@ -12,6 +12,7 @@ import '../models/jadwal_sholat_model.dart';
 import '../providers/my_masjid_provider.dart';
 import '../../../core/widgets/app_image_slider.dart';
 import '../../../core/time/time_sync_service.dart';
+import '../../../core/time/hijri_localization.dart';
 import '../../../core/widgets/app_live_clock.dart';
 
 class JumatScreen extends ConsumerWidget {
@@ -100,6 +101,7 @@ class JumatScreen extends ConsumerWidget {
     } else {
       // Fallback ke library, dengan koreksi -1 hari
       final correctedDate = dateToCalculate.subtract(const Duration(days: 1));
+      initializeHijriLocale();
       final hijriDate = HijriCalendar.fromDate(correctedDate);
       tanggalHijriah =
           "${hijriDate.hDay} ${hijriDate.longMonthName} ${hijriDate.hYear} H";

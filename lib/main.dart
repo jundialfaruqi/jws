@@ -9,6 +9,7 @@ import 'core/providers/selected_profil_provider.dart';
 import 'core/providers/view_mode_provider.dart';
 import 'core/services/prayer_transition_service.dart';
 import 'core/services/murotal_audio_service.dart';
+import 'core/time/hijri_localization.dart';
 import 'features/select_profil/models/profil_masjid_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -25,6 +26,7 @@ Future<void> main() async {
   
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('id', null);
+  initializeHijriLocale();
 
   // Membaca storage untuk cek profil terakhir
   final storage = SecureStorageService();
