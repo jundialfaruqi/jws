@@ -350,7 +350,7 @@ class JumatScreen extends ConsumerWidget {
   Widget _buildPetugasRow(String label, String value) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -360,25 +360,32 @@ class JumatScreen extends ConsumerWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
+            textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 32,
+              fontWeight: FontWeight.w500,
               color: Colors.white70,
               fontFamily: 'Poppins',
+              letterSpacing: 2,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              height: 1.2,
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 50,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Poppins',
+                height: 1.2,
+              ),
             ),
           ),
         ],
