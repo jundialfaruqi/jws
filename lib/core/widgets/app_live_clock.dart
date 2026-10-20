@@ -66,7 +66,7 @@ class _AppLiveClockState extends ConsumerState<AppLiveClock> {
       return widget.builder!(context, now);
     }
 
-    var dateStr = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    var dateStr = DateFormat('EEEE, dd MMM yyyy', 'id').format(now);
     dateStr = dateStr.replaceAll('Minggu', 'Ahad');
     
     final separator = (widget.blinkSeparator && now.second % 2 != 0) ? " " : ":";

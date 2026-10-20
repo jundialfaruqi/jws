@@ -97,18 +97,18 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
 
   static const List<String> _namaBulanIndo = [
     '',
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
     'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des',
   ];
 
   @override

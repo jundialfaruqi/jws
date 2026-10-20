@@ -87,7 +87,7 @@ class JumatScreen extends ConsumerWidget {
       } catch (_) {}
     }
 
-    String tanggalMasehi = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+    String tanggalMasehi = DateFormat('EEEE, dd MMM yyyy', 'id').format(now);
     tanggalMasehi = tanggalMasehi.replaceAll('Minggu', 'Ahad');
 
     String tanggalHijriah = "";
