@@ -10,6 +10,7 @@ import 'package:hijri/hijri_calendar.dart';
 
 class AppNextPrayerBar extends ConsumerStatefulWidget {
   final double leftMargin;
+  final double? rightMargin;
   final List<JadwalSholatModel> jadwalSholatList;
   final bool countdownOnly;
   final bool dateOnly;
@@ -27,6 +28,7 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
   const AppNextPrayerBar({
     super.key,
     this.leftMargin = 0.0,
+    this.rightMargin,
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
     this.dateOnly = false,
@@ -264,7 +266,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
               color: Colors.white,
               size: effBellIconSize,
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Text(
               'MENUJU $nextPrayer',
               style: TextStyle(
@@ -272,12 +274,12 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                 fontSize: effNextPrayerFontSize,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
-                letterSpacing: 2.0,
+                letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(width: 24),
+            const SizedBox(width: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(12),
@@ -308,7 +310,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
               color: Colors.white,
               size: effIconSize,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text.rich(
               TextSpan(
                 children: [
@@ -355,7 +357,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
               color: Colors.white,
               size: effIconSize,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text(
               tanggalHijriah,
               style: TextStyle(
@@ -379,13 +381,13 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               countdownWidget,
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               buildDivider(),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               masehiWidget,
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               buildDivider(),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               hijriWidget,
             ],
           );
@@ -393,8 +395,8 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
           return Container(
             color: AppColors.bgNavy,
             padding: EdgeInsets.only(
-              left: widget.leftMargin + 32,
-              right: 48,
+              left: widget.leftMargin + 24,
+              right: widget.rightMargin ?? 48,
               top: 16,
               bottom: 16,
             ),
@@ -428,7 +430,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
           color: AppColors.bgNavy,
           padding: EdgeInsets.only(
             left: widget.leftMargin + 32,
-            right: 48,
+            right: widget.rightMargin ?? 48,
             top: 16,
             bottom: 16,
           ),
