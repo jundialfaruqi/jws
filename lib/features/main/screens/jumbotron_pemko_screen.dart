@@ -65,9 +65,12 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
     return '$cleanBase$cleanPath';
   }
 
+  late final VideoPlaybackNotifier _videoAudioNotifier;
+
   @override
   void initState() {
     super.initState();
+    _videoAudioNotifier = ref.read(isVideoPlayingWithAudioProvider.notifier);
     if (widget.videoUrl != null && widget.videoUrl!.isNotEmpty) {
       _initVideoPlayer();
     }
@@ -179,7 +182,7 @@ class _JumbotronPemkoScreenState extends ConsumerState<JumbotronPemkoScreen> {
     // Pastikan state audio direset saat widget ini di-dispose
     // agar murottal tidak tetap ter-pause selamanya jika video di-unmount tiba-tiba.
     try {
-      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      _videoAudioNotifier.setPlaying(false);
     } catch (_) {}
     super.dispose();
   }

@@ -62,12 +62,20 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
   List<Map<String, dynamic>>? _pendingNewItems;
   int _pendingMainDurationMs = 30000;
 
+  late final VideoPlaybackNotifier _videoAudioNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoAudioNotifier = ref.read(isVideoPlayingWithAudioProvider.notifier);
+  }
+
   @override
   void dispose() {
     _phaseTimer?.cancel();
     _videoWatchdogTimer?.cancel();
     _retryFocusNode.dispose();
-    ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+    _videoAudioNotifier.setPlaying(false);
     super.dispose();
   }
 
@@ -76,18 +84,18 @@ class _IdleScreenManagerState extends ConsumerState<IdleScreenManager> {
     if (_cycleSlots.isEmpty ||
         _currentSlotIndex < 0 ||
         _currentSlotIndex >= _cycleSlots.length) {
-      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      _videoAudioNotifier.setPlaying(false);
       return;
     }
     final slot = _cycleSlots[_currentSlotIndex];
     if (slot.isMain) {
-      ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(false);
+      _videoAudioNotifier.setPlaying(false);
       return;
     }
     final item = slot.item!;
     final isVideoWithAudio =
         item['type'] == 'pemko_video' && (item['hasAudio'] == true);
-    ref.read(isVideoPlayingWithAudioProvider.notifier).setPlaying(isVideoWithAudio);
+    _videoAudioNotifier.setPlaying(isVideoWithAudio);
   }
 
   // ---------------------------------------------------------------------------
