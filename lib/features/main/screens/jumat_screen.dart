@@ -118,21 +118,6 @@ class JumatScreen extends ConsumerWidget {
       }
     }
 
-    // Fallback data simulasi/testing jika data backend belum diisi
-    final String namaKhatib =
-        (petugasHariIni != null && petugasHariIni.khatib.isNotEmpty)
-        ? petugasHariIni.khatib
-        : 'Ustad Erbi';
-    // : 'Abu Bakar Ash-Shiddiq';
-    final String namaImam =
-        (petugasHariIni != null && petugasHariIni.imam.isNotEmpty)
-        ? petugasHariIni.imam
-        : 'Umar bin Khattab';
-    final String namaMuadzin =
-        (petugasHariIni != null && petugasHariIni.muadzin.isNotEmpty)
-        ? petugasHariIni.muadzin
-        : 'Ali bin Abi Thalib';
-
     return TvScaffold(
       backgroundColor: AppColors.bgBlack,
       body: Stack(
@@ -214,9 +199,27 @@ class JumatScreen extends ConsumerWidget {
                         width: 750,
                         child: Column(
                           children: [
-                            _buildPetugasRow('Khatib', namaKhatib),
-                            _buildPetugasRow('Imam', namaImam),
-                            _buildPetugasRow('Muadzin', namaMuadzin),
+                            _buildPetugasRow(
+                              'Khatib',
+                              (petugasHariIni != null &&
+                                      petugasHariIni.khatib.isNotEmpty)
+                                  ? petugasHariIni.khatib
+                                  : '-',
+                            ),
+                            _buildPetugasRow(
+                              'Imam',
+                              (petugasHariIni != null &&
+                                      petugasHariIni.imam.isNotEmpty)
+                                  ? petugasHariIni.imam
+                                  : '-',
+                            ),
+                            _buildPetugasRow(
+                              'Muadzin',
+                              (petugasHariIni != null &&
+                                      petugasHariIni.muadzin.isNotEmpty)
+                                  ? petugasHariIni.muadzin
+                                  : '-',
+                            ),
                           ],
                         ),
                       ),
