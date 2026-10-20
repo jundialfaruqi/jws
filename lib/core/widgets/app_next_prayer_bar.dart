@@ -13,6 +13,7 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
   final List<JadwalSholatModel> jadwalSholatList;
   final bool countdownOnly;
   final bool dateOnly;
+  final bool countdownAfterDate;
   final double fontSize;
   final double? countdownFontSize;
   final double? nextPrayerFontSize;
@@ -29,6 +30,7 @@ class AppNextPrayerBar extends ConsumerStatefulWidget {
     this.jadwalSholatList = const [],
     this.countdownOnly = false,
     this.dateOnly = false,
+    this.countdownAfterDate = false,
     this.fontSize = 28.0,
     this.countdownFontSize,
     this.nextPrayerFontSize,
@@ -298,7 +300,7 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
           return countdownWidget;
         }
 
-        final dateWidget = Row(
+        final masehiWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -342,9 +344,12 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                 ],
               ),
             ),
-            const SizedBox(width: 24),
-            Container(width: 2, height: effDateFontSize, color: Colors.white54),
-            const SizedBox(width: 24),
+          ],
+        );
+
+        final hijriWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Icon(
               TablerIcons.moon_stars,
               color: Colors.white,
@@ -360,6 +365,62 @@ class _AppNextPrayerBarState extends ConsumerState<AppNextPrayerBar> {
                 fontFamily: 'Poppins',
               ),
             ),
+          ],
+        );
+
+        Widget buildDivider() => Container(
+          width: 2,
+          height: effDateFontSize,
+          color: Colors.white54,
+        );
+
+        if (widget.countdownAfterDate) {
+          final fullRowContent = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              countdownWidget,
+              const SizedBox(width: 24),
+              buildDivider(),
+              const SizedBox(width: 24),
+              masehiWidget,
+              const SizedBox(width: 24),
+              buildDivider(),
+              const SizedBox(width: 24),
+              hijriWidget,
+            ],
+          );
+
+          return Container(
+            color: AppColors.bgNavy,
+            padding: EdgeInsets.only(
+              left: widget.leftMargin + 32,
+              right: 48,
+              top: 16,
+              bottom: 16,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: fullRowContent,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final dateWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            masehiWidget,
+            const SizedBox(width: 24),
+            buildDivider(),
+            const SizedBox(width: 24),
+            hijriWidget,
           ],
         );
 
