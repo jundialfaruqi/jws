@@ -36,6 +36,16 @@ class FinalScreen extends ConsumerWidget {
               leftMargin: 0,
             ),
           ),
+
+          // Border / Bingkai Emas Layar Iqomah (Overlay)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/final-screen/border-final-screen.png',
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
         ],
       ),
     );
