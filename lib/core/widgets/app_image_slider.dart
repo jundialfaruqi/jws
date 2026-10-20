@@ -21,14 +21,12 @@ class AppImageSlider extends ConsumerStatefulWidget {
 }
 
 class _AppImageSliderState extends ConsumerState<AppImageSlider> {
-  late final PageController _pageController;
   int _currentPage = 0;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 0);
 
     // Gunakan post-frame untuk mengatur initial index secara presisi absolut
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,30 +58,6 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
       setState(() {
         _currentPage = nextIndex;
       });
-
-      if (_pageController.hasClients) {
-        if (initial) {
-          _pageController.jumpToPage(_currentPage);
-        } else {
-          // Hanya gunakan animasi jika bergeser 1 slide (normal flow)
-          bool isAdjacent =
-              (_pageController.page?.round() ?? 0) == _currentPage - 1 ||
-              (_pageController.page?.round() ?? 0) == _currentPage + 1 ||
-              (_currentPage == 0 &&
-                  (_pageController.page?.round() ?? 0) ==
-                      widget.imageUrls.length - 1);
-
-          if (isAdjacent) {
-            _pageController.animateToPage(
-              _currentPage,
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.easeInOutCubic,
-            );
-          } else {
-            _pageController.jumpToPage(_currentPage);
-          }
-        }
-      }
     }
 
     // Jadwalkan eksekusi timer meledak persis di kelipatan 20.000 ms berikutnya
@@ -106,7 +80,6 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
   @override
   void dispose() {
     _timer?.cancel();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -146,17 +119,35 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
       );
     }
 
+    final safeIndex = _currentPage % widget.imageUrls.length;
+    final fullUrl = _getFullUrl(widget.imageUrls[safeIndex]);
+
     return Padding(
       padding: EdgeInsets.only(left: widget.leftMargin),
-      child: PageView.builder(
-        controller: _pageController,
-        physics:
-            const NeverScrollableScrollPhysics(), // Biarkan timer yang scroll
-        itemCount: widget.imageUrls.length,
-        itemBuilder: (context, index) {
-          final fullUrl = _getFullUrl(widget.imageUrls[index]);
-          return _SliderImageItem(url: fullUrl);
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 1000),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+          return Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: <Widget>[
+              ...previousChildren,
+              if (currentChild != null) currentChild,
+            ],
+          );
         },
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        child: _SliderImageItem(
+          key: ValueKey('slide_${safeIndex}_$fullUrl'),
+          url: fullUrl,
+        ),
       ),
     );
   }
@@ -164,17 +155,38 @@ class _AppImageSliderState extends ConsumerState<AppImageSlider> {
 
 class _SliderImageItem extends StatelessWidget {
   final String url;
-  const _SliderImageItem({required this.url});
+  const _SliderImageItem({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {
     if (!url.startsWith('http')) {
-      return Image.asset(
-        url,
+      return SizedBox.expand(
+        child: Image.asset(
+          url,
+          fit: BoxFit.fill,
+          cacheWidth: 1280,
+          cacheHeight: 720,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: Colors.blueGrey.shade900,
+              child: const Center(
+                child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    return SizedBox.expand(
+      child: CachedNetworkImage(
+        imageUrl: url,
         fit: BoxFit.fill,
-        cacheWidth: 1280,
-        cacheHeight: 720,
-        errorBuilder: (context, error, stackTrace) {
+        memCacheWidth: 1280,
+        memCacheHeight: 720,
+        fadeInDuration: const Duration(milliseconds: 250),
+        fadeOutDuration: const Duration(milliseconds: 100),
+        errorWidget: (context, url, error) {
           return Container(
             color: Colors.blueGrey.shade900,
             child: const Center(
@@ -182,24 +194,7 @@ class _SliderImageItem extends StatelessWidget {
             ),
           );
         },
-      );
-    }
-
-    return CachedNetworkImage(
-      imageUrl: url,
-      fit: BoxFit.fill,
-      memCacheWidth: 1280,
-      memCacheHeight: 720,
-      fadeInDuration: const Duration(milliseconds: 250),
-      fadeOutDuration: const Duration(milliseconds: 100),
-      errorWidget: (context, url, error) {
-        return Container(
-          color: Colors.blueGrey.shade900,
-          child: const Center(
-            child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
-          ),
-        );
-      },
+      ),
     );
   }
 }
