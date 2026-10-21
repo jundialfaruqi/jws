@@ -23,11 +23,18 @@ class AppJadwalSholatHorizontal extends ConsumerStatefulWidget {
 class _AppJadwalSholatHorizontalState
     extends ConsumerState<AppJadwalSholatHorizontal> {
   Timer? _timer;
-  bool _showPrimary = true;
+  bool _showImsak = true;
+  bool _showSyuruq = true;
 
   @override
   void initState() {
     super.initState();
+    final now = ref.read(timeSyncServiceProvider).now();
+    final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
+    final int cyclePosition = epochSeconds % 14;
+    _showImsak = cyclePosition >= 7;
+    _showSyuruq = cyclePosition >= 8 || cyclePosition == 0;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _syncAndScheduleNext();
     });
@@ -40,11 +47,17 @@ class _AppJadwalSholatHorizontalState
     final int nowMs = now.millisecondsSinceEpoch;
     final int epochSeconds = nowMs ~/ 1000;
 
-    // 1 Siklus total = 14 detik (7 detik Imsak/Terbit, 7 detik Subuh/Dhuha)
+    // 1 Siklus total = 14 detik (masing-masing fase berdurasi tepat 7 detik)
+    // Slot 1 (Imsak/Subuh) berganti di detik 0 dan detik 7
+    // Slot 2 (Syuruq/Dhuha) berganti di detik 1 dan detik 8 (berurutan dengan jeda 1 detik)
     final int cyclePosition = epochSeconds % 14;
 
     setState(() {
-      _showPrimary = cyclePosition < 7;
+      // Detik 0..6: Subuh, Detik 7..13: Imsak (durasi tepat 7 detik)
+      _showImsak = cyclePosition >= 7;
+
+      // Detik 1..7: Dhuha, Detik 8..13 & 0: Syuruq (durasi tepat 7 detik)
+      _showSyuruq = cyclePosition >= 8 || cyclePosition == 0;
     });
 
     final int msUntilNext = 1000 - (nowMs % 1000);
@@ -126,16 +139,11 @@ class _AppJadwalSholatHorizontalState
 
     final List<Map<String, dynamic>> prayersToDisplay = [];
     if (todayJadwal != null) {
-      if (_showPrimary) {
+      if (_showImsak) {
         prayersToDisplay.add({
           'label': 'IMSAK',
           'time': todayJadwal.imsak,
           'icon': TablerIcons.moon_2,
-        });
-        prayersToDisplay.add({
-          'label': 'SYURUQ',
-          'time': todayJadwal.terbit,
-          'icon': TablerIcons.sunrise,
         });
       } else {
         prayersToDisplay.add({
@@ -143,6 +151,15 @@ class _AppJadwalSholatHorizontalState
           'time': todayJadwal.subuh,
           'icon': TablerIcons.sun_low,
         });
+      }
+
+      if (_showSyuruq) {
+        prayersToDisplay.add({
+          'label': 'SYURUQ',
+          'time': todayJadwal.terbit,
+          'icon': TablerIcons.sunrise,
+        });
+      } else {
         prayersToDisplay.add({
           'label': 'DHUHA',
           'time': todayJadwal.dhuha,
