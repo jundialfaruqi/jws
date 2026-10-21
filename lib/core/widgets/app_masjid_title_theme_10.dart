@@ -17,6 +17,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
   final bool isLeftAligned;
   final bool showText;
   final double? width;
+  final double? height;
   final EdgeInsetsGeometry? padding;
 
   const AppMasjidTitleTheme10({
@@ -39,6 +40,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
     this.isLeftAligned = false,
     this.showText = true,
     this.width = 1000.0,
+    this.height = 148.0,
     this.padding,
   });
 

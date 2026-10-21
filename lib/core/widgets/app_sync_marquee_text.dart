@@ -121,13 +121,11 @@ class _AppSyncMarqueeTextState extends ConsumerState<AppSyncMarqueeText>
           );
         }
 
-        const double vPadding = 6.0;
-        final double boxHeight = _textHeight + (vPadding * 2);
-
         return SizedBox(
           width: availableWidth,
-          height: boxHeight,
+          height: _textHeight,
           child: ClipRect(
+            clipper: const _HorizontalMarqueeClipper(),
             child: ValueListenableBuilder<double>(
               valueListenable: _offsetNotifier,
               builder: (context, offset, child) {
@@ -140,27 +138,24 @@ class _AppSyncMarqueeTextState extends ConsumerState<AppSyncMarqueeText>
                 minWidth: 0,
                 maxWidth: double.infinity,
                 alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: vPadding),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.text,
-                        style: widget.style,
-                        maxLines: 1,
-                        softWrap: false,
-                      ),
-                      SizedBox(width: widget.blankSpace),
-                      Text(
-                        widget.text,
-                        style: widget.style,
-                        maxLines: 1,
-                        softWrap: false,
-                      ),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.text,
+                      style: widget.style,
+                      maxLines: 1,
+                      softWrap: false,
+                    ),
+                    SizedBox(width: widget.blankSpace),
+                    Text(
+                      widget.text,
+                      style: widget.style,
+                      maxLines: 1,
+                      softWrap: false,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -169,4 +164,16 @@ class _AppSyncMarqueeTextState extends ConsumerState<AppSyncMarqueeText>
       },
     );
   }
+}
+
+class _HorizontalMarqueeClipper extends CustomClipper<Rect> {
+  const _HorizontalMarqueeClipper();
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(0, -20, size.width, size.height + 40);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }
