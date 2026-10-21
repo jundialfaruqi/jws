@@ -139,7 +139,7 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
               color: AppColors.bgDark.withValues(alpha: 0.8),
             ),
             child: Text(
-              "PERIODE ${data.periodeString.toUpperCase()}",
+              data.periodeString.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,

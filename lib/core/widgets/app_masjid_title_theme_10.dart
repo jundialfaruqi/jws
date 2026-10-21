@@ -153,6 +153,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
                 fontSize: 28,
                 color: addressColor ?? textColor.withValues(alpha: 0.8),
                 fontFamily: 'Poppins',
+                height: 1.1,
               ),
               textAlign: textAlign,
               velocity: 50.0,
@@ -196,6 +197,7 @@ class AppMasjidTitleTheme10 extends StatelessWidget {
 
     return Container(
       width: width ?? 1000.0,
+      height: height,
       padding: padding ??
           const EdgeInsets.only(top: 24, bottom: 24, left: 20, right: 80),
       decoration: BoxDecoration(
