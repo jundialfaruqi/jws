@@ -94,7 +94,7 @@ class Theme10Widget extends StatelessWidget {
                     top: 0,
                     right: 0,
                     child: AppNextPrayerBarTheme10(
-                      dateCardWidth: 880,
+                      dateCardWidth: 700,
                       countdownCardWidth: 560,
                       jadwalSholatList: data.jadwalSholat,
                     ),
@@ -125,7 +125,7 @@ class Theme10Widget extends StatelessWidget {
           child: Center(
             child: Container(
               padding: const EdgeInsets.only(
-                left: 20,
+                left: 40,
                 top: 12,
                 bottom: 12,
                 right: 12, // Melebarkan sisi kanan pembungkus jam
@@ -139,7 +139,7 @@ class Theme10Widget extends StatelessWidget {
                 ),
                 color: AppColors.bgNavy,
               ),
-              child: const AppAnalogClock(size: 300),
+              child: const AppAnalogClock(size: 350),
             ),
           ),
         ),
@@ -160,7 +160,7 @@ class Theme10Widget extends StatelessWidget {
           top: 0,
           left: 0,
           child: AppMasjidTitleTheme10(
-            width: 1000,
+            width: 1200,
             title: data.profil.name,
             address: data.profil.address,
             logoMasjid: data.profil.logoMasjid,
@@ -176,5 +176,3 @@ class Theme10Widget extends StatelessWidget {
     );
   }
 }
-
-
