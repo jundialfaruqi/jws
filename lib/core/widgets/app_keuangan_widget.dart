@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
-import 'package:sticky_headers/sticky_headers.dart';
 import '../../features/main/models/laporan_keuangan_model.dart';
 import '../constants/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,10 +26,10 @@ class AppKeuanganWidget extends ConsumerStatefulWidget {
 
 class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
     with SingleTickerProviderStateMixin {
-  final ScrollController _scrollController = ScrollController();
   late Ticker _ticker;
   double _contentHeight = 0.0;
-  bool _isHeightCalculated = false;
+  final ValueNotifier<double> _offsetNotifier = ValueNotifier<double>(0.0);
+  final GlobalKey _contentKey = GlobalKey();
 
   @override
   void initState() {
@@ -43,19 +42,7 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
   }
 
   void _onTick(Duration elapsed) {
-    if (!mounted || !_scrollController.hasClients) return;
-
-    // Hitung tinggi 1 set konten jika belum
-    if (!_isHeightCalculated) {
-      final maxExtent = _scrollController.position.maxScrollExtent;
-      if (maxExtent > 0) {
-        // Karena kita merender 2 set konten identik (plus header),
-        // kita akan menghitung tinggi per set nanti setelah frame dirender penuh.
-        // Untuk sekarang, kita asumsikan jika bisa scroll, kita cari tingginya.
-      }
-    }
-
-    if (_contentHeight == 0.0) return;
+    if (!mounted || _contentHeight == 0.0) return;
 
     // Logika Sinkronisasi Jam Dunia (Keajaiban Sinkronisasi)
     final int nowMs = ref
@@ -76,18 +63,34 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
     // Hitung sisa jarak agar animasi berulang (looping) secara mulus di dalam 1 set konten
     final double position = distance % _contentHeight;
 
-    // Update posisi scroll secara melompat (jumpTo) dengan pembulatan agar StickyHeader tidak gempa
-    _scrollController.jumpTo(position.floorToDouble());
+    // Update posisi via ValueNotifier tanpa setState dan tanpa pembulatan agar sub-pixel smooth
+    _offsetNotifier.value = -position;
+  }
+
+  @override
+  void didUpdateWidget(covariant AppKeuanganWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.laporanData != widget.laporanData) {
+      _contentHeight = 0.0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final renderBox =
+            _contentKey.currentContext?.findRenderObject() as RenderBox?;
+        if (renderBox != null) {
+          setState(() {
+            _contentHeight = renderBox.size.height;
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _ticker.dispose();
-    _scrollController.dispose();
+    _offsetNotifier.dispose();
     super.dispose();
   }
-
-  final GlobalKey _contentKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -163,36 +166,51 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
                       _contentHeight != renderBox.size.height) {
                     setState(() {
                       _contentHeight = renderBox.size.height;
-                      _isHeightCalculated = true;
                     });
                   }
                 });
 
-                return SingleChildScrollView(
-                  controller: _scrollController,
-                  physics:
-                      const NeverScrollableScrollPhysics(), // Scroll hanya via Ticker
-                  child: Column(
-                    children: [
-                      // Set Konten Asli (Diukur Tingginya)
-                      Container(
-                        key: _contentKey,
+                return ClipRect(
+                  child: RepaintBoundary(
+                    child: ValueListenableBuilder<double>(
+                      valueListenable: _offsetNotifier,
+                      builder: (context, offsetY, child) {
+                        return Transform.translate(
+                          offset: Offset(0, offsetY),
+                          child: child,
+                        );
+                      },
+                      child: OverflowBox(
+                        minWidth: constraints.maxWidth,
+                        maxWidth: constraints.maxWidth,
+                        minHeight: 0,
+                        maxHeight: double.infinity,
+                        alignment: Alignment.topCenter,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: scrollItems,
+                          children: [
+                            // Set Konten Asli (Diukur Tingginya)
+                            Container(
+                              key: _contentKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: scrollItems,
+                              ),
+                            ),
+                            // Set Konten Bayangan 1 (Untuk Seamless Looping)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: scrollItems,
+                            ),
+                            // Set Konten Bayangan 2 (Jaga-jaga jika tinggi layar sangat besar)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: scrollItems,
+                            ),
+                          ],
                         ),
                       ),
-                      // Set Konten Bayangan 1 (Untuk Seamless Looping)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: scrollItems,
-                      ),
-                      // Set Konten Bayangan 2 (Jaga-jaga jika tinggi layar sangat besar)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: scrollItems,
-                      ),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -251,83 +269,86 @@ class _AppKeuanganWidgetState extends ConsumerState<AppKeuanganWidget>
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 32),
-      child: StickyHeader(
-        header: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.bgBlue,
-            borderRadius: BorderRadius.circular(0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.bgBlue,
+              borderRadius: BorderRadius.circular(0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Text(
+              group.categoryName.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
               ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // const SizedBox(height: 16),
+              // SUMMARY KATEGORI
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.bgPrimary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(0),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                ),
+                child: Column(
+                  children: [
+                    _buildSummaryRow(
+                      "Pemasukan",
+                      fmt.format(group.sumMasuk),
+                      Colors.greenAccent,
+                    ),
+                    _buildSummaryRow(
+                      "Pengeluaran",
+                      fmt.format(group.sumKeluar),
+                      Colors.redAccent,
+                    ),
+                    const Divider(color: Colors.white24, height: 16),
+                    _buildSummaryRow(
+                      "Total",
+                      fmt.format(group.ending),
+                      Colors.white,
+                    ),
+                    _buildSummaryRow(
+                      "Saldo Sebelumnya",
+                      fmt.format(group.saldoSebelumnya),
+                      Colors.white,
+                    ),
+                    const Divider(color: Colors.white24, height: 16),
+                    _buildSummaryRow(
+                      "Saldo Akhir",
+                      fmt.format(group.saldoAkhir),
+                      AppColors.textYellow,
+                      isBold: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 32,
+              ), // Jarak lebih luas antara rincian item dengan card summary
+              // TRANSAKSI
+              ...group.items.map((item) => _buildTransactionItem(item, fmt)),
             ],
           ),
-          child: Text(
-            group.categoryName.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // const SizedBox(height: 16),
-            // SUMMARY KATEGORI
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.bgPrimary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(0),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              ),
-              child: Column(
-                children: [
-                  _buildSummaryRow(
-                    "Pemasukan",
-                    fmt.format(group.sumMasuk),
-                    Colors.greenAccent,
-                  ),
-                  _buildSummaryRow(
-                    "Pengeluaran",
-                    fmt.format(group.sumKeluar),
-                    Colors.redAccent,
-                  ),
-                  const Divider(color: Colors.white24, height: 16),
-                  _buildSummaryRow(
-                    "Total",
-                    fmt.format(group.ending),
-                    Colors.white,
-                  ),
-                  _buildSummaryRow(
-                    "Saldo Sebelumnya",
-                    fmt.format(group.saldoSebelumnya),
-                    Colors.white,
-                  ),
-                  const Divider(color: Colors.white24, height: 16),
-                  _buildSummaryRow(
-                    "Saldo Akhir",
-                    fmt.format(group.saldoAkhir),
-                    AppColors.textYellow,
-                    isBold: true,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 32,
-            ), // Jarak lebih luas antara rincian item dengan card summary
-            // TRANSAKSI
-            ...group.items.map((item) => _buildTransactionItem(item, fmt)),
-          ],
-        ),
+        ],
       ),
     );
   }
