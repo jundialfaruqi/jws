@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -44,12 +45,19 @@ class AppJadwalSholat extends ConsumerStatefulWidget {
 }
 
 class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
-  bool _showPrimary = true;
   Timer? _timer;
+  bool _showImsak = true;
+  bool _showSyuruq = true;
 
   @override
   void initState() {
     super.initState();
+    final now = ref.read(timeSyncServiceProvider).now();
+    final int epochSeconds = now.millisecondsSinceEpoch ~/ 1000;
+    final int cyclePosition = epochSeconds % 14;
+    _showImsak = cyclePosition >= 7;
+    _showSyuruq = cyclePosition >= 8 || cyclePosition == 0;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _syncAndScheduleNext();
     });
@@ -62,18 +70,65 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     final int nowMs = now.millisecondsSinceEpoch;
     final int epochSeconds = nowMs ~/ 1000;
 
-    // 1 Siklus total = 14 detik (7 detik Imsak, 7 detik Syuruq)
+    // 1 Siklus total = 14 detik (masing-masing fase berdurasi tepat 7 detik)
+    // Slot 1 (Imsak/Subuh) berganti di detik 0 dan detik 7
+    // Slot 2 (Syuruq/Dhuha) berganti di detik 1 dan detik 8 (berurutan dengan jeda 1 detik)
     final int cyclePosition = epochSeconds % 14;
 
     setState(() {
-      // true (0-6) tampilkan Imsak/Terbit
-      // false (7-13) tampilkan Subuh/Dhuha
-      _showPrimary = cyclePosition < 7;
+      // Detik 0..6: Subuh, Detik 7..13: Imsak (durasi tepat 7 detik)
+      _showImsak = cyclePosition >= 7;
+
+      // Detik 1..7: Dhuha, Detik 8..13 & 0: Syuruq (durasi tepat 7 detik)
+      _showSyuruq = cyclePosition >= 8 || cyclePosition == 0;
     });
 
     final int msUntilNext = 1000 - (nowMs % 1000);
     _timer?.cancel();
     _timer = Timer(Duration(milliseconds: msUntilNext), _syncAndScheduleNext);
+  }
+
+  Widget _buildFlipTransition(Widget child, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      child: child,
+      builder: (context, childWidget) {
+        final isIncoming = animation.status != AnimationStatus.reverse;
+        final value = animation.value;
+
+        if (isIncoming) {
+          if (value < 0.5) {
+            return const SizedBox.shrink();
+          }
+          final rawProgress = (value - 0.5) * 2.0;
+          final progress = Curves.easeOutCubic.transform(rawProgress);
+          final angle = -math.pi / 2 * (1.0 - progress);
+
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateX(angle),
+            child: childWidget,
+          );
+        } else {
+          if (value < 0.5) {
+            return const SizedBox.shrink();
+          }
+          final rawProgress = (1.0 - value) * 2.0;
+          final progress = Curves.easeInCubic.transform(rawProgress);
+          final angle = math.pi / 2 * progress;
+
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.0015)
+              ..rotateX(angle),
+            child: childWidget,
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -169,7 +224,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
     }
 
     final List<Map<String, dynamic>> jadwal = [
-      _showPrimary
+      _showImsak
           ? {
               'nama': 'IMSAK',
               'jam': todayJadwal?.imsak ?? '--:--',
@@ -184,7 +239,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               'color': getColor('SUBUH'),
               'bgColor': getBgColor('SUBUH'),
             },
-      _showPrimary
+      _showSyuruq
           ? {
               'nama': 'SYURUQ',
               'jam': todayJadwal?.terbit ?? '--:--',
@@ -313,28 +368,22 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   ),
                   decoration: decoration,
                   child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  final offsetAnimation = Tween<Offset>(
-                    begin: const Offset(
-                      -0.3,
-                      0.0,
-                    ), // Muncul dari agak kiri (horizontal)
-                    end: Offset.zero,
-                  ).animate(animation);
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Row(
-                  key:
-                      uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
+                    duration: const Duration(milliseconds: 700),
+                    switchInCurve: Curves.linear,
+                    switchOutCurve: Curves.linear,
+                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                      return Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    transitionBuilder: _buildFlipTransition,
+                    child: Row(
+                      key:
+                          uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
