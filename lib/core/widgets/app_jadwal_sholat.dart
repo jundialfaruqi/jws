@@ -361,79 +361,79 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
                   );
                 }
 
-                return Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: widget.useCardVariant ? 19 : 20,
-                    horizontal: 24,
-                  ),
-                  decoration: decoration,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 700),
-                    switchInCurve: Curves.linear,
-                    switchOutCurve: Curves.linear,
-                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                      return Stack(
-                        alignment: Alignment.centerLeft,
-                        children: [
-                          ...previousChildren,
-                          if (currentChild != null) currentChild,
-                        ],
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 700),
+                        switchInCurve: Curves.linear,
+                        switchOutCurve: Curves.linear,
+                        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        transitionBuilder: _buildFlipTransition,
+                        child: Container(
+                          key: uniqueKey,
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            vertical: widget.useCardVariant ? 19 : 20,
+                            horizontal: 24,
+                          ),
+                          decoration: decoration,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Icon Paling Kiri
+                              Icon(
+                                item['icon'] as IconData,
+                                color: itemColor,
+                                size: widget.iconSize ?? 48,
+                              ),
+                              const SizedBox(width: 32),
+                              // Column Nama dan Jam di Kanannya
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['nama'] as String,
+                                      style: TextStyle(
+                                        fontSize: widget.titleFontSize ?? 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: itemColor,
+                                        fontFamily: 'Poppins',
+                                        letterSpacing: 4.0,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 4,
+                                    ), // Kembalikan spasi antara judul dan jam
+                                    Text(
+                                      item['jam'] as String,
+                                      style: TextStyle(
+                                        fontSize:
+                                            widget.timeFontSize ?? 72, // Jam diperbesar
+                                        fontWeight: FontWeight.bold,
+                                        color: itemColor,
+                                        fontFamily: 'Poppins',
+                                        height: 1.0,
+                                        letterSpacing:
+                                            5.0, // Memberikan sedikit spasi antar karakter
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
-                    },
-                    transitionBuilder: _buildFlipTransition,
-                    child: Row(
-                      key:
-                          uniqueKey, // Kunci unik ditempatkan pada Row agar merender ulang sekalian
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Icon Paling Kiri
-                    Icon(
-                      item['icon'] as IconData,
-                      color: itemColor,
-                      size: widget.iconSize ?? 48,
-                    ),
-                    const SizedBox(width: 32),
-                    // Column Nama dan Jam di Kanannya
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['nama'] as String,
-                            style: TextStyle(
-                              fontSize: widget.titleFontSize ?? 32,
-                              fontWeight: FontWeight.bold,
-                              color: itemColor,
-                              fontFamily: 'Poppins',
-                              letterSpacing: 4.0,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 4,
-                          ), // Kembalikan spasi antara judul dan jam
-                          Text(
-                            item['jam'] as String,
-                            style: TextStyle(
-                              fontSize:
-                                  widget.timeFontSize ?? 72, // Jam diperbesar
-                              fontWeight: FontWeight.bold,
-                              color: itemColor,
-                              fontFamily: 'Poppins',
-                              height: 1.0,
-                              letterSpacing:
-                                  5.0, // Memberikan sedikit spasi antar karakter
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
           },
         ),
       );
