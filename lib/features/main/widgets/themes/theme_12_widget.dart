@@ -182,6 +182,10 @@ class Theme12Widget extends StatelessWidget {
                   textColor: AppColors.textYellow,
                   addressColor: AppColors.textInverse,
                   isRightAligned: true,
+                  enableMarquee: false,
+                  autoShrink: true,
+                  maxCharThreshold: 31,
+                  fixedHeight: 148.0,
                 ),
 
                 // Pembatas Horisontal Dihapus

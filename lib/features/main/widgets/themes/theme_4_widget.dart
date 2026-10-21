@@ -43,6 +43,10 @@ class Theme4Widget extends StatelessWidget {
               textColor: AppColors.textYellow,
               addressColor: AppColors.textInverse,
               isRightAligned: true,
+              enableMarquee: false,
+              autoShrink: true,
+              leftMargin: 600,
+              fixedHeight: 148.0,
             ),
 
             // Info Bar Tanggal (Tanpa Countdown)

@@ -43,6 +43,10 @@ class Theme7Widget extends StatelessWidget {
               textColor: AppColors.textYellow,
               addressColor: AppColors.textInverse,
               isRightAligned: true,
+              enableMarquee: false,
+              autoShrink: true,
+              leftMargin: 530,
+              fixedHeight: 148.0,
             ),
 
             // Info Bar Waktu Sholat & Tanggal

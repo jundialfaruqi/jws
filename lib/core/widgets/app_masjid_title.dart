@@ -19,6 +19,11 @@ class AppMasjidTitle extends StatelessWidget {
   final double? customLogoSize;
   final double titleFontSize;
   final double addressFontSize;
+  final double? leftMargin;
+  final bool enableMarquee;
+  final bool autoShrink;
+  final int maxCharThreshold;
+  final double? fixedHeight;
 
   const AppMasjidTitle({
     super.key,
@@ -42,6 +47,11 @@ class AppMasjidTitle extends StatelessWidget {
     this.customLogoSize,
     this.titleFontSize = 64.0,
     this.addressFontSize = 28.0,
+    this.leftMargin,
+    this.enableMarquee = true,
+    this.autoShrink = false,
+    this.maxCharThreshold = 28,
+    this.fixedHeight,
   });
 
   String _getFullUrl(String? path) {
@@ -123,40 +133,107 @@ class AppMasjidTitle extends StatelessWidget {
       );
     }
 
+    // Perhitungan autoShrink untuk judul masjid jika melebihi batas karakter
+    double effectiveTitleFontSize = titleFontSize;
+    if (autoShrink && title.length > maxCharThreshold) {
+      effectiveTitleFontSize =
+          (titleFontSize * (maxCharThreshold / title.length)).clamp(
+            24.0,
+            titleFontSize,
+          );
+    }
+
     // Teks widget builder agar tidak berulang
     Widget buildTextColumn(CrossAxisAlignment alignment, TextAlign textAlign) {
+      final textAlignment = isRightAligned
+          ? Alignment.centerRight
+          : (isLeftAligned ? Alignment.centerLeft : Alignment.center);
+
+      Widget titleWidget;
+      if (!enableMarquee) {
+        titleWidget = SizedBox(
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: textAlignment,
+            child: Text(
+              title,
+              textAlign: textAlign,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: effectiveTitleFontSize,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+                fontFamily: 'Poppins',
+                letterSpacing: 1.5,
+                height: 1.0,
+                shadows: shadows,
+              ),
+            ),
+          ),
+        );
+      } else {
+        titleWidget = AppSyncMarqueeText(
+          text: title,
+          style: TextStyle(
+            fontSize: titleFontSize,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+            fontFamily: 'Poppins',
+            letterSpacing: 1.5,
+            height: 1.0,
+            shadows: shadows,
+          ),
+          textAlign: textAlign,
+          velocity: 60.0,
+          blankSpace: 80.0,
+        );
+      }
+
+      Widget? addressWidget;
+      if (address != null && address!.isNotEmpty) {
+        if (!enableMarquee) {
+          addressWidget = SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: textAlignment,
+              child: Text(
+                address!,
+                textAlign: textAlign,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: addressFontSize,
+                  color: addressColor ?? textColor.withValues(alpha: 0.8),
+                  fontFamily: 'Poppins',
+                  height: 1.1,
+                ),
+              ),
+            ),
+          );
+        } else {
+          addressWidget = AppSyncMarqueeText(
+            text: address!,
+            style: TextStyle(
+              fontSize: addressFontSize,
+              color: addressColor ?? textColor.withValues(alpha: 0.8),
+              fontFamily: 'Poppins',
+            ),
+            textAlign: textAlign,
+            velocity: 50.0,
+            blankSpace: 60.0,
+          );
+        }
+      }
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: alignment,
         children: [
-          AppSyncMarqueeText(
-            text: title,
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-              fontFamily: 'Poppins',
-              letterSpacing: 1.5,
-              height: 1.0,
-              shadows: shadows,
-            ),
-            textAlign: textAlign,
-            velocity: 60.0,
-            blankSpace: 80.0,
-          ),
-          if (address != null && address!.isNotEmpty) ...[
+          titleWidget,
+          if (addressWidget != null) ...[
             const SizedBox(height: 2),
-            AppSyncMarqueeText(
-              text: address!,
-              style: TextStyle(
-                fontSize: addressFontSize,
-                color: addressColor ?? textColor.withValues(alpha: 0.8),
-                fontFamily: 'Poppins',
-              ),
-              textAlign: textAlign,
-              velocity: 50.0,
-              blankSpace: 60.0,
-            ),
+            addressWidget,
           ],
         ],
       );
@@ -199,7 +276,13 @@ class AppMasjidTitle extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 24, bottom: 24, left: 48, right: 24),
+      height: fixedHeight,
+      padding: EdgeInsets.only(
+        top: 24,
+        bottom: 24,
+        left: leftMargin ?? 48,
+        right: 24,
+      ),
       color: backgroundColor,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
