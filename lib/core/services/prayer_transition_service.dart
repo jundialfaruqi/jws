@@ -60,6 +60,7 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final AudioPlayer _adzanPlayer = AudioPlayer();
   bool _hasPlayedIqomahBeep = false;
+  bool _hasPlayedSyuruqBeep = false;
   DateTime? _targetEndTime;
 
   @override
@@ -147,9 +148,12 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
         if (now.isBefore(_targetEndTime!)) {
           // Update state hanya jika detik (integer) benar-benar berubah (mencegah spam rebuild UI 10x per detik)
           if (newRemaining != state.remainingSeconds) {
-            // Cek beep 5 detik terakhir di iqomah
+            // Cek beep 5 detik terakhir di iqomah atau khusus syuruq pada alert
             if (state.status == PrayerState.iqomah && newRemaining <= 5 && newRemaining > 0 && !_hasPlayedIqomahBeep) {
               _hasPlayedIqomahBeep = true;
+              _playSound();
+            } else if (state.status == PrayerState.alert && state.prayerName == 'SYURUQ' && newRemaining <= 5 && newRemaining > 0 && !_hasPlayedSyuruqBeep) {
+              _hasPlayedSyuruqBeep = true;
               _playSound();
             }
             state = state.copyWith(remainingSeconds: newRemaining);
@@ -262,8 +266,9 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
     if (now.compareTo(exactEndTime) >= 0) return;
     
-    // Reset status bunyi beep khusus iqomah
+    // Reset status bunyi beep khusus iqomah dan syuruq
     _hasPlayedIqomahBeep = false;
+    _hasPlayedSyuruqBeep = false;
     
     // Bunyikan beep HANYA JIKA baru mulai (selisih <= 2 detik dari awal fase)
     if (totalSeconds - remainingSeconds <= 2) {
@@ -308,10 +313,13 @@ class PrayerTransitionNotifier extends Notifier<PrayerTransitionState> {
 
     if (nextStatus == PrayerState.idle) {
       _targetEndTime = null;
+      _hasPlayedIqomahBeep = false;
+      _hasPlayedSyuruqBeep = false;
       state = PrayerTransitionState(); // Reset
       _navigateToMain();
     } else {
       _hasPlayedIqomahBeep = false;
+      _hasPlayedSyuruqBeep = false;
       int durationMinutes = _getDurationForState(nextStatus, name, durasi);
       
       _targetEndTime = now.add(Duration(minutes: durationMinutes));
