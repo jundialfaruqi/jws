@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'app_version_text.dart';
+import 'app_info_dialog.dart';
 
 class TvDrawerMenu extends StatefulWidget {
   final VoidCallback onDrawerClosed;
@@ -21,6 +22,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
 
   final FocusNode _drawerWrapperFocusNode = FocusNode();
   final FocusNode _settingsFocusNode = FocusNode();
+  final FocusNode _infoFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -42,12 +44,31 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
       // Mulanya tertutup
     });
 
-    // Cegah fokus melompat keluar dari laci (menghilang ke ruang hampa)
+    // Navigasi D-Pad antar menu laci
     _settingsFocusNode.onKeyEvent = (node, event) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
-          event.logicalKey == LogicalKeyboardKey.arrowUp ||
-          event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        return KeyEventResult.handled;
+      if (event is KeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          _infoFocusNode.requestFocus();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp ||
+            event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          return KeyEventResult.handled;
+        }
+      }
+      return KeyEventResult.ignored;
+    };
+
+    _infoFocusNode.onKeyEvent = (node, event) {
+      if (event is KeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          _settingsFocusNode.requestFocus();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+            event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          return KeyEventResult.handled;
+        }
       }
       return KeyEventResult.ignored;
     };
@@ -76,7 +97,9 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
 
   void _onFocusChanged(bool _) {
     final isFocused =
-        _settingsFocusNode.hasFocus || _drawerWrapperFocusNode.hasFocus;
+        _settingsFocusNode.hasFocus ||
+        _infoFocusNode.hasFocus ||
+        _drawerWrapperFocusNode.hasFocus;
 
     // Auto-dismiss jika dibiarkan (meskipun sedang fokus)
     if (isFocused) {
@@ -89,12 +112,18 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
     context.pushNamed('settings');
   }
 
+  void _handlePressInfo() {
+    hideDrawer();
+    AppInfoDialog.show(context);
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
     _hideTimer?.cancel();
     _drawerWrapperFocusNode.dispose();
     _settingsFocusNode.dispose();
+    _infoFocusNode.dispose();
     super.dispose();
   }
 
@@ -175,6 +204,14 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                     onPressed: _handlePressSettings,
                     icon: Icons.settings,
                     label: 'Pengaturan',
+                  ),
+                  const SizedBox(height: 8),
+                  _TvDrawerMenuItem(
+                    focusNode: _infoFocusNode,
+                    onFocusChange: _onFocusChanged,
+                    onPressed: _handlePressInfo,
+                    icon: Icons.info_outline,
+                    label: 'Informasi',
                   ),
                   const Spacer(),
                   const Center(
