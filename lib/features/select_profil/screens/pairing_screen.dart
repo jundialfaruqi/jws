@@ -142,71 +142,152 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                 'TAUTKAN TV MASJID',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
+                  fontSize: 56,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                  fontFamily: 'Poppins',
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               const Text(
                 'Scan QR Code dengan HP Anda atau masukkan kode 6 digit di Web Admin:',
-                style: TextStyle(color: Colors.white70, fontSize: 26),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
+                ),
               ),
-              const SizedBox(height: 56),
+              const SizedBox(height: 42),
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Text(
                     _error!,
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 24),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (_pairingCode != null)
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(32),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            blurRadius: 36,
+                            spreadRadius: 4,
+                          ),
+                        ],
                       ),
                       child: QrImageView(
-                        data: '${ApiConstant.baseUrl}tv-pairing?code=$_pairingCode',
+                        data:
+                            '${ApiConstant.baseUrl}tv-pairing?code=$_pairingCode',
                         version: QrVersions.auto,
-                        size: 220.0,
+                        size: 440.0,
                         backgroundColor: Colors.white,
+                        padding: EdgeInsets.zero,
                       ),
                     ),
-                  if (_pairingCode != null) const SizedBox(width: 48),
+                  if (_pairingCode != null) const SizedBox(width: 64),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 56,
-                      vertical: 28,
-                    ),
+                    height: 488,
+                    padding: const EdgeInsets.symmetric(horizontal: 64),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.blueAccent, width: 3),
-                    ),
-                    child: Text(
-                      _isLoading ? '...' : (_pairingCode ?? '...'),
-                      style: const TextStyle(
-                        color: Colors.blueAccent,
-                        fontSize: 90,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 16,
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: const Color(0xFFFFD54F),
+                        width: 4.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFFFFD54F,
+                          ).withValues(alpha: 0.18),
+                          blurRadius: 36,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'KODE PAIRING',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 8,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _isLoading ? '...' : (_pairingCode ?? '...'),
+                            style: const TextStyle(
+                              color: Color(0xFFFFD54F),
+                              fontSize: 160,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 20,
+                              fontFamily: 'JetBrainsMono',
+                              height: 1.0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        Text(
+                          'Masukkan kode ini pada Web Admin',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.65),
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 64),
-              const CircularProgressIndicator(color: Colors.white38),
-              const SizedBox(height: 20),
-              Text(
-                _isLoading ? 'Memuat kode aktivasi...' : 'Menunggu aktivasi...',
-                style: const TextStyle(color: Colors.white54, fontSize: 22),
+              const SizedBox(height: 44),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 34,
+                    height: 34,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4.0,
+                      color: Color(0xFFFFD54F),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Text(
+                    _isLoading
+                        ? 'Memuat kode aktivasi...'
+                        : 'Menunggu aktivasi dari Web Admin...',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
