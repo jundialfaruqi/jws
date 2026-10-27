@@ -76,16 +76,13 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
 
   void _onFocusChanged(bool _) {
     final isFocused =
-        _settingsFocusNode.hasFocus ||
-        _drawerWrapperFocusNode.hasFocus;
+        _settingsFocusNode.hasFocus || _drawerWrapperFocusNode.hasFocus;
 
     // Auto-dismiss jika dibiarkan (meskipun sedang fokus)
     if (isFocused) {
       _startHideTimer();
     }
   }
-
-
 
   void _handlePressSettings() {
     hideDrawer();
@@ -111,97 +108,94 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
           offstage: isClosed,
           child: ExcludeFocus(
             excluding: isClosed,
-            child: SlideTransition(
-              position: _offsetAnimation,
-              child: child!,
-            ),
+            child: SlideTransition(position: _offsetAnimation, child: child!),
           ),
         );
       },
       child: Focus(
-          focusNode: _drawerWrapperFocusNode,
-          onKeyEvent: (node, event) {
-            // Tangkap D-Pad Kiri untuk menutup drawer
-            if (event is KeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-              hideDrawer();
-              return KeyEventResult.handled;
-            }
+        focusNode: _drawerWrapperFocusNode,
+        onKeyEvent: (node, event) {
+          // Tangkap D-Pad Kiri untuk menutup drawer
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            hideDrawer();
+            return KeyEventResult.handled;
+          }
 
-            // Jika ada input tombol lain, reset timer agar tidak tiba-tiba tertutup saat user sedang aktif navigasi
-            if (event is KeyDownEvent) {
-              _startHideTimer();
-            }
+          // Jika ada input tombol lain, reset timer agar tidak tiba-tiba tertutup saat user sedang aktif navigasi
+          if (event is KeyDownEvent) {
+            _startHideTimer();
+          }
 
-            return KeyEventResult.ignored;
-          },
-          child: Container(
-            width: 450,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.85),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  blurRadius: 15,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: FocusTraversalGroup(
-                policy: WidgetOrderTraversalPolicy(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 64),
-                    Center(
-                      child: Image.asset(
-                        'assets/logo/diskominfotiksan-logo.png',
-                        width: 320,
-                        fit: BoxFit.contain,
+          return KeyEventResult.ignored;
+        },
+        child: Container(
+          width: 450,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.85),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 15,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: FocusTraversalGroup(
+              policy: WidgetOrderTraversalPolicy(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 64),
+                  Center(
+                    child: Image.asset(
+                      'assets/logo/diskominfotiksan-logo.png',
+                      width: 320,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  const Center(
+                    child: Text(
+                      'JWS Diskominfo',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    const Center(
-                      child: Text(
-                        'JWS Diskominfo',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
+                  ),
+                  const SizedBox(height: 48),
 
-                    _TvDrawerMenuItem(
-                      focusNode: _settingsFocusNode,
-                      onFocusChange: _onFocusChanged,
-                      onPressed: _handlePressSettings,
-                      icon: Icons.settings,
-                      label: 'Pengaturan',
-                    ),
-                    const Spacer(),
-                    const Center(
-                      child: AppVersionText(
-                        style: TextStyle(
-                          color: Colors.white38,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                          letterSpacing: 1.2,
-                        ),
+                  _TvDrawerMenuItem(
+                    focusNode: _settingsFocusNode,
+                    onFocusChange: _onFocusChanged,
+                    onPressed: _handlePressSettings,
+                    icon: Icons.settings,
+                    label: 'Pengaturan',
+                  ),
+                  const Spacer(),
+                  const Center(
+                    child: AppVersionText(
+                      style: TextStyle(
+                        color: Colors.white38,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                        letterSpacing: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 36),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 36),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
