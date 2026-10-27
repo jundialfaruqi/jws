@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
+import 'app_version_text.dart';
 
 class TvDrawerMenu extends StatefulWidget {
   final VoidCallback onDrawerClosed;
@@ -181,6 +182,19 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                       icon: Icons.settings,
                       label: 'Pengaturan',
                     ),
+                    const Spacer(),
+                    const Center(
+                      child: AppVersionText(
+                        style: TextStyle(
+                          color: Colors.white38,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 36),
                   ],
                 ),
               ),
