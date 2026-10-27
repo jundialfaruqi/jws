@@ -204,14 +204,15 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                     onPressed: _handlePressSettings,
                     icon: Icons.settings,
                     label: 'Pengaturan',
+                    showBorderBottom: true,
                   ),
-                  const SizedBox(height: 8),
                   _TvDrawerMenuItem(
                     focusNode: _infoFocusNode,
                     onFocusChange: _onFocusChanged,
                     onPressed: _handlePressInfo,
                     icon: Icons.info_outline,
                     label: 'Informasi',
+                    showBorderBottom: false,
                   ),
                   const Spacer(),
                   const Center(
@@ -242,6 +243,7 @@ class _TvDrawerMenuItem extends StatefulWidget {
   final VoidCallback onPressed;
   final FocusNode? focusNode;
   final ValueChanged<bool>? onFocusChange;
+  final bool showBorderBottom;
 
   const _TvDrawerMenuItem({
     required this.label,
@@ -249,6 +251,7 @@ class _TvDrawerMenuItem extends StatefulWidget {
     required this.onPressed,
     this.focusNode,
     this.onFocusChange,
+    this.showBorderBottom = false,
   });
 
   @override
@@ -283,6 +286,12 @@ class _TvDrawerMenuItemState extends State<_TvDrawerMenuItem> {
                 color: _isFocused ? Colors.white : Colors.transparent,
                 width: 6,
               ),
+              bottom: widget.showBorderBottom
+                  ? BorderSide(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      width: 1,
+                    )
+                  : BorderSide.none,
             ),
           ),
           child: Row(
