@@ -60,7 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/alert',
         name: 'alert',
-        builder: (context, state) => const AlertScreen(),
+        builder: (context, state) {
+          final preview = state.uri.queryParameters['preview'] ?? (state.extra as String?);
+          return AlertScreen(previewPrayerName: preview);
+        },
       ),
       GoRoute(
         path: '/adzan',

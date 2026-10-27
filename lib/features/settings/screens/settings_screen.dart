@@ -113,11 +113,30 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SettingsItemWidget(
             icon: Icons.warning_amber_rounded,
-            title: 'Simulasi Layar Peringatan (Debug)',
+            title: 'Simulasi Layar Peringatan Syuruq (Debug)',
             subtitle:
-                'Tekan untuk melihat preview layar peringatan (Imsak, Shuruq, Dhuha)',
+                'Tekan untuk melihat preview layar peringatan Syuruq',
             onTap: () {
-              if (context.mounted) context.pushNamed('alert');
+              if (context.mounted) {
+                context.pushNamed(
+                  'alert',
+                  queryParameters: {'preview': 'SYURUQ'},
+                );
+              }
+            },
+          ),
+          _SettingsItemWidget(
+            icon: Icons.wb_sunny_rounded,
+            title: 'Simulasi Layar Dhuha (Debug)',
+            subtitle:
+                'Tekan untuk melihat preview layar peringatan waktu Dhuha',
+            onTap: () {
+              if (context.mounted) {
+                context.pushNamed(
+                  'alert',
+                  queryParameters: {'preview': 'DHUHA'},
+                );
+              }
             },
           ),
           _SettingsItemWidget(

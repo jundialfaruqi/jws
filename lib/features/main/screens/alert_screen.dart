@@ -9,7 +9,8 @@ import '../../main/providers/my_masjid_provider.dart';
 import '../models/jadwal_sholat_model.dart';
 
 class AlertScreen extends ConsumerWidget {
-  const AlertScreen({super.key});
+  final String? previewPrayerName;
+  const AlertScreen({super.key, this.previewPrayerName});
 
   String _formatCountdown(int totalSeconds) {
     int minutes = totalSeconds ~/ 60;
@@ -40,8 +41,9 @@ class AlertScreen extends ConsumerWidget {
       }
     }
 
+    final defaultPrayer = previewPrayerName ?? 'SYURUQ';
     String displayPrayerName = transitionState.prayerName.isEmpty
-        ? 'SYURUQ'
+        ? defaultPrayer
         : transitionState.prayerName;
 
     if (displayPrayerName == 'DZUHUR' && now.weekday == DateTime.friday) {
@@ -50,7 +52,7 @@ class AlertScreen extends ConsumerWidget {
 
     final isSyuruq = displayPrayerName == 'SYURUQ';
     final isDhuha = displayPrayerName == 'DHUHA';
-    final barWidth = isSyuruq ? 1565.0 : 850.0;
+    final barWidth = isSyuruq ? 850.0 : 850.0;
 
     final dhuhaTime = transitionState.prayerTime.isNotEmpty
         ? transitionState.prayerTime
@@ -135,7 +137,7 @@ class AlertScreen extends ConsumerWidget {
                 // Progress Bar
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isSyuruq ? 20.0 : 500.0,
+                    horizontal: isSyuruq ? 20.0 : (isDhuha ? 200.0 : 500.0),
                   ),
                   child: Column(
                     children: [
@@ -212,7 +214,7 @@ class AlertScreen extends ConsumerWidget {
                                       child: Text(
                                         '$dhuhaTime s/d $dzuhurTime',
                                         style: const TextStyle(
-                                          fontSize: 120,
+                                          fontSize: 220,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                           fontFamily: 'JetBrainsMono',
