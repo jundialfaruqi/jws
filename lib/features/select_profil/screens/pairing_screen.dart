@@ -15,6 +15,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/widgets/app_confirm_exit.dart';
 import '../../../core/widgets/app_version_text.dart';
+import '../../../core/widgets/app_offline_banner.dart';
 
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
@@ -135,9 +136,11 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
     return AppConfirmExit(
       child: TvScaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        body: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
                 'TAUTKAN TV MASJID',
@@ -303,7 +306,18 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
             ],
           ),
         ),
-      ),
-    );
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: AppOfflineBanner(
+            isDot: true,
+            onRetry: _initPairing,
+          ),
+        ),
+      ],
+    ),
+  ),
+);
   }
 }

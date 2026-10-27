@@ -7,6 +7,7 @@ import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/app_view_selection_dialog.dart';
 import '../../../core/widgets/app_version_text.dart';
+import '../../../core/widgets/app_offline_banner.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/view_mode_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
@@ -49,6 +50,11 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+        actions: const [
+          AppOfflineBanner(
+            isDot: true,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(32.0, 32.0, 32.0, 120.0),
