@@ -35,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.fromLTRB(32.0, 32.0, 32.0, 120.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -936,6 +936,16 @@ class _SimButton extends StatelessWidget {
         focusColor: const Color(0xFF0F172A).withValues(alpha: 0.15),
         hoverColor: const Color(0xFF0F172A).withValues(alpha: 0.08),
         onTap: onPressed,
+        onFocusChange: (hasFocus) {
+          if (hasFocus) {
+            Scrollable.ensureVisible(
+              context,
+              alignment: 0.75,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOut,
+            );
+          }
+        },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           decoration: BoxDecoration(
