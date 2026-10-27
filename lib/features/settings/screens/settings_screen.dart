@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/app_top_bar.dart';
 import '../../../core/widgets/app_view_selection_dialog.dart';
+import '../../../core/widgets/app_version_text.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/providers/view_mode_provider.dart';
 import '../../../core/providers/selected_profil_provider.dart';
@@ -29,9 +30,24 @@ class SettingsScreen extends ConsumerWidget {
     return AppScaffold(
       appBar: AppTopBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          'Pengaturan',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        title: Text.rich(
+          TextSpan(
+            text: 'PENGATURAN ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+            children: [
+              AppVersionText.span(
+                style: const TextStyle(
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black54,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(

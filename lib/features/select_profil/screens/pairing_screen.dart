@@ -14,6 +14,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/widgets/app_confirm_exit.dart';
+import '../../../core/widgets/app_version_text.dart';
 
 class PairingScreen extends ConsumerStatefulWidget {
   const PairingScreen({super.key});
@@ -288,6 +289,16 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 18),
+              const AppVersionText(
+                style: TextStyle(
+                  color: Colors.white38,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
+                  letterSpacing: 1.2,
+                ),
               ),
             ],
           ),
