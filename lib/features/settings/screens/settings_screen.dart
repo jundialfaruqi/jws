@@ -34,9 +34,11 @@ class SettingsScreen extends ConsumerWidget {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(32.0),
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           _SettingsItemWidget(
             icon: Icons.volume_off,
             title: 'Bisukan Suara Adzan',
@@ -191,6 +193,7 @@ class SettingsScreen extends ConsumerWidget {
             const _TimeSimulationControlWidget(),
           ],
         ],
+        ),
       ),
     );
   }
