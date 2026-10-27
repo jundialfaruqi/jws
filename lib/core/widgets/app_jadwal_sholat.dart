@@ -223,6 +223,9 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
       return Colors.transparent;
     }
 
+    final bool isDhuhaActive = activePrayer == 'DHUHA';
+    final bool showSyuruqCard = _showSyuruq && !isDhuhaActive;
+
     final List<Map<String, dynamic>> jadwal = [
       _showImsak
           ? {
@@ -239,7 +242,7 @@ class _AppJadwalSholatState extends ConsumerState<AppJadwalSholat> {
               'color': getColor('SUBUH'),
               'bgColor': getBgColor('SUBUH'),
             },
-      _showSyuruq
+      showSyuruqCard
           ? {
               'nama': 'SYURUQ',
               'jam': todayJadwal?.terbit ?? '--:--',

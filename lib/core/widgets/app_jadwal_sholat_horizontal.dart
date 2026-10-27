@@ -153,7 +153,10 @@ class _AppJadwalSholatHorizontalState
         });
       }
 
-      if (_showSyuruq) {
+      final bool isDhuhaActive = activePrayer == 'DHUHA';
+      final bool showSyuruqCard = _showSyuruq && !isDhuhaActive;
+
+      if (showSyuruqCard) {
         prayersToDisplay.add({
           'label': 'SYURUQ',
           'time': todayJadwal.terbit,
