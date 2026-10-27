@@ -106,15 +106,28 @@ class AlertScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  displayPrayerName,
-                  style: const TextStyle(
-                    fontSize: 140,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 12,
-                    fontFamily: 'Poppins',
-                    height: 1.0,
+                SizedBox(
+                  height: 140,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 80),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          isSyuruq
+                              ? 'MENUJU SHOLAT SUNAH SYURUQ'
+                              : displayPrayerName,
+                          style: TextStyle(
+                            fontSize: isSyuruq ? 90 : 140,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: isSyuruq ? 4 : 12,
+                            fontFamily: 'Poppins',
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 35),
