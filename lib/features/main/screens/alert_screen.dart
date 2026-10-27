@@ -4,6 +4,9 @@ import '../../../core/widgets/tv_scaffold.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/prayer_transition_service.dart';
 import '../../../core/time/time_sync_service.dart';
+import '../../../core/providers/selected_profil_provider.dart';
+import '../../main/providers/my_masjid_provider.dart';
+import '../models/jadwal_sholat_model.dart';
 
 class AlertScreen extends ConsumerWidget {
   const AlertScreen({super.key});
@@ -18,6 +21,24 @@ class AlertScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transitionState = ref.watch(prayerTransitionProvider);
     final now = ref.watch(timeSyncServiceProvider).now();
+    final selectedProfil = ref.watch(selectedProfilProvider);
+    final masjidData = selectedProfil != null
+        ? ref.watch(myMasjidProvider(selectedProfil.id)).value
+        : null;
+
+    final todayStr =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    JadwalSholatModel? todayJadwal;
+    if (masjidData != null && masjidData.jadwalSholat.isNotEmpty) {
+      try {
+        todayJadwal = masjidData.jadwalSholat.firstWhere(
+          (j) => j.date == todayStr,
+        );
+      } catch (_) {
+        todayJadwal = null;
+      }
+    }
 
     String displayPrayerName = transitionState.prayerName.isEmpty
         ? 'SYURUQ'
@@ -28,6 +49,24 @@ class AlertScreen extends ConsumerWidget {
     }
 
     final isSyuruq = displayPrayerName == 'SYURUQ';
+    final isDhuha = displayPrayerName == 'DHUHA';
+
+    final dhuhaTime = transitionState.prayerTime.isNotEmpty
+        ? transitionState.prayerTime
+        : (todayJadwal != null && todayJadwal.dhuha.isNotEmpty
+              ? todayJadwal.dhuha
+              : '06:20');
+
+    final dzuhurTime = (todayJadwal != null && todayJadwal.dzuhur.isNotEmpty
+        ? todayJadwal.dzuhur
+        : '12:02');
+
+    String topLabel = 'WAKTU';
+    if (isDhuha) {
+      topLabel = 'MEMASUKI WAKTU';
+    } else if (isSyuruq) {
+      topLabel = 'WAKTU SYURUQ';
+    }
 
     double progress = transitionState.totalSeconds > 0
         ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
@@ -57,12 +96,12 @@ class AlertScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 36),
                 Text(
-                  isSyuruq ? 'MENUJU SHOLAT SUNAH' : 'WAKTU',
+                  topLabel,
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w600,
                     color: Colors.white70,
-                    letterSpacing: isSyuruq ? 4 : 8,
+                    letterSpacing: (isSyuruq || isDhuha) ? 4 : 8,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -108,7 +147,9 @@ class AlertScreen extends ConsumerWidget {
                           final currentSeconds = remainingFloatSeconds.ceil();
 
                           final isBlinking =
-                              currentSeconds <= 10 && currentSeconds > 0;
+                              !isDhuha &&
+                              currentSeconds <= 10 &&
+                              currentSeconds > 0;
                           final barColor = isBlinking
                               ? ((remainingFloatSeconds * 2).floor() % 2 == 0
                                     ? Colors.red
@@ -145,16 +186,37 @@ class AlertScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              Text(
-                                _formatCountdown(currentSeconds),
-                                style: TextStyle(
-                                  fontSize: 300,
-                                  fontWeight: FontWeight.bold,
-                                  color: isBlinking ? barColor : Colors.white,
-                                  fontFamily: 'JetBrainsMono',
-                                  height: 1.0,
+                              if (isDhuha)
+                                SizedBox(
+                                  height: 300,
+                                  child: Center(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '$dhuhaTime s/d $dzuhurTime',
+                                        style: const TextStyle(
+                                          fontSize: 120,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontFamily: 'JetBrainsMono',
+                                          letterSpacing: 4,
+                                          height: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                Text(
+                                  _formatCountdown(currentSeconds),
+                                  style: TextStyle(
+                                    fontSize: 300,
+                                    fontWeight: FontWeight.bold,
+                                    color: isBlinking ? barColor : Colors.white,
+                                    fontFamily: 'JetBrainsMono',
+                                    height: 1.0,
+                                  ),
                                 ),
-                              ),
                             ],
                           );
                         },
