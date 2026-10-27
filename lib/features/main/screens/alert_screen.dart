@@ -27,6 +27,8 @@ class AlertScreen extends ConsumerWidget {
       displayPrayerName = "JUM'AT";
     }
 
+    final isSyuruq = displayPrayerName == 'SYURUQ';
+
     double progress = transitionState.totalSeconds > 0
         ? ((transitionState.totalSeconds - transitionState.remainingSeconds) /
               transitionState.totalSeconds)
@@ -54,13 +56,13 @@ class AlertScreen extends ConsumerWidget {
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 36),
-                const Text(
-                  'WAKTU',
+                Text(
+                  isSyuruq ? 'MENUJU SHOLAT SUNAH' : 'WAKTU',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w600,
                     color: Colors.white70,
-                    letterSpacing: 8,
+                    letterSpacing: isSyuruq ? 4 : 8,
                     fontFamily: 'Poppins',
                   ),
                 ),
