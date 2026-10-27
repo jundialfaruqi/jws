@@ -50,6 +50,7 @@ class AlertScreen extends ConsumerWidget {
 
     final isSyuruq = displayPrayerName == 'SYURUQ';
     final isDhuha = displayPrayerName == 'DHUHA';
+    final barWidth = isSyuruq ? 1350.0 : 850.0;
 
     final dhuhaTime = transitionState.prayerTime.isNotEmpty
         ? transitionState.prayerTime
@@ -133,7 +134,9 @@ class AlertScreen extends ConsumerWidget {
                 const SizedBox(height: 35),
                 // Progress Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 500),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSyuruq ? 250.0 : 500.0,
+                  ),
                   child: Column(
                     children: [
                       TweenAnimationBuilder<double>(
@@ -174,7 +177,7 @@ class AlertScreen extends ConsumerWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(40),
                                 child: Container(
-                                  width: 850,
+                                  width: barWidth,
                                   height: 80,
                                   color: Colors.white.withValues(alpha: 0.2),
                                   child: Stack(
@@ -183,9 +186,10 @@ class AlertScreen extends ConsumerWidget {
                                         top: 0,
                                         bottom: 0,
                                         left:
-                                            -750 * (1 - value.clamp(0.0, 1.0)),
+                                            -(barWidth - 100.0) *
+                                            (1 - value.clamp(0.0, 1.0)),
                                         child: Container(
-                                          width: 850,
+                                          width: barWidth,
                                           decoration: BoxDecoration(
                                             color: barColor,
                                             borderRadius: BorderRadius.circular(
