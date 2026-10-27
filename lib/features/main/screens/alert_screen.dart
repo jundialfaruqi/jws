@@ -50,7 +50,7 @@ class AlertScreen extends ConsumerWidget {
 
     final isSyuruq = displayPrayerName == 'SYURUQ';
     final isDhuha = displayPrayerName == 'DHUHA';
-    final barWidth = isSyuruq ? 1350.0 : 850.0;
+    final barWidth = isSyuruq ? 1565.0 : 850.0;
 
     final dhuhaTime = transitionState.prayerTime.isNotEmpty
         ? transitionState.prayerTime
@@ -135,7 +135,7 @@ class AlertScreen extends ConsumerWidget {
                 // Progress Bar
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isSyuruq ? 250.0 : 500.0,
+                    horizontal: isSyuruq ? 20.0 : 500.0,
                   ),
                   child: Column(
                     children: [
