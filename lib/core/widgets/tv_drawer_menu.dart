@@ -211,7 +211,7 @@ class TvDrawerMenuState extends State<TvDrawerMenu>
                     onFocusChange: _onFocusChanged,
                     onPressed: _handlePressInfo,
                     icon: Icons.info_outline,
-                    label: 'Informasi',
+                    label: 'Sinkronisasi',
                     showBorderBottom: false,
                   ),
                   const Spacer(),

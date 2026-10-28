@@ -190,7 +190,12 @@ class SettingsScreen extends ConsumerWidget {
             title: 'Simulasi Layar Jumat (Debug)',
             subtitle: 'Tekan untuk melihat preview layar saat Khutbah Jumat',
             onTap: () {
-              if (context.mounted) context.pushNamed('jumat');
+              if (context.mounted) {
+                context.pushNamed(
+                  'jumat',
+                  queryParameters: {'preview': 'true'},
+                );
+              }
             },
           ),
           _SettingsItemWidget(

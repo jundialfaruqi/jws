@@ -83,7 +83,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/jumat',
         name: 'jumat',
-        builder: (context, state) => const JumatScreen(),
+        builder: (context, state) {
+          final isPreview = state.uri.queryParameters['preview'] == 'true';
+          return JumatScreen(isPreview: isPreview);
+        },
       ),
       GoRoute(
         path: '/jumbotron-masjid',

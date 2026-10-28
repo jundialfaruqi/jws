@@ -66,7 +66,7 @@ class AlertScreen extends ConsumerWidget {
 
     String topLabel = 'WAKTU';
     if (isDhuha) {
-      topLabel = 'MEMASUKI WAKTU';
+      topLabel = 'WAKTU SHOLAT SUNAH';
     } else if (isSyuruq) {
       topLabel = 'WAKTU SYURUQ';
     }
@@ -214,7 +214,7 @@ class AlertScreen extends ConsumerWidget {
                                       child: Text(
                                         '$dhuhaTime s/d $dzuhurTime',
                                         style: const TextStyle(
-                                          fontSize: 220,
+                                          fontSize: 100,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                           fontFamily: 'JetBrainsMono',

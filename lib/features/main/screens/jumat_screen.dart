@@ -10,17 +10,23 @@ import '../../../core/providers/selected_profil_provider.dart';
 import '../models/petugas_model.dart';
 import '../models/jadwal_sholat_model.dart';
 import '../providers/my_masjid_provider.dart';
+import '../../../core/services/prayer_transition_service.dart';
 import '../../../core/widgets/app_image_slider.dart';
 import '../../../core/time/time_sync_service.dart';
 import '../../../core/time/hijri_localization.dart';
 import '../../../core/widgets/app_live_clock.dart';
 
 class JumatScreen extends ConsumerWidget {
-  const JumatScreen({super.key});
+  final bool isPreview;
+
+  const JumatScreen({super.key, this.isPreview = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(selectedProfilProvider);
+    final transitionState = ref.watch(prayerTransitionProvider);
+    final isDebugPreview =
+        isPreview || transitionState.status != PrayerState.jumat;
 
     final myMasjidData = profil != null
         ? ref.watch(myMasjidProvider(profil.id)).value
@@ -204,21 +210,27 @@ class JumatScreen extends ConsumerWidget {
                               (petugasHariIni != null &&
                                       petugasHariIni.khatib.isNotEmpty)
                                   ? petugasHariIni.khatib
-                                  : '-',
+                                  : (isDebugPreview
+                                        ? 'Ust. Ardiansyah Eka P.'
+                                        : '-'),
                             ),
                             _buildPetugasRow(
                               'Imam',
                               (petugasHariIni != null &&
                                       petugasHariIni.imam.isNotEmpty)
                                   ? petugasHariIni.imam
-                                  : '-',
+                                  : (isDebugPreview
+                                        ? 'Ust. Deni Hidayat'
+                                        : '-'),
                             ),
                             _buildPetugasRow(
                               'Muadzin',
                               (petugasHariIni != null &&
                                       petugasHariIni.muadzin.isNotEmpty)
                                   ? petugasHariIni.muadzin
-                                  : '-',
+                                  : (isDebugPreview
+                                        ? 'Ust. Ahmad Mazlan'
+                                        : '-'),
                             ),
                           ],
                         ),
